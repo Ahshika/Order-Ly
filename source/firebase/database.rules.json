@@ -1,0 +1,79 @@
+{
+  // Order Ly: كل كافيه ليه حساب Firebase خاص بيه (بيتعمل أوتوماتيك من كمبيوتر الكاشير)، و$uid = الحساب ده.
+  // - cafes/$uid: بيانات الكافيه والمنيو وأكواد الترابيزات. أي حد يقرا (مفيش list للأكواد)، والكافيه بس يكتب.
+  // - img/$uid/$id: صور الأصناف.
+  // - inbox/$uid/$id: رسائل العملاء (طلب، نداء، دفع، تقييم). العميل يضيف بس لو معاه كود ترابيزة صحيح،
+  //   والكافيه بس اللي يقرا ويمسح.
+  // - proof/$uid/$id: صورة التحويل اللي العميل رفعها (نفس شروط inbox).
+  // - trackt/$uid/$key: حساب الترابيزة، trackc/$uid/$client: طلبات كل عميل. اللي معاه الكود بس يقرا.
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "cafes": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "pub": { ".read": true },
+        "menu": { ".read": true },
+        "mv": { ".read": true },
+        "seen": { ".read": true },
+        "tables": {
+          "$key": { ".read": true }
+        }
+      }
+    },
+
+    "img": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": { ".read": true }
+      }
+    },
+
+    "inbox": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".write": "!data.exists() && newData.exists() && newData.child('k').isString() && $id.length <= 40 && root.child('cafes').child($uid).child('tables').child(newData.child('k').val()).exists() && root.child('cafes').child($uid).child('pub').child('open').val() === true",
+          ".validate": "newData.hasChildren(['t', 'k', 'c', 'at', 'j'])",
+          "t": { ".validate": "newData.isString() && newData.val().matches(/^(order|call|pay|fb)$/)" },
+          "k": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "c": { ".validate": "newData.isString() && newData.val().length >= 10 && newData.val().length <= 64" },
+          "at": { ".validate": "newData.val() === now" },
+          "j": { ".validate": "newData.isString() && newData.val().length <= 12000" },
+          "p": { ".validate": "newData.isBoolean()" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "proof": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".write": "!data.exists() && newData.exists() && newData.child('k').isString() && $id.length <= 40 && root.child('cafes').child($uid).child('tables').child(newData.child('k').val()).exists()",
+          ".validate": "newData.hasChildren(['k', 'd'])",
+          "k": { ".validate": "newData.isString() && newData.val().length <= 40" },
+          "d": { ".validate": "newData.isString() && newData.val().length <= 1200000" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "trackt": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "$key": { ".read": true }
+      }
+    },
+
+    "trackc": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "$cid": { ".read": true }
+      }
+    }
+  }
+}
