@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image/image.dart' as img;
 
 import '../../core/cafe_models.dart';
+import '../../core/image_shrink.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
 import '../../core/shop.dart';
@@ -105,12 +104,7 @@ class _CafeSettingsScreenState extends ConsumerState<CafeSettingsScreen> {
     final bytes = await pickImageBytes(context);
     if (bytes == null) return;
     try {
-      final png = await Isolate.run(() {
-        final decoded = img.decodeImage(bytes);
-        if (decoded == null) return null;
-        final small = decoded.width > 512 ? img.copyResize(decoded, width: 512) : decoded;
-        return img.encodePng(small);
-      });
+      final png = await logoForUpload(bytes);
       if (png == null) throw Exception('الصورة مش صحيحة');
       await ref.read(sessionProvider).value!.api!.put('/api/shop/logo', {'png': base64.encode(png)});
       ref.invalidate(shopProvider);

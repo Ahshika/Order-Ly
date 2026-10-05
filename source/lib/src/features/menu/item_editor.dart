@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/cafe_models.dart';
+import '../../core/diagnostics.dart';
 import '../../core/format.dart';
+import '../../core/image_shrink.dart';
 import '../../core/providers.dart';
 import '../../core/session.dart';
 import '../../widgets/common.dart';
@@ -32,9 +34,17 @@ Future<Uint8List?> pickImageBytes(BuildContext context) async {
     final f = await ImagePicker().pickImage(source: source, maxWidth: 1200, imageQuality: 85);
     return f?.readAsBytes();
   }
-  final f = await openFile(acceptedTypeGroups: [
-    const XTypeGroup(label: 'صور', extensions: ['jpg', 'jpeg', 'png', 'webp']),
-  ]);
+  // بنفتح على فولدر الصور اللي على الجهاز، مش آخر فولدر (لو كان موبايل متوصل أو فولدر شبكة، ويندوز ممكن يعلّق فيه)
+  final pictures = '${Platform.environment['USERPROFILE'] ?? ''}\\Pictures';
+  FreezeWatchdog.action('نافذة اختيار صورة من ويندوز');
+  DiagLog.app?.write('INFO', 'فتح نافذة اختيار صورة');
+  final f = await openFile(
+    initialDirectory: Directory(pictures).existsSync() ? pictures : null,
+    acceptedTypeGroups: [
+      const XTypeGroup(label: 'صور', extensions: ['jpg', 'jpeg', 'png', 'webp']),
+    ],
+  );
+  DiagLog.app?.write('INFO', f == null ? 'نافذة اختيار الصورة اتقفلت من غير اختيار' : 'اتختارت صورة ${await f.length() ~/ 1024} KB');
   return f?.readAsBytes();
 }
 
@@ -117,10 +127,11 @@ class _ItemEditorState extends ConsumerState<ItemEditor> {
   Future<void> _pickImage() async {
     if (_id == null && !await _save(close: false)) return;
     if (!mounted) return;
-    final bytes = await pickImageBytes(context);
-    if (bytes == null) return;
+    final picked = await pickImageBytes(context);
+    if (picked == null || !mounted) return;
     setState(() => _busy = true);
     try {
+      final bytes = await shrinkForUpload(picked);
       final res = await ref.read(sessionProvider).value!.api!.send('PUT', '/api/items/$_id/image', body: {'base64': base64.encode(bytes)}, timeout: const Duration(seconds: 60));
       setState(() => _imageId = res['imageId'] as String);
       ref.invalidate(menuAllProvider);
