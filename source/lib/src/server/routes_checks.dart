@@ -346,9 +346,14 @@ extension _CheckRoutes on OrderlyServer {
         'voidReason': i['void_reason'],
       };
 
-  Map<String, Object?> _orderJson(Map<String, Object?> o, {bool withItems = true}) {
-    final pm = o['pay_method_id'] == null ? null : db.selectOne('SELECT name, kind FROM pay_methods WHERE id = ?', [o['pay_method_id']]);
-    final t = o['table_id'] == null ? null : db.selectOne('SELECT name FROM tables WHERE id = ?', [o['table_id']]);
+  /// [joined] = الصف جاي فيه table_name و pm_name و pm_kind جاهزين (شاشة المطبخ) فمش محتاجين نسأل تاني.
+  Map<String, Object?> _orderJson(Map<String, Object?> o, {bool withItems = true, bool joined = false}) {
+    final pm = joined
+        ? {'name': o['pm_name'], 'kind': o['pm_kind']}
+        : o['pay_method_id'] == null
+            ? null
+            : db.selectOne('SELECT name, kind FROM pay_methods WHERE id = ?', [o['pay_method_id']]);
+    final t = joined ? {'name': o['table_name']} : o['table_id'] == null ? null : db.selectOne('SELECT name FROM tables WHERE id = ?', [o['table_id']]);
     return {
       'id': o['id'],
       'checkId': o['check_id'],
@@ -542,18 +547,25 @@ extension _CheckRoutes on OrderlyServer {
     return _checkJson(newId);
   }
 
+  /// بيتأكد إن الحساب ينفع يتقفل. [paying] = مبلغ لسه هيتدفع دلوقتي مع القفل.
+  void _ensureClosable(Map<String, Object?> check, {int paying = 0}) {
+    final due = (check['total_cents'] as int) - (check['paid_cents'] as int) - paying;
+    if (due > 0) {
+      throw ApiError(400, paying > 0 ? 'الحساب ماتقفلش ومفيش فلوس اتسجلت: الباقي بقى ${money(due + paying)} (غالباً اتضاف طلب جديد)' : 'لسه فاضل ${money(due)} على الحساب');
+    }
+    if (db.selectOne("SELECT id FROM payments WHERE check_id = ? AND status = 'pending'", [check['id']]) != null) {
+      throw ApiError(400, 'فيه تحويل مستني تأكيد. أكّده أو ارفضه الأول');
+    }
+    if (db.selectOne("SELECT id FROM orders WHERE check_id = ? AND status = 'pending'", [check['id']]) != null) {
+      throw ApiError(400, 'فيه طلب لسه مستني موافقة على الحساب ده');
+    }
+  }
+
   Future<Object?> _closeCheck(Request req, AuthUser u) async {
     final c = _loadCheck(req.params['id']!, open: true);
     _recalcCheck(c['id'] as String);
     final fresh = _loadCheck(c['id'] as String);
-    final due = (fresh['total_cents'] as int) - (fresh['paid_cents'] as int);
-    if (due > 0) throw ApiError(400, 'لسه فاضل ${money(due)} على الحساب');
-    if (db.selectOne("SELECT id FROM payments WHERE check_id = ? AND status = 'pending'", [c['id']]) != null) {
-      throw ApiError(400, 'فيه تحويل مستني تأكيد. أكّده أو ارفضه الأول');
-    }
-    if (db.selectOne("SELECT id FROM orders WHERE check_id = ? AND status = 'pending'", [c['id']]) != null) {
-      throw ApiError(400, 'فيه طلب لسه مستني موافقة على الحساب ده');
-    }
+    _ensureClosable(fresh);
     db.transaction(() {
       final now = nowIso();
       db.execute(
@@ -734,28 +746,40 @@ extension _CheckRoutes on OrderlyServer {
 
   // ---------------------------------------------------------------- KDS (شاشة البار / المطبخ)
 
+  /// شاشة البار/المطبخ: الطلبات والأصناف بسؤالين بس مهما كان عدد الطلبات
+  /// (قبل كده كان فيه 4 أسئلة لكل طلب، وكانت بتاخد 5 ثواني في اختبار الضغط).
   Object? _kdsJson(Request req, AuthUser u) {
     final station = req.url.queryParameters['station'];
-    final stationFilter = station == null || station.isEmpty ? '' : ' AND oi.station_id IS ?';
+    final hasStation = station != null && station.isNotEmpty;
+    const live = "('new', 'preparing', 'ready')";
+    final stationFilter = hasStation ? ' AND oi.station_id IS ?' : '';
     final orders = db.select(
-      "SELECT DISTINCT o.* FROM orders o JOIN order_items oi ON oi.order_id = o.id "
-      "WHERE o.status IN ('accepted', 'ready') AND oi.status IN ('new', 'preparing', 'ready')$stationFilter ORDER BY o.accepted_at",
-      [if (stationFilter.isNotEmpty) station],
+      'SELECT o.*, c.type AS check_type, c.customer_name AS check_customer, t.name AS table_name, pm.name AS pm_name, pm.kind AS pm_kind '
+      'FROM orders o LEFT JOIN checks c ON c.id = o.check_id LEFT JOIN tables t ON t.id = o.table_id LEFT JOIN pay_methods pm ON pm.id = o.pay_method_id '
+      "WHERE o.status IN ('accepted', 'ready') AND EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.id AND oi.status IN $live$stationFilter) "
+      'ORDER BY o.accepted_at LIMIT $kdsLimit',
+      [if (hasStation) station],
     );
+    final byOrder = <String, List<Map<String, Object?>>>{};
+    if (orders.isNotEmpty) {
+      final ids = orders.map((o) => o['id']).toList();
+      final items = db.select(
+        'SELECT * FROM order_items oi WHERE oi.order_id IN (${List.filled(ids.length, '?').join(', ')}) AND oi.status IN $live$stationFilter ORDER BY rowid',
+        [...ids, if (hasStation) station],
+      );
+      for (final it in items) {
+        byOrder.putIfAbsent(it['order_id'] as String, () => []).add(it);
+      }
+    }
     return {
-      'orders': orders.map((o) {
-        final items = db.select(
-          "SELECT * FROM order_items oi WHERE oi.order_id = ? AND oi.status IN ('new', 'preparing', 'ready')$stationFilter ORDER BY rowid",
-          [o['id'], if (stationFilter.isNotEmpty) station],
-        );
-        final check = o['check_id'] == null ? null : db.selectOne('SELECT type, customer_name FROM checks WHERE id = ?', [o['check_id']]);
-        return {
-          ..._orderJson(o, withItems: false),
-          'checkType': check?['type'],
-          'customerName': check?['customer_name'],
-          'items': items.map(_orderItemJson).toList(),
-        };
-      }).toList(),
+      'orders': orders
+          .map((o) => {
+                ..._orderJson(o, withItems: false, joined: true),
+                'checkType': o['check_type'],
+                'customerName': o['check_customer'],
+                'items': (byOrder[o['id']] ?? const []).map(_orderItemJson).toList(),
+              })
+          .toList(),
     };
   }
 

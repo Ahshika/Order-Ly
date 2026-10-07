@@ -123,6 +123,8 @@ extension _PaymentRoutes on OrderlyServer {
     final fresh = _loadCheck(c['id'] as String);
     final due = (fresh['total_cents'] as int) - (fresh['paid_cents'] as int);
     if (amount > due) throw ApiError(400, 'المبلغ أكبر من الباقي على الحساب (${money(due)})');
+    // "ادفع واقفل": لو القفل مش هينفع منسجلش الدفعة أصلاً، عشان الكاشير ميتلخبطش
+    if (body['close'] == true) _ensureClosable(fresh, paying: amount);
     final session = _requireOpenRegister();
     final id = _uuid.v4();
     db.transaction(() {

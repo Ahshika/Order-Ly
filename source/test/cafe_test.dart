@@ -96,6 +96,10 @@ void main() {
     };
   }
 
+  List<Map<String, Object?>> cakeLines(Map<String, String> m) => [
+        {'itemId': m['cake'], 'qty': 1},
+      ];
+
   Future<List<Map<String, dynamic>>> tables() async =>
       ((await api.get('/api/floor'))['tables'] as List).cast<Map<String, dynamic>>();
 
@@ -210,6 +214,82 @@ void main() {
     await api.post('/api/orders/$orderId/served');
     expect(server.db.selectOne('SELECT status FROM orders WHERE id = ?', [orderId])!['status'], 'served');
     expect((await api.get('/api/kds'))['orders'], isEmpty);
+  });
+
+  test('kitchen display stays complete and in order with many orders, and is capped', () async {
+    final m = await buildMenu();
+    await api.post('/api/tables/bulk', {'from': 1, 'to': 3});
+    final t1 = (await tables()).firstWhere((t) => t['name'] == '1');
+    final dineIn = (await api.post('/api/checks', {'type': 'dine_in', 'tableId': t1['id']}))['check']['id'] as String;
+    await api.post('/api/checks/$dineIn/orders', {
+      'lines': [
+        {'itemId': m['latte'], 'qty': 1, 'modifierIds': [m['large']]},
+        {'itemId': m['cake'], 'qty': 2},
+      ],
+    });
+    final takeaway = (await api.post('/api/checks', {'type': 'takeaway', 'customerName': 'سارة'}))['check']['id'] as String;
+    await api.post('/api/checks/$takeaway/orders', {
+      'lines': [
+        {'itemId': m['cake'], 'qty': 1},
+      ],
+    });
+
+    var kds = (await api.get('/api/kds'))['orders'] as List;
+    expect(kds.length, 2);
+    expect(kds[0]['tableName'], '1');
+    expect(kds[0]['checkType'], 'dine_in');
+    expect((kds[0]['items'] as List).map((i) => i['name']), ['لاتيه', 'تشيز كيك']);
+    expect(kds[1]['checkType'], 'takeaway');
+    expect(kds[1]['customerName'], 'سارة');
+    expect(kds[1]['tableName'], isNull);
+    // البار بيشوف اللاتيه بس، والطلب التيك أواي (حلويات بس) مش عنده
+    kds = (await api.get('/api/kds', query: {'station': m['bar']!}))['orders'] as List;
+    expect(kds.single['items'].single['name'], 'لاتيه');
+
+    // المطبخ اتملى: الشاشة بتعرض أقدم ${kdsLimit} طلب بس
+    final cakeLine = [
+      {'itemId': m['cake'], 'qty': 1},
+    ];
+    for (var i = 0; i < kdsLimit; i++) {
+      await api.post('/api/checks/$takeaway/orders', {'lines': cakeLine});
+    }
+    kds = (await api.get('/api/kds'))['orders'] as List;
+    expect(kds.length, kdsLimit);
+    expect(kds.first['tableName'], '1');
+  });
+
+  test('pay-and-close saves nothing when an order was added in the meantime', () async {
+    final m = await buildMenu();
+    final checkId = (await api.post('/api/checks', {'type': 'takeaway'}))['check']['id'] as String;
+    final first = await api.post('/api/checks/$checkId/orders', {
+      'lines': [
+        {'itemId': m['cake'], 'qty': 1},
+      ],
+    });
+    final shownDue = first['check']['totalCents'] as int;
+    await api.post('/api/register/open', {'openingCashCents': 0});
+    final cash = ((await api.get('/api/pay-methods'))['methods'] as List).firstWhere((x) => x['kind'] == 'cash')['id'];
+    // الويتر ضاف طلب والكاشير لسه شايف المبلغ القديم
+    await api.post('/api/checks/$checkId/orders', {
+      'lines': [
+        {'itemId': m['cake'], 'qty': 1},
+      ],
+    });
+    await expectApiError(api.post('/api/checks/$checkId/payments', {'methodId': cash, 'amountCents': shownDue, 'close': true}), 400, 'مفيش فلوس اتسجلت');
+    expect(server.db.selectOne('SELECT COUNT(*) AS n FROM payments WHERE check_id = ?', [checkId])!['n'], 0);
+    var c = (await api.get('/api/checks/$checkId'))['check'];
+    expect(c['status'], 'open');
+    expect(c['paidCents'], 0);
+
+    // بالمبلغ الجديد بيتدفع ويتقفل عادي
+    c = (await api.post('/api/checks/$checkId/payments', {'methodId': cash, 'amountCents': c['totalCents'], 'close': true}))['check'];
+    expect(c['status'], 'closed');
+    // ودفع جزء من غير قفل لسه شغال
+    final other = (await api.post('/api/checks', {'type': 'takeaway'}))['check']['id'] as String;
+    await api.post('/api/checks/$other/orders', {'lines': cakeLines(m)});
+    c = (await api.post('/api/checks/$other/payments', {'methodId': cash, 'amountCents': 1000}))['check'];
+    expect(c['paidCents'], 1000);
+    expect(c['status'], 'open');
   });
 
   test('recipes consume stock, sold-out items are blocked, and voids return stock', () async {

@@ -45,6 +45,10 @@ const cashRoles = {'owner', 'cashier'};
 
 /// اللي بيقدروا ياخدوا طلبات ويشوفوا الترابيزات
 const floorRoles = {'owner', 'cashier', 'waiter'};
+
+/// أقصى عدد طلبات على شاشة المطبخ مرة واحدة (الأقدم الأول)، عشان الشاشة متتقلش لو المطبخ اتملى.
+const kdsLimit = 200;
+
 const _uuid = Uuid();
 
 String nowIso() => DateTime.now().toUtc().toIso8601String();
