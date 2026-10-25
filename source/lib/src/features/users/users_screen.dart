@@ -67,6 +67,7 @@ class _UserTile extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final roleColor = switch (user.role) {
       Role.owner => brandAccent,
+      Role.supervisor => const Color(0xFF059669),
       Role.cashier => brandPrimary,
       Role.waiter => const Color(0xFF7C3AED),
       Role.kitchen => const Color(0xFF0891B2),
@@ -214,15 +215,19 @@ class _UserDialogState extends ConsumerState<UserDialog> {
                 const SizedBox(height: 16),
                 Text('الصلاحية', style: Theme.of(context).textTheme.titleSmall?.bold),
                 const SizedBox(height: 8),
-                SegmentedButton<Role>(
-                  segments: [for (final r in Role.values) ButtonSegment(value: r, label: Text(r.label))],
-                  selected: {_role},
-                  onSelectionChanged: lockSelf ? null : (s) => setState(() => _role = s.first),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final r in Role.values)
+                      ChoiceChip(label: Text(r.label), selected: _role == r, onSelected: lockSelf ? null : (_) => setState(() => _role = r)),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Text(
                   switch (_role) {
                     Role.owner => 'كل الصلاحيات: التقارير والفلوس والإعدادات والموظفين.',
+                    Role.supervisor => 'كل شغل الكاشير، وكمان: إلغاء حساب، وفتح حساب اتقفل، ورجوع فلوس، والخصم، وإلغاء صنف اتحضر، والورديات القديمة. ما بيشوفش التقارير ولا بيعدّل المنيو.',
                     Role.cashier => 'الصالة والطلبات، والدفع وقفل الحسابات، والدرج، والمخزون.',
                     Role.waiter => 'يفتح ترابيزات وياخد طلبات من الموبايل، ويقبل طلبات الـ QR، ويقدّم الطلبات الجاهزة. ما بيلمسش الفلوس.',
                     Role.kitchen => 'شاشة البار / المطبخ بس: يشوف الطلبات ويعلّمها جاهزة.',

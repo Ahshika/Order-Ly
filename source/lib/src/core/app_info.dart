@@ -1,5 +1,5 @@
 const appName = 'Order Ly';
-const appVersion = '1.0.6';
+const appVersion = '1.0.7';
 
 /// بيزيد لما شكل الـ API يتغير بطريقة مش متوافقة مع النسخ القديمة.
 const apiVersion = 1;

@@ -211,7 +211,7 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
                 if (d.check.type == 'dine_in') const PopupMenuItem(value: 'guests', child: ListTile(leading: Icon(Icons.groups_rounded), title: Text('عدد الأفراد'))),
                 if (d.check.type == 'delivery') const PopupMenuItem(value: 'delivery', child: ListTile(leading: Icon(Icons.delivery_dining_rounded), title: Text('بيانات التوصيل'))),
                 const PopupMenuItem(value: 'note', child: ListTile(leading: Icon(Icons.sticky_note_2_outlined), title: Text('ملاحظة'))),
-                if (_user.isOwner) const PopupMenuItem(value: 'void', child: ListTile(leading: Icon(Icons.delete_forever_rounded, color: Colors.red), title: Text('إلغاء الحساب كله'))),
+                if (_user.isManager) const PopupMenuItem(value: 'void', child: ListTile(leading: Icon(Icons.delete_forever_rounded, color: Colors.red), title: Text('إلغاء الحساب كله'))),
               ],
             ),
           ];

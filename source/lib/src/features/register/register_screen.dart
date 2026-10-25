@@ -31,7 +31,7 @@ class RegisterScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('الدرج'),
         actions: [
-          if (user.isOwner)
+          if (user.isManager)
             TextButton.icon(
               onPressed: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => const _HistoryScreen())),
               icon: const Icon(Icons.history_rounded),

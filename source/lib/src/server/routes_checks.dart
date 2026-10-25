@@ -13,8 +13,8 @@ extension _CheckRoutes on OrderlyServer {
     r.post('/api/checks/<id>/merge', _authed(_mergeCheck, only: cashRoles));
     r.post('/api/checks/<id>/split', _authed(_splitCheck, only: cashRoles));
     r.post('/api/checks/<id>/close', _authed(_closeCheck, only: cashRoles));
-    r.post('/api/checks/<id>/void', _authed(_voidCheck, only: {'owner'}));
-    r.post('/api/checks/<id>/reopen', _authed(_reopenCheck, only: {'owner'}));
+    r.post('/api/checks/<id>/void', _authed(_voidCheck, only: managerRoles));
+    r.post('/api/checks/<id>/reopen', _authed(_reopenCheck, only: managerRoles));
     r.post('/api/checks/<id>/print', _authed(_printCheck, only: floorRoles));
 
     r.get('/api/orders', _authed(_listOrders, only: floorRoles));
@@ -424,7 +424,7 @@ extension _CheckRoutes on OrderlyServer {
         if (body.containsKey(e.key)) db.execute('UPDATE checks SET ${e.value} = ? WHERE id = ?', [_optionalText(body, e.key), c['id']]);
       }
       if (body.containsKey('discountCents')) {
-        if (u.role != 'owner' && (u.role != 'cashier' || !_cafeBool('cashierCanDiscount'))) throw ApiError(403, 'الخصم لصاحب الكافيه بس');
+        if (!u.isManager && (u.role != 'cashier' || !_cafeBool('cashierCanDiscount'))) throw ApiError(403, 'الخصم لصاحب الكافيه أو مسؤول الشفت بس');
         final d = body['discountCents'];
         if (d is! int || d < 0) throw ApiError(400, 'الخصم مش صحيح');
         db.execute('UPDATE checks SET discount_cents = ?, discount_note = ? WHERE id = ?', [d, _optionalText(body, 'discountNote'), c['id']]);
@@ -709,7 +709,7 @@ extension _CheckRoutes on OrderlyServer {
     final reason = _requiredText(body, 'reason', 'سبب الإلغاء');
     // الإلغاء بعد ما الصنف اتبعت للبار: للكاشير، أو للمالك بس لو الكافيه عايز كده
     if (u.role == 'waiter' && line['status'] != 'new') throw ApiError(403, 'الصنف اتحضر، الإلغاء من الكاشير');
-    if (_cafeBool('voidNeedsOwner') && !u.isOwner && line['status'] != 'new') throw ApiError(403, 'إلغاء صنف اتحضر محتاج صاحب الكافيه');
+    if (_cafeBool('voidNeedsOwner') && !u.isManager && line['status'] != 'new') throw ApiError(403, 'إلغاء صنف اتحضر محتاج صاحب الكافيه أو مسؤول الشفت');
     final qty = body['qty'] is int ? (body['qty'] as int).clamp(1, line['qty'] as int) : line['qty'] as int;
     db.transaction(() {
       var target = line;

@@ -38,13 +38,16 @@ part 'routes_shop.dart';
 part 'routes_tables.dart';
 
 const serverPort = 8753;
-const roles = {'owner', 'cashier', 'waiter', 'kitchen'};
+const roles = {'owner', 'supervisor', 'cashier', 'waiter', 'kitchen'};
 
 /// اللي بيقدروا يشتغلوا على الحسابات والفلوس
-const cashRoles = {'owner', 'cashier'};
+const cashRoles = {'owner', 'supervisor', 'cashier'};
+
+/// المالك ومسؤول الشفت: الإلغاء، وفتح الحسابات تاني، والمرتجع، والورديات القديمة
+const managerRoles = {'owner', 'supervisor'};
 
 /// اللي بيقدروا ياخدوا طلبات ويشوفوا الترابيزات
-const floorRoles = {'owner', 'cashier', 'waiter'};
+const floorRoles = {'owner', 'supervisor', 'cashier', 'waiter'};
 
 /// أقصى عدد طلبات على شاشة المطبخ مرة واحدة (الأقدم الأول)، عشان الشاشة متتقلش لو المطبخ اتملى.
 const kdsLimit = 200;
@@ -68,6 +71,7 @@ class AuthUser {
   String get id => row['id'] as String;
   String get role => row['role'] as String;
   bool get isOwner => role == 'owner';
+  bool get isManager => managerRoles.contains(role);
 }
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.

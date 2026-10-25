@@ -38,13 +38,13 @@ class _Destination {
   final Set<Role>? roles;
 }
 
-const _cash = {Role.owner, Role.cashier};
-const _floor = {Role.owner, Role.cashier, Role.waiter};
+const _cash = {Role.owner, Role.supervisor, Role.cashier};
+const _floor = {Role.owner, Role.supervisor, Role.cashier, Role.waiter};
 
 final _destinations = <_Destination>[
   _Destination('floor', 'الصالة', Icons.table_restaurant_outlined, Icons.table_restaurant_rounded, () => const FloorScreen(), roles: _floor),
   _Destination('orders', 'الطلبات', Icons.notifications_active_outlined, Icons.notifications_active_rounded, () => const OrdersScreen(), roles: _floor),
-  _Destination('kds', 'البار والمطبخ', Icons.soup_kitchen_outlined, Icons.soup_kitchen_rounded, () => const KdsScreen(), roles: {Role.owner, Role.cashier, Role.kitchen}),
+  _Destination('kds', 'البار والمطبخ', Icons.soup_kitchen_outlined, Icons.soup_kitchen_rounded, () => const KdsScreen(), roles: {Role.owner, Role.supervisor, Role.cashier, Role.kitchen}),
   _Destination('checks', 'الحسابات', Icons.receipt_long_outlined, Icons.receipt_long_rounded, () => const ChecksHistoryScreen(), roles: _cash),
   _Destination('register', 'الدرج', Icons.point_of_sale_outlined, Icons.point_of_sale_rounded, () => const RegisterScreen(), roles: _cash),
   _Destination('menu', 'المنيو', Icons.restaurant_menu_outlined, Icons.restaurant_menu_rounded, () => const MenuScreen(), roles: {Role.owner}),

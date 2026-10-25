@@ -1,5 +1,6 @@
 enum Role {
   owner('المالك'),
+  supervisor('مسؤول شفت'),
   cashier('كاشير'),
   waiter('ويتر'),
   kitchen('بار / مطبخ');
@@ -38,8 +39,11 @@ class AppUser {
 
   bool get isOwner => role == Role.owner;
 
+  /// المالك أو مسؤول الشفت: يلغي ويفتح الحسابات، ويرجّع الفلوس، ويوافق على الخصم.
+  bool get isManager => role == Role.owner || role == Role.supervisor;
+
   /// بيشتغل على الفلوس (الدفع، والدرج، والقفل).
-  bool get handlesCash => role == Role.owner || role == Role.cashier;
+  bool get handlesCash => isManager || role == Role.cashier;
 }
 
 class ServerInfo {

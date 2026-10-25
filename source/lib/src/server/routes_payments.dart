@@ -14,13 +14,13 @@ extension _PaymentRoutes on OrderlyServer {
         }, only: cashRoles));
     r.post('/api/payments/<id>/confirm', _authed(_confirmPayment, only: cashRoles));
     r.post('/api/payments/<id>/reject', _authed(_rejectPayment, only: cashRoles));
-    r.post('/api/payments/<id>/refund', _authed(_refundPayment, only: {'owner'}));
+    r.post('/api/payments/<id>/refund', _authed(_refundPayment, only: managerRoles));
 
     r.get('/api/register', _authed(_registerJson, only: cashRoles));
     r.post('/api/register/open', _authed(_openRegister, only: cashRoles));
     r.post('/api/register/close', _authed(_closeRegister, only: cashRoles));
     r.post('/api/register/moves', _authed(_addCashMove, only: cashRoles));
-    r.get('/api/register/history', _authed(_registerHistory, only: {'owner'}));
+    r.get('/api/register/history', _authed(_registerHistory, only: managerRoles));
 
     r.get('/api/customers', _authed(_listCustomers, only: cashRoles));
     r.post('/api/checks/<id>/customer', _authed(_linkCustomer, only: floorRoles));

@@ -93,7 +93,7 @@ class _ChecksHistoryScreenState extends ConsumerState<ChecksHistoryScreen> {
                           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                             Text(money(c.totalCents), style: const TextStyle().semiBold),
                             if (c.status == 'closed') IconButton(tooltip: 'طباعة', onPressed: () => printCheckHere(context, ref, c.id), icon: const Icon(Icons.print_outlined)),
-                            if (c.status == 'closed' && user.isOwner)
+                            if (c.status == 'closed' && user.isManager)
                               IconButton(
                                 tooltip: 'فتح الحساب تاني',
                                 icon: const Icon(Icons.lock_open_rounded),
