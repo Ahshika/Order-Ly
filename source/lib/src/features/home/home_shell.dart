@@ -1,14 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_config.dart';
 import '../../core/cafe_models.dart';
 import '../../core/models.dart';
+import '../../core/notifications.dart';
 import '../../core/providers.dart';
 import '../../core/session.dart';
+import '../../core/shop.dart';
 import '../../core/theme.dart';
 import '../../widgets/common.dart';
 import '../checks/checks_history_screen.dart';
@@ -21,6 +20,7 @@ import '../orders/orders_screen.dart';
 import '../printing/print_service.dart';
 import '../register/register_screen.dart';
 import '../reports/reports_screen.dart';
+import '../settings/backup_screen.dart';
 import '../settings/settings_screen.dart';
 import '../tables/tables_admin_screen.dart';
 import '../users/users_screen.dart';
@@ -75,22 +75,31 @@ class HomeShell extends ConsumerStatefulWidget {
 
 class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
+  late final NotificationCenter _notifications;
 
-  void _alert(String message, String? goTo) {
-    if (ref.read(appConfigProvider).alertSound) {
-      // تنبيه صوتي مكرر عشان يتسمع وسط دوشة الكافيه
-      for (var i = 0; i < 3; i++) {
-        Timer(Duration(milliseconds: i * 450), () => SystemSound.play(SystemSoundType.alert));
+  @override
+  void initState() {
+    super.initState();
+    // الإشعارات بتيجي من السيرفر (طلب جديد، ترابيزة بتنادي، تحويل، طلب جاهز...) وبتطلع رسالة على الجنب بصوت،
+    // أو إشعار على الموبايل/الكمبيوتر لو البرنامج في الخلفية
+    _notifications = ref.read(notificationCenterProvider)
+      ..onOpen = (goTo) {
+        rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
+        ref.read(shellTabProvider.notifier).go(goTo);
       }
-    }
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 6),
-        action: goTo == null ? null : SnackBarAction(label: 'افتح', onPressed: () => ref.read(shellTabProvider.notifier).go(goTo)),
-      ));
+      ..attach();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _notifications.askPermissionOnce();
+      await BackgroundConnection.update(loggedIn: true, wanted: ref.read(appConfigProvider).notifyInBackground);
+    });
+  }
+
+  @override
+  void dispose() {
+    _notifications.onOpen = null;
+    // خرج من الحساب: مفيش داعي يفضل متصل في الخلفية
+    BackgroundConnection.update(loggedIn: false, wanted: false);
+    super.dispose();
   }
 
   @override
@@ -100,22 +109,32 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     ref.watch(printAgentProvider);
     final items = _destinations.where((d) => d.roles == null || d.roles!.contains(user.role)).toList();
 
+    // الأرقام اللايف للعلامات على الأزرار بس؛ التنبيهات نفسها جاية من السيرفر (notificationCenterProvider)
     final live = user.role == Role.kitchen ? null : ref.watch(liveProvider).value;
-    ref.listen(liveProvider, (prev, next) {
-      final a = prev?.value, b = next.value;
-      if (a == null || b == null || user.role == Role.kitchen) return;
-      if (b.pendingOrders > a.pendingOrders) _alert('طلب جديد من موبايل عميل مستني موافقتك', 'orders');
-      if (b.openCalls > a.openCalls) _alert('ترابيزة بتنادي', 'orders');
-      if (b.pendingPayments > a.pendingPayments && user.handlesCash) _alert('عميل حوّل فلوس ورفع صورة التحويل', 'orders');
-      if (b.readyOrders > a.readyOrders && user.role == Role.waiter) _alert('فيه طلب جاهز للتقديم', 'orders');
-    });
     ref.listen(shellTabProvider, (_, id) {
       final i = items.indexWhere((d) => d.id == id);
       if (i >= 0) setState(() => _index = i);
     });
 
     final index = _index.clamp(0, items.length - 1);
-    final page = KeyedSubtree(key: ValueKey(items[index].id), child: items[index].builder());
+    final screen = KeyedSubtree(key: ValueKey(items[index].id), child: items[index].builder());
+    // المالك لازم يعرف لو السيرفر رجع لنسخة احتياطية لوحده (عشان يراجع الشغل اللي بعدها)
+    final recovery = user.role == Role.owner ? ref.watch(shopProvider).value?.dbRecovery : null;
+    final page = recovery == null
+        ? screen
+        : Column(children: [
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                child: RecoveryNotice(
+                  recovery: recovery,
+                  onOpen: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => const BackupScreen())),
+                ),
+              ),
+            ),
+            Expanded(child: screen),
+          ]);
     final wide = MediaQuery.sizeOf(context).width >= 840;
     int badge(_Destination d) => d.id == 'orders' ? (live?.attention ?? 0) + (user.role == Role.waiter ? live?.readyOrders ?? 0 : 0) : 0;
 

@@ -87,16 +87,36 @@ void main() {
     final metrics = File('${out.path}/server_metrics.csv').openWrite()..writeln('time,loop_lag_ms,rss_mb,db_mb,wal_mb');
     final stop = File('${out.path}/stop');
     var last = DateTime.now();
+    var lag = 0;
+    double mb(String f) => File(f).existsSync() ? File(f).lengthSync() / 1048576 : 0;
+
+    // LOAD_METRICS_PORT: نفس الأرقام بصيغة Prometheus (عشان Grafana يعرضها لايف أثناء الاختبار)
+    final metricsPort = int.tryParse(Platform.environment['LOAD_METRICS_PORT'] ?? '');
+    final exporter = metricsPort == null ? null : await HttpServer.bind(InternetAddress.loopbackIPv4, metricsPort);
+    exporter?.listen((req) {
+      int count(String sql) => server.db.selectOne(sql)!['c'] as int;
+      req.response
+        ..headers.contentType = ContentType('text', 'plain', parameters: {'version': '0.0.4'})
+        ..write('# TYPE orderly_event_loop_lag_ms gauge\norderly_event_loop_lag_ms $lag\n'
+            '# TYPE orderly_rss_bytes gauge\norderly_rss_bytes ${ProcessInfo.currentRss}\n'
+            '# TYPE orderly_db_bytes gauge\norderly_db_bytes ${(mb('${dir.path}/orderly.db') * 1048576).round()}\n'
+            '# TYPE orderly_wal_bytes gauge\norderly_wal_bytes ${(mb('${dir.path}/orderly.db-wal') * 1048576).round()}\n'
+            '# TYPE orderly_orders_total counter\norderly_orders_total ${count('SELECT COUNT(*) AS c FROM orders')}\n'
+            '# TYPE orderly_open_checks gauge\norderly_open_checks ${count("SELECT COUNT(*) AS c FROM checks WHERE status = 'open'")}\n'
+            '# TYPE orderly_kds_orders gauge\norderly_kds_orders ${count("SELECT COUNT(*) AS c FROM orders WHERE status IN ('accepted', 'ready')")}\n')
+        ..close();
+    });
+
     while (!stop.existsSync()) {
       await Future<void>.delayed(const Duration(seconds: 1));
       final now = DateTime.now();
-      final lag = now.difference(last).inMilliseconds - 1000;
+      lag = now.difference(last).inMilliseconds - 1000;
       last = now;
-      double mb(String f) => File(f).existsSync() ? File(f).lengthSync() / 1048576 : 0;
       metrics.writeln('${now.toUtc().toIso8601String()},$lag,${(ProcessInfo.currentRss / 1048576).toStringAsFixed(1)},'
           '${mb('${dir.path}/orderly.db').toStringAsFixed(2)},${mb('${dir.path}/orderly.db-wal').toStringAsFixed(2)}');
     }
     await metrics.close();
+    await exporter?.close(force: true);
     // نسخة من لوج السيرفر قبل ما الفولدر المؤقت يتمسح
     final log = File('${dir.path}/logs/server.log');
     if (log.existsSync()) log.copySync('${out.path}/server.log');

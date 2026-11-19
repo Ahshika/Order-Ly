@@ -1,0 +1,421 @@
+{
+ "__inputs": [
+  {
+   "name": "DS_TESTDATA",
+   "label": "TestData",
+   "type": "datasource",
+   "pluginId": "grafana-testdata-datasource",
+   "pluginName": "TestData"
+  }
+ ],
+ "title": "Order Ly — اختبار الضغط (500 → 10000 طلب/دقيقة)",
+ "uid": "orderly-load-test",
+ "schemaVersion": 39,
+ "time": {
+  "from": "2026-11-19T13:09:57Z",
+  "to": "2026-11-19T13:11:52Z"
+ },
+ "timezone": "browser",
+ "panels": [
+  {
+   "id": 1,
+   "type": "timeseries",
+   "title": "الطلبات في الدقيقة: المطلوب مقابل اللي اتنفذ فعلاً",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,target_per_min,orders_per_min\n2026-11-19T13:09:57Z,500,0\n2026-11-19T13:10:02Z,500,0\n2026-11-19T13:10:07Z,500,0\n2026-11-19T13:10:12Z,1000,0\n2026-11-19T13:10:17Z,1000,0\n2026-11-19T13:10:22Z,1000,0\n2026-11-19T13:10:27Z,1500,0\n2026-11-19T13:10:32Z,1500,0\n2026-11-19T13:10:37Z,1500,0\n2026-11-19T13:10:42Z,2000,0\n2026-11-19T13:10:47Z,2000,0\n2026-11-19T13:10:52Z,2000,0\n2026-11-19T13:10:57Z,2500,0\n2026-11-19T13:11:02Z,2500,0\n2026-11-19T13:11:07Z,2500,0\n2026-11-19T13:11:12Z,3000,0\n2026-11-19T13:11:17Z,3000,0\n2026-11-19T13:11:22Z,3000,0\n2026-11-19T13:11:27Z,3500,0\n2026-11-19T13:11:32Z,3500,0\n2026-11-19T13:11:37Z,3500,0\n2026-11-19T13:11:42Z,4000,0\n2026-11-19T13:11:47Z,4000,0\n2026-11-19T13:11:52Z,4000,0\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 2,
+   "type": "timeseries",
+   "title": "وقت إضافة الطلب (ms)",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,order_p50_ms,order_p95_ms,order_max_ms\n2026-11-19T13:09:57Z,369,695,760\n2026-11-19T13:10:02Z,780,865,882\n2026-11-19T13:10:07Z,741,857,879\n2026-11-19T13:10:12Z,758,883,957\n2026-11-19T13:10:17Z,781,829,869\n2026-11-19T13:10:22Z,773,875,917\n2026-11-19T13:10:27Z,827,902,933\n2026-11-19T13:10:32Z,780,847,874\n2026-11-19T13:10:37Z,786,830,853\n2026-11-19T13:10:42Z,801,900,949\n2026-11-19T13:10:47Z,795,850,893\n2026-11-19T13:10:52Z,1242,1845,1884\n2026-11-19T13:10:57Z,823,1492,1574\n2026-11-19T13:11:02Z,711,838,871\n2026-11-19T13:11:07Z,106,347,405\n2026-11-19T13:11:12Z,105,151,202\n2026-11-19T13:11:17Z,769,1513,1543\n2026-11-19T13:11:22Z,1407,1585,1629\n2026-11-19T13:11:27Z,1541,1790,1839\n2026-11-19T13:11:32Z,1353,1432,1465\n2026-11-19T13:11:37Z,1343,1401,1435\n2026-11-19T13:11:42Z,1308,1450,1516\n2026-11-19T13:11:47Z,1519,1690,1721\n2026-11-19T13:11:52Z,1024,1528,1559\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 500
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 3,
+   "type": "timeseries",
+   "title": "وقت تحديث الشاشات (الصالة/المطبخ) p95",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,screen_p95_ms\n2026-11-19T13:09:57Z,1258\n2026-11-19T13:10:02Z,2085\n2026-11-19T13:10:07Z,1962\n2026-11-19T13:10:12Z,1989\n2026-11-19T13:10:17Z,1978\n2026-11-19T13:10:22Z,2003\n2026-11-19T13:10:27Z,2107\n2026-11-19T13:10:32Z,2011\n2026-11-19T13:10:37Z,1974\n2026-11-19T13:10:42Z,2075\n2026-11-19T13:10:47Z,2033\n2026-11-19T13:10:52Z,3228\n2026-11-19T13:10:57Z,2867\n2026-11-19T13:11:02Z,2076\n2026-11-19T13:11:07Z,487\n2026-11-19T13:11:12Z,303\n2026-11-19T13:11:17Z,2788\n2026-11-19T13:11:22Z,3639\n2026-11-19T13:11:27Z,3987\n2026-11-19T13:11:32Z,3448\n2026-11-19T13:11:37Z,3404\n2026-11-19T13:11:42Z,3353\n2026-11-19T13:11:47Z,3937\n2026-11-19T13:11:52Z,3792\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1000
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 4,
+   "type": "timeseries",
+   "title": "تهنيج السيرفر (تأخير الـ event loop)",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 16,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,server_lag_ms\n2026-11-19T13:09:57Z,320\n2026-11-19T13:10:02Z,389\n2026-11-19T13:10:07Z,436\n2026-11-19T13:10:12Z,411\n2026-11-19T13:10:17Z,385\n2026-11-19T13:10:22Z,412\n2026-11-19T13:10:27Z,463\n2026-11-19T13:10:32Z,454\n2026-11-19T13:10:37Z,436\n2026-11-19T13:10:42Z,456\n2026-11-19T13:10:47Z,436\n2026-11-19T13:10:52Z,938\n2026-11-19T13:10:57Z,375\n2026-11-19T13:11:02Z,399\n2026-11-19T13:11:07Z,69\n2026-11-19T13:11:12Z,62\n2026-11-19T13:11:17Z,728\n2026-11-19T13:11:22Z,837\n2026-11-19T13:11:27Z,754\n2026-11-19T13:11:32Z,729\n2026-11-19T13:11:37Z,718\n2026-11-19T13:11:42Z,747\n2026-11-19T13:11:47Z,815\n2026-11-19T13:11:52Z,561\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "ms",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 200
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "الطلبات اللي فشلت",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 16,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,failed\n2026-11-19T13:09:57Z,0\n2026-11-19T13:10:02Z,0\n2026-11-19T13:10:07Z,0\n2026-11-19T13:10:12Z,0\n2026-11-19T13:10:17Z,0\n2026-11-19T13:10:22Z,0\n2026-11-19T13:10:27Z,0\n2026-11-19T13:10:32Z,0\n2026-11-19T13:10:37Z,0\n2026-11-19T13:10:42Z,0\n2026-11-19T13:10:47Z,0\n2026-11-19T13:10:52Z,0\n2026-11-19T13:10:57Z,0\n2026-11-19T13:11:02Z,0\n2026-11-19T13:11:07Z,0\n2026-11-19T13:11:12Z,0\n2026-11-19T13:11:17Z,0\n2026-11-19T13:11:22Z,0\n2026-11-19T13:11:27Z,0\n2026-11-19T13:11:32Z,0\n2026-11-19T13:11:37Z,0\n2026-11-19T13:11:42Z,0\n2026-11-19T13:11:47Z,0\n2026-11-19T13:11:52Z,0\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "رامات السيرفر (MB)",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 24,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,rss_mb\n2026-11-19T13:09:57Z,191.6\n2026-11-19T13:10:02Z,216.6\n2026-11-19T13:10:07Z,275.1\n2026-11-19T13:10:12Z,328.4\n2026-11-19T13:10:17Z,329.0\n2026-11-19T13:10:22Z,324.4\n2026-11-19T13:10:27Z,281.6\n2026-11-19T13:10:32Z,199.9\n2026-11-19T13:10:37Z,190.7\n2026-11-19T13:10:42Z,194.1\n2026-11-19T13:10:47Z,197.7\n2026-11-19T13:10:52Z,193.1\n2026-11-19T13:10:57Z,166.9\n2026-11-19T13:11:02Z,170.4\n2026-11-19T13:11:07Z,157.2\n2026-11-19T13:11:12Z,146.0\n2026-11-19T13:11:17Z,198.1\n2026-11-19T13:11:22Z,214.7\n2026-11-19T13:11:27Z,199.4\n2026-11-19T13:11:32Z,202.8\n2026-11-19T13:11:37Z,222.6\n2026-11-19T13:11:42Z,243.9\n2026-11-19T13:11:47Z,273.5\n2026-11-19T13:11:52Z,271.7\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "decmbytes",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "حجم قاعدة البيانات (MB)",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 24,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "time,db_mb\n2026-11-19T13:09:57Z,5.75\n2026-11-19T13:10:02Z,7.2\n2026-11-19T13:10:07Z,9.24\n2026-11-19T13:10:12Z,10.9\n2026-11-19T13:10:17Z,12.1\n2026-11-19T13:10:22Z,13.87\n2026-11-19T13:10:27Z,15.28\n2026-11-19T13:10:32Z,17.0\n2026-11-19T13:10:37Z,18.69\n2026-11-19T13:10:42Z,19.81\n2026-11-19T13:10:47Z,21.47\n2026-11-19T13:10:52Z,22.34\n2026-11-19T13:10:57Z,23.7\n2026-11-19T13:11:02Z,25.55\n2026-11-19T13:11:07Z,27.31\n2026-11-19T13:11:12Z,28.92\n2026-11-19T13:11:17Z,30.13\n2026-11-19T13:11:22Z,31.64\n2026-11-19T13:11:27Z,32.79\n2026-11-19T13:11:32Z,34.27\n2026-11-19T13:11:37Z,35.71\n2026-11-19T13:11:42Z,37.05\n2026-11-19T13:11:47Z,38.44\n2026-11-19T13:11:52Z,39.46\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "decmbytes",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 8,
+   "type": "table",
+   "title": "ملخص كل مرحلة (15 ثانية)",
+   "datasource": {
+    "type": "grafana-testdata-datasource",
+    "uid": "${DS_TESTDATA}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 32,
+    "w": 24,
+    "h": 14
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "grafana-testdata-datasource",
+      "uid": "${DS_TESTDATA}"
+     },
+     "scenarioId": "csv_content",
+     "csvContent": "stage,target_per_min,orders_ok,actual_per_min,failed,http_errors,order_p50,order_p95,order_p99,order_max,close_p95,screen_p95,screen_max,server_lag_max,rss_mb,db_mb\n1,500,0,0,0,0,739,860,872,882,0,2026,2134,436,275.1,9.24\n2,1000,0,0,0,0,769,853,908,957,0,1992,2056,412,329.0,13.870000000000001\n3,1500,0,0,0,0,796,862,918,933,0,2050,2157,463,281.6,18.689999999999998\n4,2000,0,0,0,0,809,1529,1848,1884,0,2213,3842,938,197.7,22.34\n5,2500,0,0,0,0,700,896,1508,1574,0,2131,3903,399,170.4,27.31\n6,3000,0,0,0,0,788,1547,1601,1629,0,3547,3898,837,214.7,31.64\n7,3500,0,0,0,0,1362,1674,1814,1839,0,3917,4112,754,222.6,35.71\n8,4000,0,0,0,0,1332,1638,1699,1721,0,3783,4027,815,273.5,39.46\n9,4500,0,0,0,0,0,0,0,0,0,0,0,1,120.7,39.46\n10,5000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n11,5500,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n12,6000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n13,6500,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n14,7000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n15,7500,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n16,8000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n17,8500,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n18,9000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n19,9500,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n20,10000,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {},
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   }
+  }
+ ],
+ "tags": [
+  "orderly",
+  "k6"
+ ]
+}

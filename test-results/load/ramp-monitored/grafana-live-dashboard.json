@@ -1,0 +1,48 @@
+{
+  "uid": "orderly-live",
+  "title": "Order Ly live load",
+  "description": "k6 (remote write) + Order Ly server metrics (load_server_test.dart LOAD_METRICS_PORT). Datasource uid: prom.",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "refresh": "5s",
+  "time": { "from": "now-10m", "to": "now" },
+  "panels": [
+    { "id": 1, "type": "timeseries", "title": "Orders / second (ok)", "gridPos": { "x": 0, "y": 0, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" },
+      "targets": [ { "refId": "A", "expr": "sum(rate(k6_orders_ok_total[15s]))", "legendFormat": "orders/s" } ] },
+    { "id": 2, "type": "timeseries", "title": "Order time (ms)", "gridPos": { "x": 8, "y": 0, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "max(k6_order_time_p50) * 1000", "legendFormat": "p50" },
+        { "refId": "B", "expr": "max(k6_order_time_p95) * 1000", "legendFormat": "p95" },
+        { "refId": "C", "expr": "max(k6_order_time_p99) * 1000", "legendFormat": "p99" } ] },
+    { "id": 3, "type": "timeseries", "title": "Screens p95 (ms)", "gridPos": { "x": 16, "y": 0, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [ { "refId": "A", "expr": "max(k6_screen_time_p95) * 1000", "legendFormat": "screens p95" } ] },
+    { "id": 4, "type": "timeseries", "title": "Server event-loop lag (ms) — over ~200 ms the screens feel stuck", "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "unit": "ms" }, "overrides": [] },
+      "targets": [ { "refId": "A", "expr": "orderly_event_loop_lag_ms", "legendFormat": "lag" } ] },
+    { "id": 5, "type": "timeseries", "title": "Server memory / database (MB)", "gridPos": { "x": 8, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "unit": "decmbytes" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "orderly_rss_bytes / 1048576", "legendFormat": "RSS" },
+        { "refId": "B", "expr": "orderly_db_bytes / 1048576", "legendFormat": "DB" },
+        { "refId": "C", "expr": "orderly_wal_bytes / 1048576", "legendFormat": "WAL" } ] },
+    { "id": 6, "type": "timeseries", "title": "Virtual devices, open checks, kitchen queue", "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prom" },
+      "targets": [
+        { "refId": "A", "expr": "max(k6_vus)", "legendFormat": "devices (VUs)" },
+        { "refId": "B", "expr": "orderly_open_checks", "legendFormat": "open checks" },
+        { "refId": "C", "expr": "orderly_kds_orders", "legendFormat": "kitchen queue" } ] },
+    { "id": 7, "type": "stat", "title": "Failed requests (rate)", "gridPos": { "x": 0, "y": 16, "w": 8, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "prom" }, "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 3 }, "overrides": [] },
+      "targets": [ { "refId": "A", "expr": "max(k6_http_req_failed_rate)" } ] },
+    { "id": 8, "type": "stat", "title": "Orders completed", "gridPos": { "x": 8, "y": 16, "w": 8, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "prom" },
+      "targets": [ { "refId": "A", "expr": "max(orderly_orders_total)" } ] },
+    { "id": 9, "type": "stat", "title": "HTTP requests / second", "gridPos": { "x": 16, "y": 16, "w": 8, "h": 5 },
+      "datasource": { "type": "prometheus", "uid": "prom" },
+      "targets": [ { "refId": "A", "expr": "sum(rate(k6_http_reqs_total[15s]))" } ] }
+  ]
+}

@@ -280,7 +280,7 @@ extension _ReportRoutes on OrderlyServer {
       final p = db.selectOne('SELECT percent_bp FROM promotions WHERE id = ?', [id])!;
       if ((p['percent_bp'] as int) == 0) throw ApiError(400, 'اكتب نسبة الخصم');
     });
-    _audit(u.id, 'promotion.save', 'promotion', id, body['name'] as String?);
+    _audit(u.id, 'promotion.save', 'promotion', id, _optionalText(body, 'name'));
     _broadcast('menu');
     return _promotionsJson();
   }

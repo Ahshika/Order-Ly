@@ -114,8 +114,8 @@ extension _PaymentRoutes on OrderlyServer {
   }
 
   Future<Object?> _addPayment(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
+    final c = _loadCheck(req.params['id']!, open: true);
     final m = _loadPayMethod(body['methodId']);
     final amount = body['amountCents'];
     if (amount is! int || amount <= 0) throw ApiError(400, 'المبلغ مش صحيح');
@@ -146,19 +146,30 @@ extension _PaymentRoutes on OrderlyServer {
 
   /// الكاشير شاف صورة التحويل واتأكد إن الفلوس وصلت.
   Future<Object?> _confirmPayment(Request req, AuthUser u) async {
+    // الـ body الأول: لو كاشيرين داسوا "تأكيد" على نفس التحويل في نفس اللحظة، التاني يشوف إنه اتأكد (من غير ما الدرج يتحسب مرتين)
+    final body = await _body(req);
     final p = db.selectOne('SELECT * FROM payments WHERE id = ?', [req.params['id']]);
     if (p == null) throw ApiError(404, 'الدفعة دي مش موجودة');
     if (p['status'] != 'pending') throw ApiError(400, 'الدفعة دي اتراجعت قبل كده');
-    final body = await _body(req);
     // الكاشير ممكن يعدّل المبلغ لو اللي وصل غير اللي العميل كتبه
     final amount = body['amountCents'] is int && (body['amountCents'] as int) > 0 ? body['amountCents'] as int : p['amount_cents'] as int;
+    _recalcCheck(p['check_id'] as String);
+    final check = _loadCheck(p['check_id'] as String);
+    // الحد الأقصى = الباقي على الحساب + الطلبات اللي لسه مستنية موافقة (العميل ممكن يحوّل قبل ما الكاشير يقبل الطلب)
+    final waiting = db.selectOne(
+      "SELECT COALESCE(SUM(oi.qty * oi.unit_price_cents), 0) AS s FROM order_items oi JOIN orders o ON o.id = oi.order_id "
+      "WHERE oi.check_id = ? AND oi.status <> 'void' AND o.status = 'pending'",
+      [check['id']],
+    )!['s'] as int;
+    final due = (check['total_cents'] as int) - (check['paid_cents'] as int) + waiting;
+    if (check['status'] != 'open' || due <= 0) throw ApiError(400, 'الحساب ده مفيش عليه فلوس. ارفض التحويل');
+    if (amount > due) throw ApiError(400, 'المبلغ أكبر من الباقي على الحساب (${money(due)})');
     final session = _requireOpenRegister();
     db.transaction(() {
       db.execute(
         "UPDATE payments SET status = 'confirmed', amount_cents = ?, session_id = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?",
         [amount, session, u.id, nowIso(), p['id']],
       );
-      final check = _loadCheck(p['check_id'] as String);
       _cashMove(session, 'sale', amount, p['method_kind'] as String, refType: 'payment', refId: p['id'] as String, note: 'حساب #${check['number']} • ${p['method_name']} (تحويل)', userId: u.id);
       _recalcCheck(p['check_id'] as String);
     });
@@ -170,10 +181,10 @@ extension _PaymentRoutes on OrderlyServer {
   }
 
   Future<Object?> _rejectPayment(Request req, AuthUser u) async {
+    final body = await _body(req);
     final p = db.selectOne('SELECT * FROM payments WHERE id = ?', [req.params['id']]);
     if (p == null) throw ApiError(404, 'الدفعة دي مش موجودة');
     if (p['status'] != 'pending') throw ApiError(400, 'الدفعة دي اتراجعت قبل كده');
-    final body = await _body(req);
     final reason = _optionalText(body, 'reason') ?? 'التحويل ما وصلش';
     db.execute("UPDATE payments SET status = 'rejected', reject_reason = ?, reviewed_by = ?, reviewed_at = ? WHERE id = ?", [reason, u.id, nowIso(), p['id']]);
     _audit(u.id, 'payment.reject', 'payment', p['id'] as String, '${p['method_name']} ${money(p['amount_cents'] as int)}: $reason');
@@ -271,8 +282,8 @@ extension _PaymentRoutes on OrderlyServer {
 
   Future<Object?> _openRegister(Request req, AuthUser u) async {
     await _requireLicense();
-    if (_openRegisterId() != null) throw ApiError(400, 'الدرج مفتوح بالفعل');
     final body = await _body(req);
+    if (_openRegisterId() != null) throw ApiError(400, 'الدرج مفتوح بالفعل');
     final opening = body['openingCashCents'] is int ? (body['openingCashCents'] as int).clamp(0, 100000000) : 0;
     final branch = db.selectOne('SELECT id FROM branches WHERE is_local = 1 LIMIT 1')?['id'];
     db.execute('INSERT INTO register_sessions(id, branch_id, opened_by, opened_at, opening_cash_cents) VALUES(?, ?, ?, ?, ?)', [_uuid.v4(), branch, u.id, nowIso(), opening]);
@@ -283,8 +294,8 @@ extension _PaymentRoutes on OrderlyServer {
   }
 
   Future<Object?> _closeRegister(Request req, AuthUser u) async {
-    final id = _requireOpenRegister();
     final body = await _body(req);
+    final id = _requireOpenRegister();
     final counted = body['countedCashCents'];
     if (counted is! int || counted < 0) throw ApiError(400, 'اكتب الفلوس اللي في الدرج');
     final kept = body['keptCashCents'] is int ? (body['keptCashCents'] as int).clamp(0, counted) : 0;
@@ -296,13 +307,14 @@ extension _PaymentRoutes on OrderlyServer {
     _audit(u.id, 'register.close', 'register', id, 'المتوقع ${money(summary['expectedCashCents'] as int)} • الفعلي ${money(counted)}');
     _broadcast('register');
     _broadcast('shop');
+    _backupAfterShiftClose();
     return {'closed': _sessionSummary(db.selectOne('SELECT * FROM register_sessions WHERE id = ?', [id])!)};
   }
 
   /// مصروف، أو إيداع في الدرج، أو سحب منه.
   Future<Object?> _addCashMove(Request req, AuthUser u) async {
-    final id = _requireOpenRegister();
     final body = await _body(req);
+    final id = _requireOpenRegister();
     final type = body['type'];
     if (!const {'expense', 'deposit', 'withdraw'}.contains(type)) throw ApiError(400, 'نوع الحركة مش صحيح');
     final amount = body['amountCents'];
@@ -347,8 +359,8 @@ extension _PaymentRoutes on OrderlyServer {
 
   /// بيربط عميل (برقم الموبايل) بالحساب عشان ياخد نقط.
   Future<Object?> _linkCustomer(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
+    final c = _loadCheck(req.params['id']!, open: true);
     final phone = _requiredText(body, 'phone', 'رقم الموبايل');
     final norm = _phoneNorm(phone);
     if (norm.length < 8 || norm.length > 15) throw ApiError(400, 'رقم الموبايل مش صحيح');
@@ -372,10 +384,10 @@ extension _PaymentRoutes on OrderlyServer {
   }
 
   Future<Object?> _redeemPoints(Request req, AuthUser u) async {
+    final body = await _body(req);
     final c = _loadCheck(req.params['id']!, open: true);
     if (!_cafeBool('loyaltyEnabled')) throw ApiError(400, 'نقط الولاء مقفولة من الإعدادات');
     if (c['customer_id'] == null) throw ApiError(400, 'اربط العميل برقم موبايله الأول');
-    final body = await _body(req);
     final customer = db.selectOne('SELECT * FROM customers WHERE id = ?', [c['customer_id']])!;
     final points = body['points'];
     if (points is! int || points < 0) throw ApiError(400, 'عدد النقط مش صحيح');

@@ -22,7 +22,7 @@ class WelcomeScreen extends ConsumerWidget {
         children: [
           const OrderlyLogo(size: 72),
           const SizedBox(height: 8),
-          Text('نظام إدارة محلات صيانة الموبايلات', textAlign: TextAlign.center, style: text.bodyLarge),
+          Text('نظام كاشير وطلب بالـ QR للكافيهات', textAlign: TextAlign.center, style: text.bodyLarge),
           const SizedBox(height: 32),
           Text('الجهاز ده هيشتغل إزاي؟', style: text.titleLarge?.bold),
           const SizedBox(height: 12),

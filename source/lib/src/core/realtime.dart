@@ -2,9 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'session.dart';
+
+/// الجهاز متصل بالسيرفر دلوقتي؟ (الشاشة الرئيسية بتعرض شريط ثابت لما الاتصال يقطع، لحد ما يرجع)
+final serverConnectedProvider = NotifierProvider<ServerConnection, bool>(ServerConnection.new);
+
+class ServerConnection extends Notifier<bool> {
+  @override
+  bool build() => true;
+
+  void set(bool connected) {
+    if (state != connected) state = connected;
+  }
+}
 
 /// اتصال لحظي بالسيرفر: أول ما أي جهاز يغيّر حاجة، كل الأجهزة التانية بتعرف وتحدّث الشاشة.
 ///
@@ -19,24 +32,45 @@ final realtimeProvider = StreamProvider<RealtimeEvent>((ref) {
   Timer? reconnect;
   var disposed = false;
   var connectedBefore = false;
+  // آخر وقت (بساعة السيرفر) شفنا فيه حاجة: لما الاتصال يرجع بنطلب الإشعارات اللي فاتتنا من بعده
+  String? serverTime;
+
+  void online(bool v) {
+    if (!disposed) ref.read(serverConnectedProvider.notifier).set(v);
+  }
 
   void connect() {
     if (disposed) return;
-    channel = WebSocketChannel.connect(api.webSocketUri());
+    // ping كل 5 ثواني: لو الواي فاي قطع من غير ما الاتصال يتقفل رسمي، بنعرف في ثواني مش دقايق
+    final uri = api.webSocketUri();
+    channel = IOWebSocketChannel.connect(
+      serverTime == null ? uri : uri.replace(queryParameters: {...uri.queryParameters, 'since': serverTime}),
+      pingInterval: const Duration(seconds: 5),
+    );
     // أول ما الاتصال يرجع بعد ما قطع (السيرفر رجع، أو الواي فاي رجع): كل الشاشات تتحدّث
     channel!.ready.then((_) {
+      online(true);
       if (connectedBefore && !disposed) controller.add(RealtimeEvent('*'));
       connectedBefore = true;
-    }, onError: (_) {});
+    }, onError: (_) => online(false));
     channel!.stream.listen(
       (msg) {
         try {
           final data = jsonDecode(msg as String) as Map<String, dynamic>;
+          if ((data['type'] == 'hello' || data['type'] == 'notify') && data['at'] is String) {
+            final at = data['at'] as String;
+            if (serverTime == null || at.compareTo(serverTime!) > 0) serverTime = at;
+          }
           if (data['type'] == 'changed') controller.add(RealtimeEvent(data['topic'] as String));
+          // إشعار للموظفين (طلب جديد، ترابيزة بتنادي، تحويل...): الشاشات مابتسمعش عليه، مركز الإشعارات بس
+          if (data['type'] == 'notify') controller.add(RealtimeEvent('notify', data));
         } catch (_) {}
       },
-      onDone: () => reconnect = Timer(const Duration(seconds: 3), connect),
-      onError: (_) {},
+      onDone: () {
+        online(false);
+        reconnect = Timer(const Duration(seconds: 3), connect);
+      },
+      onError: (_) => online(false),
       cancelOnError: false,
     );
   }
@@ -69,8 +103,11 @@ void refreshOnTopics(Ref ref, Set<String> topics) {
 
 /// كل حدث object جديد (من غير ==) عشان Riverpod ما يتجاهلش حدثين ورا بعض لنفس الموضوع.
 class RealtimeEvent {
-  RealtimeEvent(this.topic);
+  RealtimeEvent(this.topic, [this.data]);
   final String topic;
+
+  /// تفاصيل الحدث (للإشعارات بس).
+  final Map<String, dynamic>? data;
 }
 
 /// زي [refreshOn] بس لأكتر من موضوع.

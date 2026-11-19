@@ -112,8 +112,8 @@ extension _MenuRoutes on OrderlyServer {
 
   String? _validStation(Object? id) {
     if (id == null || id == '') return null;
-    if (db.selectOne('SELECT id FROM stations WHERE id = ?', [id]) == null) throw ApiError(400, 'مكان التحضير مش موجود');
-    return id as String;
+    if (id is! String || db.selectOne('SELECT id FROM stations WHERE id = ?', [id]) == null) throw ApiError(400, 'مكان التحضير مش موجود');
+    return id;
   }
 
   Future<Object?> _saveStation(Request req, AuthUser u) async {
@@ -161,7 +161,7 @@ extension _MenuRoutes on OrderlyServer {
         db.execute('UPDATE categories SET updated_at = ? WHERE id = ?', [now, id]);
       });
     }
-    _audit(u.id, id == null ? 'menu.category.create' : 'menu.category.update', 'category', id, body['name'] as String?);
+    _audit(u.id, id == null ? 'menu.category.create' : 'menu.category.update', 'category', id, _optionalText(body, 'name'));
     _broadcast('menu');
     return _menuJson(includeInactive: true);
   }
@@ -232,14 +232,14 @@ extension _MenuRoutes on OrderlyServer {
       }
       db.execute('UPDATE items SET updated_at = ? WHERE id = ?', [now, id]);
     });
-    _audit(u.id, req.params['id'] == null ? 'menu.item.create' : 'menu.item.update', 'item', id, body['name'] as String? ?? body.keys.join('، '));
+    _audit(u.id, req.params['id'] == null ? 'menu.item.create' : 'menu.item.update', 'item', id, _optionalText(body, 'name') ?? body.keys.join('، '));
     _broadcast('menu');
     return {'id': id, ..._menuJson(includeInactive: true)};
   }
 
   Future<Object?> _setItemImage(Request req, AuthUser u) async {
-    final item = _loadItem(req.params['id']!);
     final body = await _body(req);
+    final item = _loadItem(req.params['id']!);
     final fileId = await _saveImage(_decodeImageBody(body), 'menu', u.id, maxSide: 720, quality: 78);
     db.execute('UPDATE items SET image_id = ?, updated_at = ? WHERE id = ?', [fileId, nowIso(), item['id']]);
     _deleteFile(item['image_id'] as String?);
@@ -276,8 +276,8 @@ extension _MenuRoutes on OrderlyServer {
       if (body['active'] is bool) db.execute('UPDATE modifier_groups SET active = ? WHERE id = ?', [body['active'] == true ? 1 : 0, id]);
       if (body['minSelect'] is int || body['maxSelect'] is int) {
         final g = db.selectOne('SELECT min_select, max_select FROM modifier_groups WHERE id = ?', [id])!;
-        final min = (body['minSelect'] as int? ?? g['min_select'] as int).clamp(0, 20);
-        final max = (body['maxSelect'] as int? ?? g['max_select'] as int).clamp(1, 20);
+        final min = (_field<int>(body, 'minSelect') ?? g['min_select'] as int).clamp(0, 20);
+        final max = (_field<int>(body, 'maxSelect') ?? g['max_select'] as int).clamp(1, 20);
         if (min > max) throw ApiError(400, 'أقل عدد اختيارات أكبر من أكتر عدد');
         db.execute('UPDATE modifier_groups SET min_select = ?, max_select = ? WHERE id = ?', [min, max, id]);
       }
@@ -287,20 +287,20 @@ extension _MenuRoutes on OrderlyServer {
         var sort = 0;
         for (final raw in (body['options'] as List).whereType<Map>()) {
           final o = raw.cast<String, dynamic>();
-          final name = (o['name'] as String? ?? '').trim();
+          final name = (_field<String>(o, 'name') ?? '').trim();
           if (name.isEmpty) continue;
           final price = o['priceCents'] is int ? (o['priceCents'] as int).clamp(-100000000, 100000000) : 0;
-          var oid = o['id'] as String?;
+          var oid = _field<String>(o, 'id');
           if (oid != null && db.selectOne('SELECT id FROM modifier_options WHERE id = ? AND group_id = ?', [oid, id]) != null) {
             db.execute(
               'UPDATE modifier_options SET name = ?, name_en = ?, price_cents = ?, is_default = ?, sort = ?, active = 1 WHERE id = ?',
-              [name, (o['nameEn'] as String?)?.trim(), price, o['isDefault'] == true ? 1 : 0, sort, oid],
+              [name, _field<String>(o, 'nameEn')?.trim(), price, o['isDefault'] == true ? 1 : 0, sort, oid],
             );
           } else {
             oid = _uuid.v4();
             db.execute(
               'INSERT INTO modifier_options(id, group_id, name, name_en, price_cents, is_default, sort) VALUES(?, ?, ?, ?, ?, ?, ?)',
-              [oid, id, name, (o['nameEn'] as String?)?.trim(), price, o['isDefault'] == true ? 1 : 0, sort],
+              [oid, id, name, _field<String>(o, 'nameEn')?.trim(), price, o['isDefault'] == true ? 1 : 0, sort],
             );
           }
           keep.add(oid);
@@ -325,7 +325,7 @@ extension _MenuRoutes on OrderlyServer {
         final ids = body[e.key];
         if (ids is! List) continue;
         for (var i = 0; i < ids.length; i++) {
-          db.execute('UPDATE ${e.value} SET sort = ? WHERE id = ?', [i, ids[i]]);
+          if (ids[i] is String) db.execute('UPDATE ${e.value} SET sort = ? WHERE id = ?', [i, ids[i]]);
         }
       }
     });

@@ -1,0 +1,213 @@
+{
+  "generatedAt": "2026-11-19T17:50:22.164639",
+  "results": [
+    {
+      "scenario": "race.add_order_vs_close",
+      "status": "PASS",
+      "httpStatus": 400,
+      "closedCheckUnpaidCents": 0,
+      "orderLandedOnNewCheckCents": null
+    },
+    {
+      "scenario": "race.discount_vs_close",
+      "status": "PASS",
+      "httpStatus": 400,
+      "totalAtClose": 10000,
+      "totalAfter": 10000,
+      "discountAfter": 0
+    },
+    {
+      "scenario": "race.void_item_vs_close",
+      "status": "PASS",
+      "httpStatus": 400,
+      "totalAtClose": 10000,
+      "totalAfter": 10000,
+      "paid": 10000
+    },
+    {
+      "scenario": "race.split_vs_close",
+      "status": "PASS",
+      "httpStatus": 400,
+      "openChecksAfter": 0
+    },
+    {
+      "scenario": "race.double_confirm_transfer",
+      "status": "PASS",
+      "secondHttpStatus": 400,
+      "drawerEntries": 1,
+      "drawerSum": 10000,
+      "note": "added after the fix; same load-before-body pattern as the other race bugs"
+    },
+    {
+      "scenario": "race.double_register_open",
+      "status": "PASS",
+      "secondHttpStatus": 400,
+      "openShifts": 1,
+      "note": "added after the fix; same load-before-body pattern as the other race bugs"
+    },
+    {
+      "scenario": "race.merge_vs_close",
+      "status": "PASS",
+      "httpStatus": 400,
+      "sourceStatusAfter": "closed"
+    },
+    {
+      "scenario": "flood.300_orders_same_check",
+      "status": "PASS",
+      "errors": 0,
+      "ms": 3323,
+      "subtotal": 3000000,
+      "expected": 3000000,
+      "uniqueOrderNumbers": true
+    },
+    {
+      "scenario": "flood.same_table_open",
+      "status": "PASS",
+      "openChecks": 1
+    },
+    {
+      "scenario": "flood.double_payment",
+      "status": "PASS",
+      "succeeded": 1,
+      "rejected": 19,
+      "paid": 20000,
+      "drawerSales": 20000
+    },
+    {
+      "scenario": "flood.close_vs_void",
+      "status": "PASS",
+      "outcomes": [
+        "close-failed",
+        "void"
+      ],
+      "finalStatus": "void"
+    },
+    {
+      "scenario": "flood.websockets_400",
+      "status": "PASS",
+      "messagesReceived": 100021,
+      "writeMsFor100Orders": 12083,
+      "infoLatencyMs": 85,
+      "rssMB": 280
+    },
+    {
+      "scenario": "dos.slowloris_1000",
+      "status": "PASS",
+      "infoLatencyMs": 1
+    },
+    {
+      "scenario": "inventory.void_pending_qr_order",
+      "status": "PASS",
+      "stockAfter": 1000.0,
+      "expected": 1000
+    },
+    {
+      "scenario": "inventory.void_accepted_order",
+      "status": "PASS",
+      "stockAfter": 500.0
+    },
+    {
+      "scenario": "money.max_values",
+      "status": "PASS",
+      "subtotal": 1188000000000,
+      "total": 2673000000000,
+      "expectedTotal": 2673000000000
+    },
+    {
+      "scenario": "money.absurd_numbers",
+      "status": "PASS",
+      "negativeDiscountStatus": 400,
+      "infinityAmountStatus": 400,
+      "total": 0
+    },
+    {
+      "scenario": "money.confirm_overpayment",
+      "status": "PASS",
+      "httpStatus": 400,
+      "overpaidCents": -5000
+    },
+    {
+      "scenario": "authz.matrix",
+      "status": "PASS",
+      "checks": 134,
+      "leaks": []
+    },
+    {
+      "scenario": "security.sql_injection",
+      "status": "PASS",
+      "problems": []
+    },
+    {
+      "scenario": "fuzz.wrong_types",
+      "status": "PASS",
+      "requests": 564,
+      "serverErrors": 0,
+      "examples": [],
+      "dbIntegrity": "ok"
+    },
+    {
+      "scenario": "fuzz.qr_messages",
+      "status": "PASS",
+      "messages": 500,
+      "threwInsideIngest": 116,
+      "ordersWithoutItems": 0,
+      "dbIntegrity": "ok",
+      "note": "a throw is caught by CloudSync._handle and the message is deleted"
+    },
+    {
+      "scenario": "qr.flood",
+      "status": "PASS",
+      "replayStored": 1,
+      "sameClientAccepted": 5,
+      "rotatingClientIdsPending": 0,
+      "pendingOnTheTable": 6,
+      "note": "the per-phone id is chosen by the phone, so there is also a per-table limit (6 waiting, 15 per 10 min)"
+    },
+    {
+      "scenario": "dos.huge_unauth_body",
+      "status": "PASS",
+      "httpStatus": 413,
+      "rssGrowthMB": 7,
+      "peakRssMB": 377
+    },
+    {
+      "scenario": "dos.image_bomb",
+      "status": "PASS",
+      "fileKB": 117,
+      "decodedMegapixels": 100,
+      "ms": 6,
+      "peakRssGrowthMB": 95,
+      "refused": true
+    },
+    {
+      "scenario": "security.bruteforce_lock",
+      "status": "PASS",
+      "lockedAfter": 5
+    },
+    {
+      "scenario": "restore.garbage_db",
+      "status": "PASS",
+      "httpStatus": 400,
+      "note": "if staged, the server cannot start again after restart"
+    },
+    {
+      "scenario": "restore.zip_slip",
+      "status": "PASS",
+      "escapedFiles": []
+    },
+    {
+      "scenario": "resilience.corrupt_db",
+      "status": "INFO",
+      "started": false,
+      "error": "ApiError(500): قاعدة البيانات بايظة ومفيش نسخة احتياطية سليمة نرجع لها. الملف البايظ اتحفظ في C:\\Users\\ahmed\\AppData\\Local\\Temp\\orderly_stress25615749\\corrupt-2026-11-19T17-50-20. كلم الدعم الفني ومتمسحش الفولدر ده"
+    },
+    {
+      "scenario": "resilience.stop_under_load",
+      "status": "PASS",
+      "completedBeforeStop": 18,
+      "ordersStored": 200,
+      "halfOrders": 0,
+      "dbIntegrity": "ok"
+    }
+  ]
+}

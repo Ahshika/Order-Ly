@@ -1,0 +1,313 @@
+2026-11-19 15:30:07:212 [Appium] Welcome to Appium v4.0.0
+2026-11-19 15:30:07:213 [Appium] Non-default server args:
+2026-11-19 15:30:07:213 [Appium] { address: '127.0.0.1' }
+2026-11-19 15:30:07:239 [Appium] Attempting to load driver uiautomator2...
+2026-11-19 15:30:08:767 [HTTP] Appium REST http interface listener started on http://127.0.0.1:4723
+2026-11-19 15:30:08:767 [Appium] Available drivers:
+2026-11-19 15:30:08:768 [Appium]   - uiautomator2@9.2.2 (automationName 'UiAutomator2')
+2026-11-19 15:30:08:768 [Appium] No plugins have been installed. Use the "appium plugin" command to install the one(s) you want to use.
+2026-11-19 15:30:26:755 [HTTP] --> GET /status 
+2026-11-19 15:30:26:803 [HTTP] <-- GET /status 200 46 ms - 110
+2026-11-19 15:30:32:457 [HTTP] --> POST /session {"capabilities":{"alwaysMatch":{"platformName":"Android","appium:automationName":"UiAutomator2","appium:app":"D:\\Project\\Programes\\Order Ly\\.claude\\worktrees\\comprehensive-stress-testing-f1539b\\source\\build\\app\\outputs\\flutter-apk\\app-debug.apk","appium:autoGrantPermissions":true,"appium:newCommandTimeout":900}}}
+2026-11-19 15:30:32:467 [Appium] Attempting to find matching driver for automationName 'UiAutomator2' and platformName 'Android'
+2026-11-19 15:30:32:467 [Appium] The 'uiautomator2' driver was installed and matched caps.
+2026-11-19 15:30:32:467 [Appium] Will require it at C:\Users\ahmed\.appium\node_modules\appium-uiautomator2-driver
+2026-11-19 15:30:32:478 [AppiumDriver@2003] Appium v4.0.0 creating new AndroidUiautomator2Driver (v9.2.2) session
+2026-11-19 15:30:32:478 [AppiumDriver@2003] Checking BaseDriver versions for Appium and AndroidUiautomator2Driver
+2026-11-19 15:30:32:478 [AppiumDriver@2003] Appium's BaseDriver version is 11.0.0
+2026-11-19 15:30:32:479 [AppiumDriver@2003] AndroidUiautomator2Driver's BaseDriver version is 11.0.0
+2026-11-19 15:30:32:491 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Session created with session id: 1bae64a5-9381-4780-a922-b89e007ca716
+2026-11-19 15:30:32:512 [1bae64a5][ADB] Found 4 'build-tools' folders under 'C:\Users\ahmed\AppData\Local\Android\Sdk' (newest first):
+2026-11-19 15:30:32:512 [1bae64a5][ADB]     C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\36.0.0
+2026-11-19 15:30:32:513 [1bae64a5][ADB]     C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\35.0.0
+2026-11-19 15:30:32:513 [1bae64a5][ADB]     C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\34.0.0
+2026-11-19 15:30:32:513 [1bae64a5][ADB]     C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\28.0.3
+2026-11-19 15:30:32:513 [1bae64a5][ADB] Using 'adb.exe' from 'C:\Users\ahmed\AppData\Local\Android\Sdk\platform-tools\adb.exe'
+2026-11-19 15:30:32:603 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Retrieving device list
+2026-11-19 15:30:32:651 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Using device: emulator-5554
+2026-11-19 15:30:32:652 [1bae64a5][BaseDriver] Subscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 to topic 'uiautomator2:sessionUdidClaimed'
+2026-11-19 15:30:32:653 [1bae64a5][BaseDriver] Subscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 to topic 'uiautomator2:sessionUdidContended'
+2026-11-19 15:30:32:653 [1bae64a5][BaseDriver] Subscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 to topic 'uiautomator2:sessionUdidReleased'
+2026-11-19 15:30:32:681 [1bae64a5][BaseDriver] Unsubscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 from topic 'uiautomator2:sessionUdidContended'
+2026-11-19 15:30:32:681 [1bae64a5][BaseDriver] Unsubscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 from topic 'uiautomator2:sessionUdidReleased'
+2026-11-19 15:30:32:682 [1bae64a5][ADB] Using 'adb.exe' from 'C:\Users\ahmed\AppData\Local\Android\Sdk\platform-tools\adb.exe'
+2026-11-19 15:30:32:731 [1bae64a5][BaseDriver] Using local app 'D:\Project\Programes\Order Ly\.claude\worktrees\comprehensive-stress-testing-f1539b\source\build\app\outputs\flutter-apk\app-debug.apk'
+2026-11-19 15:30:33:194 [1bae64a5][ADB] Getting device platform version
+2026-11-19 15:30:33:265 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Relaxing hidden api policy
+2026-11-19 15:30:33:288 [1bae64a5][ADB] Using 'aapt2.exe' from 'C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\36.0.0\aapt2.exe'
+2026-11-19 15:30:33:373 [1bae64a5][ADB] Package name: 'com.orderly.app'
+2026-11-19 15:30:33:373 [1bae64a5][ADB] Main activity name: 'com.orderly.orderly.MainActivity'
+2026-11-19 15:30:35:725 [1bae64a5][ADB] The installation of 'settings_apk-debug.apk' took 2223ms
+2026-11-19 15:30:39:997 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Server packages are going to be (re)installed
+2026-11-19 15:30:40:151 [1bae64a5][ADB] Using 'apksigner.jar' from 'C:\Users\ahmed\AppData\Local\Android\Sdk\build-tools\36.0.0\lib\apksigner.jar'
+2026-11-19 15:30:41:032 [1bae64a5][ADB] 'D:\Project\Programes\Order Ly\.claude\worktrees\comprehensive-stress-testing-f1539b\source\build\app\outputs\flutter-apk\app-debug.apk' is signed with a non-default certificate
+2026-11-19 15:30:42:856 [1bae64a5][ADB] The installation of 'appium-uiautomator2-server-debug-androidTest.apk' took 2731ms
+2026-11-19 15:30:43:653 [1bae64a5][ADB] The installation of 'appium-uiautomator2-server-v11.0.8.apk' took 3536ms
+2026-11-19 15:30:44:004 [1bae64a5][ADB] Adding packages ["io.appium.settings","io.appium.uiautomator2.server","io.appium.uiautomator2.server.test"] to Doze whitelist
+2026-11-19 15:30:49:429 [1bae64a5][ADB] The installation of 'app-debug.apk' took 7897ms
+2026-11-19 15:30:49:651 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Starting UIAutomator2 server 11.0.8
+2026-11-19 15:30:49:651 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Using UIAutomator2 server from 'C:\Users\ahmed\.appium\node_modules\appium-uiautomator2-driver\node_modules\appium-uiautomator2-server\apks\appium-uiautomator2-server-v11.0.8.apk' and test from 'C:\Users\ahmed\.appium\node_modules\appium-uiautomator2-driver\node_modules\appium-uiautomator2-server\apks\appium-uiautomator2-server-debug-androidTest.apk'
+2026-11-19 15:30:49:651 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Waiting up to 30000ms for UiAutomator2 to be online...
+2026-11-19 15:30:49:679 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] socket hang up
+2026-11-19 15:30:50:690 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] socket hang up
+2026-11-19 15:30:51:697 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] socket hang up
+2026-11-19 15:30:52:706 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] socket hang up
+2026-11-19 15:30:53:715 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] socket hang up
+2026-11-19 15:30:55:029 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Screen already unlocked, doing nothing
+2026-11-19 15:30:55:030 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Starting 'com.orderly.app/com.orderly.orderly.MainActivityand waiting for 'com.orderly.app/com.orderly.orderly.MainActivity'
+2026-11-19 15:31:02:757 [1bae64a5][BaseDriver] Unsubscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 from topic 'uiautomator2:sessionUdidClaimed'
+2026-11-19 15:31:02:757 [1bae64a5][BaseDriver] Subscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 to topic 'uiautomator2:sessionUdidClaimed'
+2026-11-19 15:31:02:758 [1bae64a5][AppiumDriver@2003] New AndroidUiautomator2Driver session created successfully, session 1bae64a5-9381-4780-a922-b89e007ca716 added to master session list
+2026-11-19 15:31:02:763 [HTTP] <-- POST /session 200 30304 ms - 1221
+2026-11-19 15:31:02:773 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الاتصال بسيرفر الكافيه') or contains(@text,'الاتصال بسيرفر الكافيه')]"}
+2026-11-19 15:31:04:093 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 1321 ms - 139
+2026-11-19 15:31:04:108 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-000800000003/click {}
+2026-11-19 15:31:04:242 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-000800000003/click 200 134 ms - 14
+2026-11-19 15:31:04:264 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.EditText"}
+2026-11-19 15:31:05:295 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 1030 ms - 12
+2026-11-19 15:31:05:798 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.EditText"}
+2026-11-19 15:31:06:010 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 212 ms - 139
+2026-11-19 15:31:06:011 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/click {}
+2026-11-19 15:31:06:099 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/click 200 87 ms - 14
+2026-11-19 15:31:06:121 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/clear {}
+2026-11-19 15:31:06:870 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/clear 200 749 ms - 14
+2026-11-19 15:31:06:872 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/value {"text":"10.0.2.2:18797"}
+2026-11-19 15:31:07:105 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001100000003/value 200 232 ms - 14
+2026-11-19 15:31:08:384 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'دخول') or contains(@text,'دخول')]"}
+2026-11-19 15:31:09:011 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 627 ms - 139
+2026-11-19 15:31:09:030 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"(//android.widget.EditText)[1]"}
+2026-11-19 15:31:09:179 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 148 ms - 139
+2026-11-19 15:31:09:180 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/click {}
+2026-11-19 15:31:09:283 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/click 200 102 ms - 14
+2026-11-19 15:31:09:296 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/clear {}
+2026-11-19 15:31:10:937 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/clear 200 1640 ms - 14
+2026-11-19 15:31:10:938 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/value {"text":"owner"}
+2026-11-19 15:31:10:989 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001900000003/value 200 51 ms - 14
+2026-11-19 15:31:11:791 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"(//android.widget.EditText)[2]"}
+2026-11-19 15:31:11:839 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 49 ms - 139
+2026-11-19 15:31:11:859 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/click {}
+2026-11-19 15:31:11:932 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/click 200 73 ms - 14
+2026-11-19 15:31:11:952 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/clear {}
+2026-11-19 15:31:13:068 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/clear 200 1116 ms - 14
+2026-11-19 15:31:13:070 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/value {"text":"owner123"}
+2026-11-19 15:31:13:103 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001a00000003/value 200 33 ms - 14
+2026-11-19 15:31:14:016 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[@content-desc='دخول']"}
+2026-11-19 15:31:14:064 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 47 ms - 139
+2026-11-19 15:31:14:064 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001c00000003/click {}
+2026-11-19 15:31:14:114 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-001c00000003/click 200 49 ms - 14
+2026-11-19 15:31:14:115 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:31:14:340 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 225 ms - 12
+2026-11-19 15:31:14:842 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:31:17:151 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 2309 ms - 139
+2026-11-19 15:31:17:180 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:17:939 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 758 ms - 147920
+2026-11-19 15:31:17:941 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'1\n')]"}
+2026-11-19 15:31:18:009 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 68 ms - 139
+2026-11-19 15:31:18:010 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-002b00000003/click {}
+2026-11-19 15:31:18:706 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-002b00000003/click 200 696 ms - 14
+2026-11-19 15:31:18:709 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[@content-desc='2']"}
+2026-11-19 15:31:18:785 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 76 ms - 139
+2026-11-19 15:31:18:785 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-004c00000003/click {}
+2026-11-19 15:31:18:853 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-004c00000003/click 200 68 ms - 14
+2026-11-19 15:31:18:874 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-1')]"}
+2026-11-19 15:31:19:158 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 284 ms - 12
+2026-11-19 15:31:19:661 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-1')]"}
+2026-11-19 15:31:20:302 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 641 ms - 139
+2026-11-19 15:31:20:322 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007200000003/click {}
+2026-11-19 15:31:21:269 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007200000003/click 200 947 ms - 14
+2026-11-19 15:31:21:876 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-1')]"}
+2026-11-19 15:31:22:582 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 707 ms - 139
+2026-11-19 15:31:22:598 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007200000003/click {}
+2026-11-19 15:31:23:097 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007200000003/click 200 498 ms - 14
+2026-11-19 15:31:23:698 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-0')]"}
+2026-11-19 15:31:24:093 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 395 ms - 139
+2026-11-19 15:31:24:094 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007000000003/click {}
+2026-11-19 15:31:24:212 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-007000000003/click 200 118 ms - 14
+2026-11-19 15:31:24:213 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'كبير')]"}
+2026-11-19 15:31:24:849 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 635 ms - 139
+2026-11-19 15:31:24:850 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-009400000003/click {}
+2026-11-19 15:31:25:372 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-009400000003/click 200 522 ms - 14
+2026-11-19 15:31:25:374 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'شوت')]"}
+2026-11-19 15:31:25:763 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 390 ms - 139
+2026-11-19 15:31:25:765 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-009700000003/click {}
+2026-11-19 15:31:26:146 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-009700000003/click 200 381 ms - 14
+2026-11-19 15:31:26:147 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[@content-desc='ضيف']"}
+2026-11-19 15:31:26:497 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 349 ms - 139
+2026-11-19 15:31:26:499 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00a000000003/click {}
+2026-11-19 15:31:26:915 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00a000000003/click 200 416 ms - 14
+2026-11-19 15:31:26:915 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الحساب')]"}
+2026-11-19 15:31:27:085 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 169 ms - 12
+2026-11-19 15:31:27:587 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الحساب')]"}
+2026-11-19 15:31:27:945 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 358 ms - 139
+2026-11-19 15:31:27:946 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click {}
+2026-11-19 15:31:28:037 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click 200 91 ms - 14
+2026-11-19 15:31:28:038 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'إرسال الطلب')]"}
+2026-11-19 15:31:28:706 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 668 ms - 139
+2026-11-19 15:31:28:724 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00b100000003/click {}
+2026-11-19 15:31:29:166 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00b100000003/click 200 442 ms - 14
+2026-11-19 15:31:29:190 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'طلب #1')]"}
+2026-11-19 15:31:29:529 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 339 ms - 12
+2026-11-19 15:31:30:031 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'طلب #1')]"}
+2026-11-19 15:31:30:375 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 344 ms - 139
+2026-11-19 15:31:30:397 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:30:834 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 437 ms - 91060
+2026-11-19 15:31:30:904 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الإجمالي') and contains(@content-desc,'230 ')]"}
+2026-11-19 15:31:31:051 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 147 ms - 12
+2026-11-19 15:31:31:553 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الإجمالي') and contains(@content-desc,'230 ')]"}
+2026-11-19 15:31:31:732 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 180 ms - 139
+2026-11-19 15:31:31:734 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:31:952 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 217 ms - 111760
+2026-11-19 15:31:31:964 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:32:026 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 62 ms - 139
+2026-11-19 15:31:32:027 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:32:101 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 74 ms - 139
+2026-11-19 15:31:32:102 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:32:166 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 63 ms - 139
+2026-11-19 15:31:32:167 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006100000003/click {}
+2026-11-19 15:31:33:243 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006100000003/click 200 1076 ms - 14
+2026-11-19 15:31:33:255 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-3')]"}
+2026-11-19 15:31:33:342 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 87 ms - 139
+2026-11-19 15:31:33:343 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00cc00000003/click {}
+2026-11-19 15:31:33:393 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00cc00000003/click 200 50 ms - 14
+2026-11-19 15:31:34:017 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الحساب')]"}
+2026-11-19 15:31:34:311 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 294 ms - 139
+2026-11-19 15:31:34:327 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click {}
+2026-11-19 15:31:34:402 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click 200 76 ms - 14
+2026-11-19 15:31:37:464 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'إرسال الطلب')]"}
+2026-11-19 15:31:37:605 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 141 ms - 139
+2026-11-19 15:31:37:617 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00ea00000003/click {}
+2026-11-19 15:31:37:689 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00ea00000003/click 200 72 ms - 14
+2026-11-19 15:31:44:336 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'لسه ما اتبعتش') or contains(@text,'لسه ما اتبعتش')]"}
+2026-11-19 15:31:44:426 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 90 ms - 139
+2026-11-19 15:31:44:428 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:44:771 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 343 ms - 158488
+2026-11-19 15:31:50:648 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'إرسال الطلب')]"}
+2026-11-19 15:31:50:753 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 105 ms - 139
+2026-11-19 15:31:50:772 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00ea00000003/click {}
+2026-11-19 15:31:51:807 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-00ea00000003/click 200 1035 ms - 14
+2026-11-19 15:31:51:818 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'طلب #3')]"}
+2026-11-19 15:31:51:879 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 61 ms - 139
+2026-11-19 15:31:51:928 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:52:145 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 218 ms - 127280
+2026-11-19 15:31:52:147 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:52:206 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 59 ms - 139
+2026-11-19 15:31:52:221 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:52:275 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 53 ms - 139
+2026-11-19 15:31:52:276 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'المنيو')]"}
+2026-11-19 15:31:52:331 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 55 ms - 139
+2026-11-19 15:31:52:332 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006100000003/click {}
+2026-11-19 15:31:52:402 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006100000003/click 200 70 ms - 14
+2026-11-19 15:31:52:403 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-7')]"}
+2026-11-19 15:31:53:281 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 877 ms - 139
+2026-11-19 15:31:53:297 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-010c00000003/click {}
+2026-11-19 15:31:53:364 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-010c00000003/click 200 67 ms - 14
+2026-11-19 15:31:53:968 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الحساب')]"}
+2026-11-19 15:31:55:553 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 1586 ms - 139
+2026-11-19 15:31:55:554 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click {}
+2026-11-19 15:31:56:440 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-006200000003/click 200 885 ms - 14
+2026-11-19 15:31:56:507 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الحساب ده اتقفل') or contains(@text,'الحساب ده اتقفل')]"}
+2026-11-19 15:31:56:593 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 86 ms - 12
+2026-11-19 15:31:57:115 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الحساب ده اتقفل') or contains(@text,'الحساب ده اتقفل')]"}
+2026-11-19 15:31:57:454 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 338 ms - 139
+2026-11-19 15:31:57:455 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'ابعتها على حساب جديد')]"}
+2026-11-19 15:31:57:524 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 69 ms - 139
+2026-11-19 15:31:57:547 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:57:803 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 256 ms - 191504
+2026-11-19 15:31:57:826 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-013800000003/click {}
+2026-11-19 15:31:57:906 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-013800000003/click 200 80 ms - 14
+2026-11-19 15:31:58:926 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:31:59:256 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 329 ms - 119060
+2026-11-19 15:31:59:258 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:31:59:259 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:31:59:466 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 207 ms - 14
+2026-11-19 15:31:59:469 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:00:194 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 725 ms - 139
+2026-11-19 15:32:03:413 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:03:491 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 78 ms - 139
+2026-11-19 15:32:03:517 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:03:775 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 257 ms - 114460
+2026-11-19 15:32:03:776 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/execute/sync {"script":"mobile: backgroundApp","args":[{"seconds":6}]}
+2026-11-19 15:32:13:635 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/execute/sync 200 9857 ms - 14
+2026-11-19 15:32:16:637 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:16:812 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 175 ms - 139
+2026-11-19 15:32:19:161 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'2\n')]"}
+2026-11-19 15:32:19:229 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 67 ms - 139
+2026-11-19 15:32:19:230 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-019100000003/click {}
+2026-11-19 15:32:19:320 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-019100000003/click 200 90 ms - 14
+2026-11-19 15:32:19:350 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[@content-desc='افتح من غير عدد']"}
+2026-11-19 15:32:19:537 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 187 ms - 12
+2026-11-19 15:32:20:039 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[@content-desc='افتح من غير عدد']"}
+2026-11-19 15:32:20:362 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 323 ms - 139
+2026-11-19 15:32:20:375 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01c200000003/click {}
+2026-11-19 15:32:20:457 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01c200000003/click 200 82 ms - 14
+2026-11-19 15:32:20:458 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-9')]"}
+2026-11-19 15:32:20:782 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 323 ms - 12
+2026-11-19 15:32:21:307 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'صنف 0-9')]"}
+2026-11-19 15:32:21:561 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 253 ms - 139
+2026-11-19 15:32:21:562 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01e600000003/click {}
+2026-11-19 15:32:21:612 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01e600000003/click 200 50 ms - 14
+2026-11-19 15:32:22:215 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الحساب')]"}
+2026-11-19 15:32:22:484 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 269 ms - 139
+2026-11-19 15:32:22:485 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01f000000003/click {}
+2026-11-19 15:32:23:759 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01f000000003/click 200 1273 ms - 14
+2026-11-19 15:32:23:769 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//android.widget.Button[starts-with(@content-desc,'إرسال الطلب')]"}
+2026-11-19 15:32:23:813 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 43 ms - 139
+2026-11-19 15:32:23:814 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01fd00000003/click {}
+2026-11-19 15:32:23:867 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-000c-0000-01fd00000003/click 200 53 ms - 14
+2026-11-19 15:32:23:868 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'طلب #')]"}
+2026-11-19 15:32:24:056 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 188 ms - 139
+2026-11-19 15:32:24:205 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:24:913 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 708 ms - 80576
+2026-11-19 15:32:24:925 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:24:925 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:25:056 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 132 ms - 14
+2026-11-19 15:32:25:118 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'جاهز') or contains(@text,'جاهز')]"}
+2026-11-19 15:32:26:568 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 1450 ms - 139
+2026-11-19 15:32:26:571 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:26:955 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 384 ms - 188464
+2026-11-19 15:32:27:011 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الطباعة فشلت') or contains(@text,'الطباعة فشلت')]"}
+2026-11-19 15:32:27:252 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 241 ms - 12
+2026-11-19 15:32:27:756 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'الطباعة فشلت') or contains(@text,'الطباعة فشلت')]"}
+2026-11-19 15:32:28:078 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 322 ms - 139
+2026-11-19 15:32:28:093 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:28:279 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 186 ms - 190164
+2026-11-19 15:32:33:702 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:34:031 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 328 ms - 225036
+2026-11-19 15:32:34:039 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@text,'جاهز')]"}
+2026-11-19 15:32:34:241 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 201 ms - 139
+2026-11-19 15:32:34:257 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-0006-ffff-ffff000007a5/click {}
+2026-11-19 15:32:36:026 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/element/00000000-0000-0006-ffff-ffff000007a5/click 200 1769 ms - 14
+2026-11-19 15:32:39:030 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[starts-with(@content-desc,'الطلبات') and @selected='true']"}
+2026-11-19 15:32:39:086 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 57 ms - 139
+2026-11-19 15:32:39:087 [1bae64a5][HTTP] --> GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 
+2026-11-19 15:32:39:505 [HTTP] <-- GET /session/1bae64a5-9381-4780-a922-b89e007ca716/screenshot 200 417 ms - 92632
+2026-11-19 15:32:40:792 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:40:840 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 48 ms - 12
+2026-11-19 15:32:40:854 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:40:854 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:40:926 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 72 ms - 14
+2026-11-19 15:32:42:427 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:42:492 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 64 ms - 12
+2026-11-19 15:32:42:505 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:42:505 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:43:555 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 1050 ms - 14
+2026-11-19 15:32:45:075 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:45:121 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 46 ms - 12
+2026-11-19 15:32:45:122 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:45:122 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:46:152 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 1029 ms - 14
+2026-11-19 15:32:47:670 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:47:717 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 47 ms - 12
+2026-11-19 15:32:47:718 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:47:718 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:48:754 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 1036 ms - 14
+2026-11-19 15:32:50:256 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements {"using":"xpath","value":"//*[contains(@content-desc,'مشغولة من') or contains(@text,'مشغولة من')]"}
+2026-11-19 15:32:50:298 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/elements 200 42 ms - 12
+2026-11-19 15:32:50:314 [1bae64a5][HTTP] --> POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back {}
+2026-11-19 15:32:50:314 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Driver proxy active, passing request on via HTTP proxy
+2026-11-19 15:32:51:355 [HTTP] <-- POST /session/1bae64a5-9381-4780-a922-b89e007ca716/back 200 1041 ms - 14
+2026-11-19 15:32:52:879 [1bae64a5][HTTP] --> DELETE /session/1bae64a5-9381-4780-a922-b89e007ca716 
+2026-11-19 15:32:52:882 [1bae64a5][BaseDriver] Unsubscribing 49bd10dd-5eb8-43c6-8550-acf0e3b32595 from topic 'uiautomator2:sessionUdidClaimed'
+2026-11-19 15:32:53:672 [1bae64a5][38;5;-164m[AndroidUiautomator2Driver@49bd] Restoring hidden api policy to the device default configuration
+2026-11-19 15:32:53:972 [1bae64a5][AppiumDriver@2003] Removing session 1bae64a5-9381-4780-a922-b89e007ca716 from our master session list
+2026-11-19 15:32:53:972 [HTTP] <-- DELETE /session/1bae64a5-9381-4780-a922-b89e007ca716 200 1093 ms - 14

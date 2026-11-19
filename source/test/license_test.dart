@@ -117,12 +117,12 @@ void main() {
       await intake();
 
       // حد 2 أجهزة: "owner" من جهازين مختلفين تمام، والتالت يترفض
-      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 1'});
-      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 2'});
+      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 1', 'deviceId': 'test-device-01'});
+      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 2', 'deviceId': 'test-device-02'});
       // نفس الجهاز يقدر يدخل تاني عادي
-      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 1'});
+      await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 1', 'deviceId': 'test-device-01'});
       try {
-        await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 3'});
+        await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceName': 'موبايل 3', 'deviceId': 'test-device-03'});
         fail('third device should be blocked');
       } on ApiException catch (e) {
         expect(e.status, 402);

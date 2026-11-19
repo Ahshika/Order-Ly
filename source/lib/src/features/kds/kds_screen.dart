@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_config.dart';
@@ -24,7 +23,6 @@ class KdsScreen extends ConsumerStatefulWidget {
 class _KdsScreenState extends ConsumerState<KdsScreen> {
   late String _station = ref.read(appConfigProvider).kdsStation;
   Timer? _clock;
-  int _lastCount = -1;
 
   @override
   void initState() {
@@ -51,12 +49,7 @@ class _KdsScreenState extends ConsumerState<KdsScreen> {
   Widget build(BuildContext context) {
     final menu = ref.watch(menuProvider).value;
     final orders = ref.watch(kdsProvider(_station));
-    ref.listen(kdsProvider(_station), (_, next) {
-      final n = next.value?.where((o) => o.status == 'accepted').length;
-      if (n == null) return;
-      if (_lastCount >= 0 && n > _lastCount && ref.read(appConfigProvider).alertSound) SystemSound.play(SystemSoundType.alert);
-      _lastCount = n;
-    });
+    // صوت الطلب الجديد بقى إشعار من السيرفر (kitchen_new) بصوت الجرس، بدل صوت ويندوز اللي ماكانش بيشتغل على أندرويد
     return Scaffold(
       appBar: AppBar(
         title: const Text('البار والمطبخ'),

@@ -1,0 +1,23 @@
+[
+ {
+  "RuleID": "gcp-api-key",
+  "Description": "Uncovered a GCP API key, which could lead to unauthorized access to Google Cloud services and data breaches.",
+  "StartLine": 4,
+  "EndLine": 4,
+  "StartColumn": 26,
+  "EndColumn": 65,
+  "Match": "REDACTED'",
+  "Secret": "REDACTED",
+  "File": "source/lib/src/core/firebase_config.dart",
+  "SymlinkFile": "",
+  "Commit": "35b82d9c0b7bf62ef67c278a7ed89c7892b799cb",
+  "Link": "https://github.com/Ahshika/Order-Ly/blob/35b82d9c0b7bf62ef67c278a7ed89c7892b799cb/source/lib/src/core/firebase_config.dart#L4",
+  "Entropy": 4.7019434,
+  "Author": "Ahshika",
+  "Email": "ahmedhassanshika655@gmail.com",
+  "Date": "2026-10-05T12:45:47Z",
+  "Message": "Order Ly 1.0.4: cafe POS with QR self-ordering\n\nFlutter (Windows + Android) cafe system with a local server on the\ncashier PC and a Firebase-hosted customer menu:\n\n- QR menu (Arabic/English): modifiers, upsell, name + phone, payment\n  by cash/card/wallet/InstaPay with transfer screenshot, live order\n  status, call waiter, ask for bill, partial payment, rating.\n- Cashier: table map, checks (move/merge/split, discount, service,\n  tax), QR inbox with alerts, transfer confirmation, register shifts.\n- Bar/kitchen display and automatic ticket printing per station.\n- Recipe-based inventory with auto sold-out, purchases, suppliers,\n  \"received quantity\" dialog; promotions; loyalty points.\n- Reports: profit, peak hours, menu engineering, voids, feedback.\n- Printable QR cards with cafe name/logo.\n- Reliability: self-restarting server isolate, background isolates for\n  backups/images, debounced refresh, freeze watchdog + logs.\n- Tests: server, live Firebase end-to-end, restart, watchdog, visuals.\n\nCo-Authored-By: Claude Opus 5.5 \u003cnoreply@anthropic.com\u003e",
+  "Tags": [],
+  "Fingerprint": "35b82d9c0b7bf62ef67c278a7ed89c7892b799cb:source/lib/src/core/firebase_config.dart:gcp-api-key:4"
+ }
+]

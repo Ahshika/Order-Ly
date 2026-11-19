@@ -4,7 +4,7 @@ part of 'api_server.dart';
 /// وشاشة البار/المطبخ، والطباعة، ونقل ودمج وتقسيم الحساب، والقفل.
 extension _CheckRoutes on OrderlyServer {
   void _registerCheckRoutes(Router r) {
-    r.get('/api/checks', _authed(_listChecks, only: floorRoles));
+    r.get('/api/checks', _authed((req, u) => _cachedScreen(req, () => _listChecks(req, u)), only: floorRoles));
     r.post('/api/checks', _authed(_openCheckRoute, only: floorRoles));
     r.get('/api/checks/<id>', _authed((req, u) => _checkJson(req.params['id']!), only: floorRoles));
     r.patch('/api/checks/<id>', _authed(_updateCheck, only: floorRoles));
@@ -25,13 +25,13 @@ extension _CheckRoutes on OrderlyServer {
     r.post('/api/order-items/<id>/status', _authed(_itemStatusRoute));
     r.post('/api/order-items/<id>/void', _authed(_voidItemRoute, only: floorRoles));
 
-    r.get('/api/kds', _authed(_kdsJson));
+    r.get('/api/kds', _authed((req, u) => _cachedScreen(req, () => _kdsJson(req, u))));
     r.get('/api/calls', _authed(_listCalls, only: floorRoles));
     r.post('/api/calls/<id>/done', _authed(_callDone, only: floorRoles));
 
     r.get('/api/print/claim', _authed(_claimPrintJobs));
     r.post('/api/print/<id>/result', _authed(_printResult));
-    r.get('/api/live', _authed((req, u) => _liveCounts()));
+    r.get('/api/live', _authed((req, u) => _cachedScreen(req, _liveCounts)));
   }
 
   // ---------------------------------------------------------------- helpers
@@ -116,10 +116,13 @@ extension _CheckRoutes on OrderlyServer {
     final soldOut = _soldOutItemIds();
     final out = <Map<String, Object?>>[];
     for (final l in lines) {
-      final item = db.selectOne(
-        'SELECT i.*, c.station_id AS cat_station, c.active AS cat_active FROM items i JOIN categories c ON c.id = i.category_id WHERE i.id = ?',
-        [l['itemId']],
-      );
+      final itemId = l['itemId'];
+      final item = itemId is! String
+          ? null
+          : db.selectOne(
+              'SELECT i.*, c.station_id AS cat_station, c.active AS cat_active FROM items i JOIN categories c ON c.id = i.category_id WHERE i.id = ?',
+              [itemId],
+            );
       if (item == null || item['active'] != 1 || item['cat_active'] != 1 || (fromQr && item['show_in_qr'] != 1)) {
         throw ApiError(400, 'فيه صنف مش موجود في المنيو');
       }
@@ -128,7 +131,7 @@ extension _CheckRoutes on OrderlyServer {
       if (qty is! int || qty < 1 || qty > 99) throw ApiError(400, 'الكمية مش صحيحة');
 
       // الإضافات: لازم تبقى من مجموعات الصنف ده، وبعدد مسموح
-      final picked = (l['modifierIds'] as List? ?? const []).whereType<String>().toSet();
+      final picked = (_field<List>(l, 'modifierIds') ?? const []).whereType<String>().toSet();
       final groups = db.select(
         'SELECT g.* FROM item_modifier_groups ig JOIN modifier_groups g ON g.id = ig.group_id WHERE ig.item_id = ? AND g.active = 1 ORDER BY ig.sort',
         [item['id']],
@@ -151,8 +154,8 @@ extension _CheckRoutes on OrderlyServer {
 
       final promo = _promoFor(promos, item);
       final base = promo == 0 ? item['price_cents'] as int : _applyPromo(item['price_cents'] as int, promo);
-      final note = (l['note'] as String? ?? '').trim();
-      final guest = (l['guest'] as String? ?? '').trim();
+      final note = (_field<String>(l, 'note') ?? '').trim();
+      final guest = (_field<String>(l, 'guest') ?? '').trim();
       out.add({
         'item_id': item['id'],
         'name': item['name'],
@@ -179,6 +182,7 @@ extension _CheckRoutes on OrderlyServer {
     String? payMethodId,
     String? cloudId,
     String? clientId,
+    String? requestId,
     String? userId,
     bool accept = true,
   }) {
@@ -187,9 +191,9 @@ extension _CheckRoutes on OrderlyServer {
     final day = _today();
     final number = db.selectOne('SELECT COALESCE(MAX(number), 0) + 1 AS n FROM orders WHERE day = ?', [day])!['n'] as int;
     db.execute(
-      'INSERT INTO orders(id, check_id, number, day, source, status, table_id, guest_name, guest_phone, note, pay_method_id, cloud_id, client_id, user_id, created_at) '
-      "VALUES(?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [id, checkId, number, day, source, tableId, guestName, guestPhone, note, payMethodId, cloudId, clientId, userId, now],
+      'INSERT INTO orders(id, check_id, number, day, source, status, table_id, guest_name, guest_phone, note, pay_method_id, cloud_id, client_id, request_id, user_id, created_at) '
+      "VALUES(?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [id, checkId, number, day, source, tableId, guestName, guestPhone, note, payMethodId, cloudId, clientId, requestId, userId, now],
     );
     for (final l in priced) {
       db.execute(
@@ -347,7 +351,8 @@ extension _CheckRoutes on OrderlyServer {
       };
 
   /// [joined] = الصف جاي فيه table_name و pm_name و pm_kind جاهزين (شاشة المطبخ) فمش محتاجين نسأل تاني.
-  Map<String, Object?> _orderJson(Map<String, Object?> o, {bool withItems = true, bool joined = false}) {
+  /// [items] = أصناف الطلب جاهزة (الحساب بيجيبها كلها بسؤال واحد بدل سؤال لكل طلب).
+  Map<String, Object?> _orderJson(Map<String, Object?> o, {bool withItems = true, bool joined = false, List<Map<String, Object?>>? items}) {
     final pm = joined
         ? {'name': o['pm_name'], 'kind': o['pm_kind']}
         : o['pay_method_id'] == null
@@ -372,7 +377,7 @@ extension _CheckRoutes on OrderlyServer {
       'acceptedAt': o['accepted_at'],
       'readyAt': o['ready_at'],
       if (withItems)
-        'items': db.select('SELECT * FROM order_items WHERE order_id = ? ORDER BY rowid', [o['id']]).map(_orderItemJson).toList(),
+        'items': (items ?? db.select('SELECT * FROM order_items WHERE order_id = ? ORDER BY rowid', [o['id']])).map(_orderItemJson).toList(),
       // صور التحويل اللي العميل رفعها مع الطلب
       'payments': o['cloud_id'] == null
           ? const []
@@ -388,9 +393,20 @@ extension _CheckRoutes on OrderlyServer {
     );
     if (c == null) throw ApiError(404, 'الحساب ده مش موجود');
     final customer = c['customer_id'] == null ? null : db.selectOne('SELECT * FROM customers WHERE id = ?', [c['customer_id']]);
+    // أصناف كل الطلبات بسؤال واحد: قبل كده كان سؤال لكل طلب، والحساب اللي عليه طلبات كتير كان بيبطّأ كل إضافة
+    final orders = db.select('SELECT * FROM orders WHERE check_id = ? ORDER BY created_at', [id]);
+    final itemsByOrder = <String, List<Map<String, Object?>>>{};
+    if (orders.isNotEmpty) {
+      for (final it in db.select(
+        'SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.check_id = ? ORDER BY oi.rowid',
+        [id],
+      )) {
+        itemsByOrder.putIfAbsent(it['order_id'] as String, () => []).add(it);
+      }
+    }
     return {
       'check': _checkSummary(c),
-      'orders': db.select('SELECT * FROM orders WHERE check_id = ? ORDER BY created_at', [id]).map((o) => _orderJson(o)).toList(),
+      'orders': orders.map((o) => _orderJson(o, items: itemsByOrder[o['id']] ?? const [])).toList(),
       'payments': db.select('SELECT * FROM payments WHERE check_id = ? ORDER BY created_at', [id]).map(_paymentJson).toList(),
       'calls': db.select("SELECT * FROM service_calls WHERE check_id = ? AND status = 'open'", [id]).map(_callJson).toList(),
       'customer': customer == null ? null : _customerJson(customer),
@@ -401,9 +417,9 @@ extension _CheckRoutes on OrderlyServer {
     await _requireLicense();
     final body = await _body(req);
     final id = db.transaction(() => _openCheck(
-          type: body['type'] as String? ?? 'dine_in',
-          tableId: body['tableId'] as String?,
-          guests: body['guests'] as int?,
+          type: _field<String>(body, 'type') ?? 'dine_in',
+          tableId: _field<String>(body, 'tableId'),
+          guests: _field<int>(body, 'guests'),
           customerName: _optionalText(body, 'customerName'),
           customerPhone: _optionalText(body, 'customerPhone'),
           address: _optionalText(body, 'address'),
@@ -415,9 +431,11 @@ extension _CheckRoutes on OrderlyServer {
     return _checkJson(id);
   }
 
+  // في كل العمليات على حساب موجود: بنقرا الـ body الأول وبعدين نحمّل الحساب، عشان لو موبايل على واي فاي ضعيف
+  // لسه بيبعت والكاشير قفل الحساب في النص، نشوف الحالة الجديدة (قبل كده الخصم/الإلغاء/التقسيم كان بيعدّل حساب اتدفع واتقفل).
   Future<Object?> _updateCheck(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
+    final c = _loadCheck(req.params['id']!, open: true);
     db.transaction(() {
       if (body['guests'] is int) db.execute('UPDATE checks SET guests = ? WHERE id = ?', [(body['guests'] as int).clamp(0, 200), c['id']]);
       for (final e in const {'customerName': 'customer_name', 'customerPhone': 'customer_phone', 'address': 'address', 'note': 'note'}.entries) {
@@ -447,25 +465,33 @@ extension _CheckRoutes on OrderlyServer {
 
   Future<Object?> _addOrderRoute(Request req, AuthUser u) async {
     await _requireLicense();
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
-    final lines = (body['lines'] as List? ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+    // نفس الطلب اتبعت تاني (الرد الأولاني ضاع في الواي فاي): نرجّع اللي اتسجل بالفعل من غير ما نسجله مرتين
+    final requestId = _field<String>(body, 'requestId');
+    if (requestId != null && (requestId.length < 8 || requestId.length > 64)) throw ApiError(400, 'البيانات المبعوتة مش مفهومة');
+    final repeated = requestId == null ? null : db.selectOne('SELECT id, check_id FROM orders WHERE request_id = ?', [requestId]);
+    if (repeated != null) return {'orderId': repeated['id'], 'repeated': true, ..._checkJson(repeated['check_id'] as String)};
+    // لو الحساب اتقفل في النص، _acceptOrder بيفتح حساب جديد على نفس الترابيزة (الطلب مابيضيعش)
+    final c = _loadCheck(req.params['id']!, open: true);
+    final lines = (_field<List>(body, 'lines') ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
     final orderId = db.transaction(() => _createOrder(
           source: u.role == 'waiter' ? 'waiter' : 'cashier',
           priced: _priceLines(lines, fromQr: false),
           checkId: c['id'] as String,
           tableId: c['table_id'] as String?,
           note: _optionalText(body, 'note'),
+          requestId: requestId,
           userId: u.id,
         ));
     _changed();
+    _notifyKitchen(orderId);
     return {'orderId': orderId, ..._checkJson(c['id'] as String)};
   }
 
   Future<Object?> _moveCheck(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
-    final tableId = body['tableId'] as String?;
+    final c = _loadCheck(req.params['id']!, open: true);
+    final tableId = _field<String>(body, 'tableId');
     if (tableId == null || db.selectOne('SELECT id FROM tables WHERE id = ? AND active = 1', [tableId]) == null) throw ApiError(400, 'اختار الترابيزة');
     if (db.selectOne("SELECT id FROM checks WHERE table_id = ? AND status = 'open' AND id <> ?", [tableId, c['id']]) != null) {
       throw ApiError(409, 'الترابيزة دي عليها حساب مفتوح. استخدم "دمج" بدل النقل');
@@ -482,9 +508,9 @@ extension _CheckRoutes on OrderlyServer {
 
   /// دمج حساب ده جوه حساب تاني (مثلاً ترابيزتين اتجمعوا).
   Future<Object?> _mergeCheck(Request req, AuthUser u) async {
-    final from = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
-    final into = _loadCheck(body['intoCheckId'] as String? ?? '', open: true);
+    final from = _loadCheck(req.params['id']!, open: true);
+    final into = _loadCheck(_field<String>(body, 'intoCheckId') ?? '', open: true);
     if (from['id'] == into['id']) throw ApiError(400, 'اختار حساب تاني');
     db.transaction(() {
       for (final t in ['orders', 'order_items', 'payments', 'service_calls']) {
@@ -506,10 +532,10 @@ extension _CheckRoutes on OrderlyServer {
 
   /// تقسيم الحساب: الأصناف المختارة بتطلع في حساب جديد (عشان كل واحد يدفع اللي عليه).
   Future<Object?> _splitCheck(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
-    final lines = (body['lines'] as List? ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
-    if (lines.isEmpty) throw ApiError(400, 'اختار الأصناف اللي هتتقسم');
+    final c = _loadCheck(req.params['id']!, open: true);
+    final lines = (_field<List>(body, 'lines') ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+    if (lines.isEmpty || lines.any((l) => l['id'] is! String)) throw ApiError(400, 'اختار الأصناف اللي هتتقسم');
     final newId = db.transaction(() {
       final tableName = c['table_id'] == null ? null : db.selectOne('SELECT name FROM tables WHERE id = ?', [c['table_id']])?['name'];
       final newId = _openCheck(
@@ -585,8 +611,8 @@ extension _CheckRoutes on OrderlyServer {
   }
 
   Future<Object?> _voidCheck(Request req, AuthUser u) async {
-    final c = _loadCheck(req.params['id']!, open: true);
     final body = await _body(req);
+    final c = _loadCheck(req.params['id']!, open: true);
     final reason = _requiredText(body, 'reason', 'سبب الإلغاء');
     if (db.selectOne("SELECT id FROM payments WHERE check_id = ? AND status = 'confirmed'", [c['id']]) != null) {
       throw ApiError(400, 'الحساب عليه دفعات. رجّعها الأول قبل الإلغاء');
@@ -645,6 +671,7 @@ extension _CheckRoutes on OrderlyServer {
     _audit(u.id, 'order.accept', 'order', o['id'] as String, '#${o['number']}');
     _changed();
     _broadcast('payments');
+    _notifyKitchen(o['id'] as String);
     return _orderJson(_loadOrder(o['id'] as String));
   }
 
@@ -663,7 +690,7 @@ extension _CheckRoutes on OrderlyServer {
   Future<Object?> _orderReadyRoute(Request req, AuthUser u) async {
     final o = _loadOrder(req.params['id']!);
     final body = await _body(req);
-    final station = body['stationId'] as String?;
+    final station = _field<String>(body, 'stationId');
     db.transaction(() {
       db.execute(
         "UPDATE order_items SET status = 'ready', updated_at = ? WHERE order_id = ? AND status IN ('new', 'preparing')${station == null ? '' : ' AND station_id IS ?'}",
@@ -672,7 +699,18 @@ extension _CheckRoutes on OrderlyServer {
       _refreshOrderStatus(o['id'] as String);
     });
     _changed();
+    _notifyIfReady(o);
     return {'ok': true};
+  }
+
+  /// الطلب لسه بقى جاهز كله (مكانش جاهز قبل العملية دي): الويتر والكاشير ياخدوا إشعار يقدّموه.
+  void _notifyIfReady(Map<String, Object?> before) {
+    if (before['status'] == 'ready') return;
+    final o = db.selectOne('SELECT * FROM orders WHERE id = ?', [before['id']]);
+    if (o == null || o['status'] != 'ready') return;
+    _notify('order_ready', 'طلب #${o['number']} جاهز', '${_placeName(o['table_id'] as String?, customerName: o['guest_name'] as String?)} • قدّمه للعميل',
+        const {'owner', 'supervisor', 'cashier', 'waiter'},
+        goTo: 'orders');
   }
 
   Object? _orderServedRoute(Request req, AuthUser u) {
@@ -686,9 +724,10 @@ extension _CheckRoutes on OrderlyServer {
   }
 
   Future<Object?> _itemStatusRoute(Request req, AuthUser u) async {
+    final body = await _body(req);
     final line = db.selectOne('SELECT * FROM order_items WHERE id = ?', [req.params['id']]);
     if (line == null) throw ApiError(404, 'الصنف ده مش موجود');
-    final body = await _body(req);
+    final before = _loadOrder(line['order_id'] as String);
     final status = body['status'];
     if (!const {'new', 'preparing', 'ready', 'served'}.contains(status)) throw ApiError(400, 'الحالة مش صحيحة');
     if (line['status'] == 'void') throw ApiError(400, 'الصنف ده اتلغى');
@@ -697,15 +736,16 @@ extension _CheckRoutes on OrderlyServer {
       _refreshOrderStatus(line['order_id'] as String);
     });
     _changed();
+    _notifyIfReady(before);
     return {'ok': true};
   }
 
   Future<Object?> _voidItemRoute(Request req, AuthUser u) async {
+    final body = await _body(req);
     final line = db.selectOne('SELECT * FROM order_items WHERE id = ?', [req.params['id']]);
     if (line == null) throw ApiError(404, 'الصنف ده مش موجود');
     if (line['status'] == 'void') throw ApiError(400, 'الصنف ده اتلغى بالفعل');
     final c = line['check_id'] == null ? null : _loadCheck(line['check_id'] as String, open: true);
-    final body = await _body(req);
     final reason = _requiredText(body, 'reason', 'سبب الإلغاء');
     // الإلغاء بعد ما الصنف اتبعت للبار: للكاشير، أو للمالك بس لو الكافيه عايز كده
     if (u.role == 'waiter' && line['status'] != 'new') throw ApiError(403, 'الصنف اتحضر، الإلغاء من الكاشير');
@@ -866,7 +906,8 @@ extension _CheckRoutes on OrderlyServer {
     final q = req.url.queryParameters;
     final stations = (q['stations'] ?? '').split(',').where((s) => s.isNotEmpty).toList();
     if (stations.isEmpty) return {'jobs': const []};
-    final device = q['device'] ?? u.id;
+    // الجهاز من الجلسة نفسها (مش من الرابط)، عشان النتيجة بعد كده ماتتبعتش غير منه
+    final device = u.deviceId ?? u.id;
     final receipt = stations.remove('receipt');
     final stale = DateTime.now().toUtc().subtract(const Duration(minutes: 2)).toIso8601String();
     final conds = <String>[
@@ -893,12 +934,21 @@ extension _CheckRoutes on OrderlyServer {
 
   Future<Object?> _printResult(Request req, AuthUser u) async {
     final body = await _body(req);
+    final job = db.selectOne('SELECT claimed_by, status FROM print_jobs WHERE id = ?', [req.params['id']]);
+    if (job == null) throw ApiError(404, 'شغل الطباعة ده مش موجود');
+    // الجهاز اللي أخد الشغل بس هو اللي يقول اتطبع ولا لأ (أو المالك/مسؤول الشفت)،
+    // عشان محدش يعلّم تيكتات المطبخ "اتطبعت" وهي ما اتطبعتش
+    if (job['claimed_by'] != (u.deviceId ?? u.id) && !u.isManager) throw ApiError(403, 'الشغل ده مع طابعة تانية');
     final ok = body['ok'] == true;
     db.execute(
       'UPDATE print_jobs SET status = ?, error = ?, printed_at = ? WHERE id = ?',
-      [ok ? 'done' : 'failed', ok ? null : (body['error'] as String? ?? 'الطباعة فشلت'), ok ? nowIso() : null, req.params['id']],
+      [ok ? 'done' : 'failed', ok ? null : (_optionalText(body, 'error') ?? 'الطباعة فشلت'), ok ? nowIso() : null, req.params['id']],
     );
-    if (!ok) _broadcast('print_failed');
+    if (!ok) {
+      _broadcast('print_failed');
+      final j = db.selectOne('SELECT s.name AS station FROM print_jobs p LEFT JOIN stations s ON s.id = p.station_id WHERE p.id = ?', [req.params['id']]);
+      _notify('problem', 'الطباعة فشلت${j?['station'] == null ? '' : ' في ${j!['station']}'}', _optionalText(body, 'error') ?? 'اتأكد من الطابعة والورق', cashRoles);
+    }
     return {'ok': true};
   }
 

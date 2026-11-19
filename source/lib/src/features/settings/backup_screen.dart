@@ -12,6 +12,51 @@ import '../../core/providers.dart';
 
 final _backupsProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) => apiOf(ref).get('/api/backups'));
 
+String _everyLabel(int hours) => switch (hours) {
+      1 => 'كل ساعة',
+      24 => 'كل يوم',
+      168 => 'كل أسبوع',
+      _ => 'كل $hours ساعات',
+    };
+
+/// رسالة للمالك: قاعدة البيانات كانت بايظة والسيرفر رجع لنسخة احتياطية لوحده.
+class RecoveryNotice extends StatelessWidget {
+  const RecoveryNotice({super.key, required this.recovery, this.onDismiss, this.onOpen});
+  final Map<String, dynamic> recovery;
+  final VoidCallback? onDismiss;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final at = parseDate(recovery['backupAt']);
+    return Card(
+      color: scheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.restore_rounded, color: scheme.onErrorContainer),
+            const SizedBox(width: 8),
+            Expanded(child: Text('قاعدة البيانات كانت بايظة، والبرنامج رجع لآخر نسخة سليمة لوحده', style: TextStyle(color: scheme.onErrorContainer).bold)),
+          ]),
+          const SizedBox(height: 6),
+          Text(
+            'النسخة: ${at == null ? recovery['backup'] : formatDateTime(at)}. أي حاجة اتسجلت بعد الوقت ده مش موجودة، راجعها.\n'
+            'الملف البايظ متحفظ هنا (ماتمسحوش، ممكن الدعم الفني يرجّع منه حاجات): ${recovery['corruptFolder']}',
+            style: TextStyle(color: scheme.onErrorContainer),
+          ),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, children: [
+            if (onOpen != null) FilledButton.tonal(onPressed: onOpen, child: const Text('النسخ الاحتياطي')),
+            if (onDismiss != null) TextButton(onPressed: onDismiss, child: const Text('فهمت')),
+          ]),
+        ]),
+      ),
+    );
+  }
+}
+
 /// النسخ الاحتياطي: بيتعمل لوحده كل يوم، وتقدر تعمله يدوي أو ترجّع نسخة قديمة.
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({super.key});
@@ -97,13 +142,22 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           final err = (d['lastBackupError'] as String?)?.isEmpty ?? true ? null : d['lastBackupError'] as String;
           final external = (d['backupDir'] as String?)?.isEmpty ?? true ? null : d['backupDir'] as String;
           final backups = (d['backups'] as List).cast<Map<String, dynamic>>();
+          final every = d['everyHours'] as int? ?? 24;
+          final keep = d['keep'] as int? ?? 14;
+          final estimated = d['estimatedBytes'] as int?;
+          final recovery = d['recovery'] as Map<String, dynamic>?;
+          Future<void> save(Map<String, Object?> body) => _run(() => ref.read(sessionProvider).value!.api!.patch('/api/backups/settings', body), 'اتحفظ');
           return ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
+            if (recovery != null) ...[
+              RecoveryNotice(recovery: recovery, onDismiss: _busy ? null : () => save({'dismissRecovery': true})),
+              const SizedBox(height: 12),
+            ],
             if (d['restorePending'] == true)
               const Padding(padding: EdgeInsets.only(bottom: 12), child: ErrorBanner('فيه ترجيع مستني: اقفل البرنامج على كمبيوتر السيرفر وافتحه تاني.')),
             SectionCard(title: 'الحالة', icon: Icons.shield_rounded, children: [
               Text(last == null ? 'لسه ما اتعملش نسخة' : 'آخر نسخة: ${formatDateTime(last)} (${timeAgo(last)})', style: const TextStyle().semiBold),
               const SizedBox(height: 4),
-              const Text('البرنامج بيعمل نسخة لوحده كل يوم، وبيحتفظ بآخر 14 نسخة.'),
+              Text('البرنامج بيعمل نسخة لوحده ${_everyLabel(every)}، وبيحتفظ بآخر $keep نسخة.'),
               if (err != null) ...[const SizedBox(height: 8), ErrorBanner(err)],
               const SizedBox(height: 12),
               BusyButton(
@@ -111,6 +165,35 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 icon: Icons.backup_rounded,
                 busy: _busy,
                 onPressed: () => _run(() => ref.read(sessionProvider).value!.api!.post('/api/backups'), 'اتعملت نسخة'),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            SectionCard(title: 'مواعيد النسخ', icon: Icons.schedule_rounded, children: [
+              DropdownButtonFormField<int>(
+                key: ValueKey('every-$every'),
+                initialValue: every,
+                decoration: const InputDecoration(labelText: 'اعمل نسخة'),
+                items: [for (final h in (d['everyChoices'] as List? ?? const [1, 3, 6, 12, 24, 168]).cast<int>()) DropdownMenuItem(value: h, child: Text(_everyLabel(h)))],
+                onChanged: _busy ? null : (v) => v == null || v == every ? null : save({'everyHours': v}),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                key: ValueKey('keep-$keep'),
+                initialValue: keep,
+                decoration: const InputDecoration(labelText: 'احتفظ بآخر'),
+                items: [for (final k in (d['keepChoices'] as List? ?? const [7, 14, 30, 60]).cast<int>()) DropdownMenuItem(value: k, child: Text('$k نسخة'))],
+                onChanged: _busy ? null : (v) => v == null || v == keep ? null : save({'keep': v}),
+              ),
+              if (estimated != null) ...[
+                const SizedBox(height: 6),
+                Text('المساحة المتوقعة على الكمبيوتر: حوالي ${(estimated / 1024 / 1024).toStringAsFixed(0)} ميجا', style: Theme.of(context).textTheme.bodySmall),
+              ],
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: d['onShiftClose'] == true,
+                title: const Text('نسخة كمان مع قفل كل وردية'),
+                subtitle: const Text('أول ما الكاشير يقفل الدرج، شغل الوردية كله بيتحفظ'),
+                onChanged: _busy ? null : (v) => save({'onShiftClose': v}),
               ),
             ]),
             const SizedBox(height: 12),

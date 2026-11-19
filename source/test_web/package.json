@@ -1,0 +1,1 @@
+{"name":"orderly-test-web","private":true,"description":"Playwright tests for the customer QR menu (firebase/public/menu.html)","scripts":{"test":"playwright test"},"devDependencies":{"@playwright/test":"^1.64.0"}}
