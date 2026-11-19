@@ -554,7 +554,7 @@ extension _CloudIngest on OrderlyServer {
       case 'fb':
         final rating = body['r'];
         if (rating is! int || rating < 1 || rating > 5) return;
-        final comment = (body['cm'] as String? ?? '').trim();
+        final comment = _text(body['cm']);
         final check = db.selectOne('SELECT id FROM checks WHERE id IN (SELECT check_id FROM orders WHERE client_id = ?) ORDER BY opened_at DESC LIMIT 1', [clientId]);
         db.execute('INSERT OR IGNORE INTO feedback(id, check_id, table_id, rating, comment, cloud_id, created_at) VALUES(?, ?, ?, ?, ?, ?, ?)',
             [_uuid.v4(), check?['id'], table?['id'], rating, comment.isEmpty ? null : comment.substring(0, min(comment.length, 500)), cloudId, nowIso()]);
@@ -565,12 +565,16 @@ extension _CloudIngest on OrderlyServer {
   /// الطلبات اللي فات عليها أكتر من كده (مثلاً الكمبيوتر كان مقفول) بتترفض.
   static const _staleMinutes = 20;
 
+  /// حدود طلبات الـ QR (ضد إغراق الكاشير بطلبات وهمية من ترابيزة واحدة).
+  static const _qrMaxWaitingTable = 6, _qrMaxPer10MinTable = 15;
+  static const _qrMaxWaitingTakeaway = 25, _qrMaxPer10MinTakeaway = 60;
+
   void _ingestOrder(String cloudId, String clientId, Map<String, Object?>? table, Map<String, dynamic> body, DateTime at, List<int>? proof) {
     if (db.selectOne('SELECT id FROM orders WHERE cloud_id = ?', [cloudId]) != null) return;
-    final guest = (body['name'] as String? ?? '').trim();
+    final guest = _text(body['name']);
     final phone = _cleanPhone(body['phone']);
-    final note = (body['note'] as String? ?? '').trim();
-    final lines = (body['items'] as List? ?? const []).whereType<Map>().map((m) {
+    final note = _text(body['note']);
+    final lines = (body['items'] is List ? body['items'] as List : const []).whereType<Map>().map((m) {
       final x = m.cast<String, dynamic>();
       return <String, dynamic>{'itemId': x['i'], 'qty': x['q'], 'modifierIds': x['m'], 'note': x['note'], 'guest': guest.isEmpty ? null : guest};
     }).toList();
@@ -596,6 +600,14 @@ extension _CloudIngest on OrderlyServer {
     final recent = db.selectOne('SELECT COUNT(*) AS c FROM orders WHERE client_id = ? AND created_at > ?',
         [clientId, DateTime.now().toUtc().subtract(const Duration(minutes: 10)).toIso8601String()])!['c'] as int;
     if (recent >= 8) return reject('طلبات كتير في وقت قصير. كلم الويتر');
+    // الحد اللي فوق بيعتمد على رقم بيختاره موبايل العميل (ممكن يتغير ويعدّي الحد)، فكمان حد لكل ترابيزة:
+    // طلبات كتير مستنية موافقة، أو طلبات كتير في 10 دقايق (حتى لو الترابيزة بتقبل لوحدها)
+    final tableId = table?['id'];
+    final since = DateTime.now().toUtc().subtract(const Duration(minutes: 10)).toIso8601String();
+    final waiting = db.selectOne("SELECT COUNT(*) AS c FROM orders WHERE source = 'qr' AND status = 'pending' AND table_id IS ?", [tableId])!['c'] as int;
+    final lately = db.selectOne("SELECT COUNT(*) AS c FROM orders WHERE source = 'qr' AND status <> 'rejected' AND table_id IS ? AND created_at > ?", [tableId, since])!['c'] as int;
+    final (maxWaiting, maxLately) = table == null ? (_qrMaxWaitingTakeaway, _qrMaxPer10MinTakeaway) : (_qrMaxWaitingTable, _qrMaxPer10MinTable);
+    if (waiting >= maxWaiting || lately >= maxLately) return reject('فيه طلبات كتير على ${table == null ? 'التيك أواي' : 'الترابيزة دي'} دلوقتي. كلم الويتر أو استنى شوية');
     if (_cafeBool('qrRequireContact') && (guest.isEmpty || phone == null)) return reject('اكتب اسمك ورقم موبايلك وابعت الطلب تاني');
 
     final List<Map<String, Object?>> priced;
@@ -606,12 +618,14 @@ extension _CloudIngest on OrderlyServer {
     }
 
     final pay = body['pay'] is Map ? (body['pay'] as Map).cast<String, dynamic>() : null;
-    final method = pay == null ? null : db.selectOne('SELECT * FROM pay_methods WHERE id = ? AND active = 1 AND show_in_qr = 1', [pay['m']]);
+    final method = pay == null ? null : db.selectOne('SELECT * FROM pay_methods WHERE id = ? AND active = 1 AND show_in_qr = 1', [_text(pay['m'])]);
 
     final autoAccept = table == null
         ? _cafe['qrApproval'] == 'auto'
         : (table['auto_accept'] == null ? _cafe['qrApproval'] == 'auto' : table['auto_accept'] == 1);
 
+    String? orderId;
+    int? transferAmount;
     db.transaction(() {
       final checkId = table != null
           ? _openCheck(type: 'dine_in', tableId: table['id'] as String)
@@ -627,7 +641,7 @@ extension _CloudIngest on OrderlyServer {
           );
         }
       }
-      final orderId = _createOrder(
+      orderId = _createOrder(
         source: 'qr',
         priced: priced,
         checkId: checkId,
@@ -644,12 +658,27 @@ extension _CloudIngest on OrderlyServer {
         final total = priced.fold<int>(0, (s, l) => s + (l['qty'] as int) * (l['unit_price_cents'] as int));
         final amount = pay!['a'] is int && (pay['a'] as int) > 0 ? min(pay['a'] as int, total * 3) : total;
         _insertCloudPayment(cloudId, clientId, checkId, method, amount, proof, pay['ref']);
+        transferAmount = amount;
       }
-      if (autoAccept) _acceptOrder(orderId, null);
+      if (autoAccept) _acceptOrder(orderId!, null);
     });
     _changed();
     _broadcast('payments');
+
+    final where = _placeName(table?['id'] as String?, customerName: guest.isEmpty ? null : guest);
+    final total = priced.fold<int>(0, (s, l) => s + (l['qty'] as int) * (l['unit_price_cents'] as int));
+    final count = priced.fold<int>(0, (s, l) => s + (l['qty'] as int));
+    _notify('order_new', autoAccept ? 'طلب QR اتقبل لوحده' : 'طلب جديد من موبايل عميل', '$where • $count صنف • ${money(total)}${autoAccept ? '' : ' • مستني موافقتك'}',
+        floorRoles,
+        goTo: 'orders');
+    if (autoAccept) _notifyKitchen(orderId!);
+    if (transferAmount != null) {
+      _notify('payment', 'تحويل مستني تأكيد', '$where • ${method!['name']} ${money(transferAmount!)}', cashRoles, goTo: 'orders');
+    }
   }
+
+  /// نص من رسالة العميل (اللي جاية من النت بأي شكل): أي نوع تاني بيتعامل كأنه فاضي.
+  String _text(Object? v) => v is String ? v.trim() : '';
 
   String? _cleanPhone(Object? v) {
     final s = latinDigits('${v ?? ''}').replaceAll(RegExp(r'[^\d+]'), '');
@@ -676,8 +705,8 @@ extension _CloudIngest on OrderlyServer {
     final check = db.selectOne("SELECT * FROM checks WHERE table_id = ? AND status = 'open'", [table['id']]);
     // نداء مكرر من نفس الترابيزة لسه مفتوح: مش محتاجين واحد جديد
     if (db.selectOne("SELECT id FROM service_calls WHERE table_id = ? AND type = ? AND status = 'open'", [table['id'], type]) != null) return;
-    final method = body['pm'] == null ? null : db.selectOne('SELECT id FROM pay_methods WHERE id = ? AND active = 1', [body['pm']]);
-    final note = (body['note'] as String? ?? '').trim();
+    final method = body['pm'] is! String ? null : db.selectOne('SELECT id FROM pay_methods WHERE id = ? AND active = 1', [body['pm']]);
+    final note = _text(body['note']);
     db.transaction(() {
       db.execute(
         'INSERT OR IGNORE INTO service_calls(id, table_id, check_id, type, note, pay_method_id, cloud_id, created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?)',
@@ -691,11 +720,14 @@ extension _CloudIngest on OrderlyServer {
     _broadcast('calls');
     _broadcast('tables');
     _broadcast('checks');
+    _notify('table_call', type == 'bill' ? 'ترابيزة ${table['name']} عايزة الحساب' : 'ترابيزة ${table['name']} بتنادي الويتر',
+        note.isEmpty ? 'روح للترابيزة' : note, floorRoles,
+        goTo: 'orders');
   }
 
   void _ingestPayment(String cloudId, String clientId, Map<String, Object?>? table, Map<String, dynamic> body, List<int>? proof) {
     if (db.selectOne('SELECT id FROM payments WHERE cloud_id = ?', [cloudId]) != null) return;
-    final method = db.selectOne('SELECT * FROM pay_methods WHERE id = ? AND active = 1 AND show_in_qr = 1', [body['m']]);
+    final method = db.selectOne('SELECT * FROM pay_methods WHERE id = ? AND active = 1 AND show_in_qr = 1', [_text(body['m'])]);
     if (method == null) return;
     final check = table != null
         ? db.selectOne("SELECT * FROM checks WHERE table_id = ? AND status = 'open'", [table['id']])
@@ -719,5 +751,11 @@ extension _CloudIngest on OrderlyServer {
     _broadcast('payments');
     _broadcast('calls');
     _changed(orders: false);
+    final where = _placeName(table?['id'] as String?, customerName: check['customer_name'] as String?);
+    if (method['kind'] == 'cash' || method['kind'] == 'card') {
+      _notify('table_call', '$where عايزة تدفع ${method['name']}', 'المبلغ ${money(amount)} • روح حصّل', floorRoles, goTo: 'orders');
+    } else {
+      _notify('payment', 'تحويل مستني تأكيد', '$where • ${method['name']} ${money(amount)}', cashRoles, goTo: 'orders');
+    }
   }
 }

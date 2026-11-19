@@ -149,7 +149,7 @@ class SessionController extends AsyncNotifier<Session> {
 
   Future<void> completeSetup(Map<String, String> form) async {
     final api = _current!.api!;
-    final res = await api.post('/api/setup', {...form, 'deviceName': _config.deviceName});
+    final res = await api.post('/api/setup', {...form, 'deviceName': _config.deviceName, 'deviceId': _config.deviceId});
     await _config.setToken(res['token'] as String);
     await retry();
   }
@@ -160,6 +160,8 @@ class SessionController extends AsyncNotifier<Session> {
       'username': username,
       'password': password,
       'deviceName': _config.deviceName,
+      // الرقم المميز للجهاز ده (السيرفر بيعدّ الأجهزة بيه في حد الاشتراك)
+      'deviceId': _config.deviceId,
     });
     await _config.setToken(res['token'] as String);
     await retry();

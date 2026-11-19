@@ -17,7 +17,8 @@ Output: `k6-report.html` (open in a browser) and `grafana-dashboard.json`
 | File | |
 |---|---|
 | `load_server_test.dart` | Starts the isolated server, seeds 40 items / 310 tables, records event-loop lag, RAM and DB size every second. |
-| `orders.js` | The k6 scenario. |
+| `orders.js` | The k6 scenario (default). |
+| `spike.js` | Worst case: 0 → 400 devices in 5 s, then a second jump to 600 (more devices than tables, so several work on the same check), with 10% junk requests (broken JSON, wrong types, bad tokens, 2 MB bodies). Passes only with zero 5xx / dropped connections. Run with `-Script spike.js`. |
 | `analyze.py` | Per-stage summary (`stages.csv`) and 5-second series (`series.csv`). |
 | `grafana_dashboard.py` | Builds the importable Grafana dashboard from those CSVs. |
 

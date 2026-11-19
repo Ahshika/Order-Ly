@@ -1,0 +1,26 @@
+{
+  "before": {
+    "GET /api/floor": 4.12,
+    "GET /api/kds": 8.24,
+    "GET /api/live": 1.22,
+    "GET /api/checks": 3.59,
+    "GET /api/info (no auth)": 0.97,
+    "POST order": 3.47
+  },
+  "after": {
+    "GET /api/floor": 1.46,
+    "GET /api/kds": 2.47,
+    "GET /api/live": 1.06,
+    "GET /api/checks": 1.61,
+    "GET /api/info (no auth)": 1.03,
+    "POST order": 3.31
+  },
+  "after-n1": {
+    "GET /api/floor": 1.31,
+    "GET /api/kds": 2.14,
+    "GET /api/live": 1.04,
+    "GET /api/checks": 1.46,
+    "GET /api/info (no auth)": 0.94,
+    "POST order": 4.56
+  }
+}

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/notifications.dart';
+import 'core/realtime.dart';
 import 'core/session.dart';
 import 'core/theme.dart';
 import 'features/auth/login_screen.dart';
@@ -25,7 +27,59 @@ class OrderlyApp extends ConsumerWidget {
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
       themeMode: ref.watch(themeModeProvider),
+      // الإشعارات بتطلع رسالتها فوق أي شاشة مفتوحة
+      navigatorKey: rootNavigatorKey,
+      // شريط "مفيش اتصال" فوق كل الشاشات (حتى شاشة الحساب) لحد ما الاتصال بالسيرفر يرجع
+      builder: (context, child) => _OfflineBar(child: child ?? const SizedBox.shrink()),
       home: const _SessionGate(),
+    );
+  }
+}
+
+class _OfflineBar extends ConsumerWidget {
+  const _OfflineBar({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ready = ref.watch(sessionProvider).value?.status == SessionStatus.ready;
+    final offline = ready && !ref.watch(serverConnectedProvider);
+    final scheme = Theme.of(context).colorScheme;
+    const message = 'مفيش اتصال بسيرفر الكافيه. بنحاول نرجع لوحدنا… الطلبات اللي ما اتبعتتش لسه محفوظة على الجهاز ده';
+    // شكل الشجرة ثابت (العمود دايماً موجود، والشريط بس اللي بيظهر ويختفي)، عشان الشاشات المفتوحة واللي لسه ما اتبعتش ما يتمسحش
+    return Column(
+      children: [
+        if (offline)
+          // liveRegion: قارئ الشاشة بيقول الرسالة أول ما الاتصال يقطع
+          Semantics(
+            container: true,
+            liveRegion: true,
+            label: message,
+            excludeSemantics: true,
+            child: Material(
+              color: scheme.errorContainer,
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.wifi_off_rounded, color: scheme.onErrorContainer, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(message, style: TextStyle(color: scheme.onErrorContainer, fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        // الشريط واخد مكان شريط الموبايل اللي فوق، فالشاشة تحته ماتسيبش مسافة تانية
+        Expanded(
+          child: MediaQuery.removePadding(context: context, removeTop: offline, child: child),
+        ),
+      ],
     );
   }
 }

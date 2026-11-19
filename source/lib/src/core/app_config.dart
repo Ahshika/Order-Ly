@@ -103,7 +103,27 @@ extension DeviceSettings on AppConfig {
   String get kdsStation => _prefs.getString(AppConfig._kKdsStation) ?? '';
   Future<void> setKdsStation(String v) => _prefs.setString(AppConfig._kKdsStation, v);
 
-  /// صوت التنبيه لما طلب جديد يوصل.
+  /// صوت الإشعارات على الجهاز ده.
   bool get alertSound => _prefs.getBool(AppConfig._kAlerts) ?? true;
   Future<void> setAlertSound(bool v) => _prefs.setBool(AppConfig._kAlerts, v);
+
+  /// الإشعارات شغالة على الجهاز ده؟
+  bool get notificationsOn => _prefs.getBool('notify_on') ?? true;
+  Future<void> setNotificationsOn(bool v) => _prefs.setBool('notify_on', v);
+
+  /// أنواع الإشعارات اللي اتقفلت على الجهاز ده (مثلاً الكاشير مش عايز "طلب جاهز").
+  Set<String> get mutedKinds => (_prefs.getStringList('notify_muted') ?? const []).toSet();
+  Future<void> setKindMuted(String kind, bool muted) {
+    final s = mutedKinds;
+    muted ? s.add(kind) : s.remove(kind);
+    return _prefs.setStringList('notify_muted', s.toList());
+  }
+
+  /// أندرويد: يفضل متصل والموبايل مقفول عشان الإشعارات توصل (بيبان إشعار ثابت "Order Ly شغال").
+  bool get notifyInBackground => _prefs.getBool('notify_background') ?? true;
+  Future<void> setNotifyInBackground(bool v) => _prefs.setBool('notify_background', v);
+
+  /// علّمنا إننا طلبنا إذن الإشعارات قبل كده (عشان مانسألش كل مرة).
+  bool get askedNotifyPermission => _prefs.getBool('notify_asked') ?? false;
+  Future<void> setAskedNotifyPermission() => _prefs.setBool('notify_asked', true);
 }

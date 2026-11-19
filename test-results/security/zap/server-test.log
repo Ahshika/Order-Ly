@@ -1,0 +1,87 @@
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.0 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+15 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.1.2 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.1 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+37 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading D:/Project/Programes/Order Ly/.claude/worktrees/comprehensive-stress-testing-f1539b/source/test_load/load_server_test.dart
+00:00 +0: load server
+Shell: ERROR - 2026-11-19 15:16:20.103031
+Shell: Error parsing request.
+Shell: RangeError (start): Invalid value: Only valid value is 0: 1
+Shell: package:shelf/shelf_io.dart 93:9                               serveRequests.<fn>.<fn>
+Shell: ===== asynchronous gap ===========================
+Shell: package:shelf/shelf_io.dart 62:16                              serve
+Shell: package:orderly/src/server/api_server.dart 132:30              OrderlyServer.start
+Shell: ===== asynchronous gap ===========================
+Shell: dart:async                                                     _CustomZone.registerUnaryCallback
+Shell: package:orderly/src/server/api_server.dart 119:5               OrderlyServer.start
+Shell: test_load\load_server_test.dart 20:18                          main.<fn>
+Shell: ===== asynchronous gap ===========================
+Shell: dart:async                                                     _CustomZone.registerUnaryCallback
+Shell: test_load\load_server_test.dart 18:17                          main.<fn>
+Shell: package:test_api/src/backend/declarer.dart 253:25              Declarer.test.<fn>.<fn>
+Shell: ===== asynchronous gap ===========================
+Shell: dart:async                                                     _CustomZone.registerUnaryCallback
+Shell: package:test_api/src/backend/declarer.dart 252:15              Declarer.test.<fn>.<fn>
+Shell: dart:async                                                     runZoned
+Shell: package:test_api/src/backend/declarer.dart 250:17              Declarer.test.<fn>
+Shell: package:test_api/src/backend/invoker.dart 318:17               Invoker._waitForOutstandingCallbacks.<fn>
+Shell: dart:async                                                     runZoned
+Shell: package:test_api/src/backend/invoker.dart 314:5                Invoker._waitForOutstandingCallbacks
+Shell: package:test_api/src/backend/invoker.dart 457:21               Invoker._onRun.<fn>.<fn>.<fn>
+Shell: ===== asynchronous gap ===========================
+Shell: dart:async                                                     _CustomZone.registerUnaryCallback
+Shell: package:test_api/src/backend/invoker.dart 455:15               Invoker._onRun.<fn>.<fn>.<fn>
+Shell: dart:async                                                     runZoned
+Shell: package:test_api/src/backend/invoker.dart 445:11               Invoker._onRun.<fn>.<fn>
+Shell: package:test_api/src/backend/invoker.dart 500:15               Invoker._guardIfGuarded
+Shell: package:test_api/src/backend/invoker.dart 444:9                Invoker._onRun.<fn>
+Shell: package:stack_trace                                            Chain.capture
+Shell: package:test_api/src/backend/invoker.dart 442:11               Invoker._onRun
+Shell: package:test_api/src/backend/live_test_controller.dart 161:11  LiveTestController.run
+Shell: package:test_api/src/backend/remote_listener.dart 320:16       RemoteListener._runLiveTest.<fn>
+Shell: dart:async                                                     runZoned
+Shell: package:test_api/src/backend/remote_listener.dart 319:5        RemoteListener._runLiveTest
+Shell: package:test_api/src/backend/remote_listener.dart 261:7        RemoteListener._serializeTest.<fn>
+Shell: dart:async                                                     _StreamSinkWrapper.add
+Shell: package:stream_channel/src/guarantee_channel.dart 125:12       _GuaranteeSink.add
+Shell: package:stream_channel/src/multi_channel.dart 159:31           new _MultiChannel.<fn>
+Shell: 
+01:26 +1: All tests passed!

@@ -15,7 +15,8 @@ extension _LicenseRoutes on OrderlyServer {
     // لو حد رجّع ساعة الكمبيوتر لورا عشان يطوّل الاشتراك
     final seen = DateTime.tryParse(db.setting('license_clock') ?? '');
     final tampered = seen != null && now.isBefore(seen.subtract(const Duration(days: 2)));
-    if (!tampered && (seen == null || now.isAfter(seen))) db.setSetting('license_clock', now.toIso8601String());
+    // كفاية نسجل الساعة مرة كل دقيقة (كانت بتتكتب في قاعدة البيانات مع كل عملية بيع)؛ كشف الترجيع بيبص على يومين
+    if (!tampered && (seen == null || now.difference(seen).inSeconds >= 60)) db.setSetting('license_clock', now.toIso8601String());
 
     var trialStart = DateTime.tryParse(db.setting('trial_started') ?? '');
     if (trialStart == null) {
@@ -68,7 +69,7 @@ extension _LicenseRoutes on OrderlyServer {
 
   Future<Object?> _activateLicense(Request req, AuthUser u) async {
     final body = await _body(req);
-    final code = (body['code'] as String? ?? '').trim();
+    final code = (_field<String>(body, 'code') ?? '').trim();
     try {
       final lic = await verifyLicense(code, deviceCode: _deviceCode);
       if (lic.expires != null && DateTime.now().toUtc().isAfter(lic.expires!)) {
@@ -97,15 +98,15 @@ extension _LicenseRoutes on OrderlyServer {
   }
 
   /// عدد الأجهزة المسموح بيها: جهاز جديد مايقدرش يدخل لو العدد اكتمل.
-  Future<void> _checkDeviceLimit(String? deviceName) async {
-    if (deviceName == null) return;
+  /// الأجهزة بتتعد برقمها المميز (اللي اتعمل أول مرة البرنامج اتسطب)، مش باسمها.
+  Future<void> _checkDeviceLimit(String deviceId) async {
     final limit = (await _licenseStatus())['devices'] as int? ?? 3;
     final since = DateTime.now().toUtc().subtract(const Duration(days: 30)).toIso8601String();
     final known = db
-        .select('SELECT DISTINCT device_name FROM sessions WHERE device_name IS NOT NULL AND last_seen_at >= ?', [since])
-        .map((r) => r['device_name'] as String)
+        .select('SELECT DISTINCT device_id FROM sessions WHERE device_id IS NOT NULL AND last_seen_at >= ?', [since])
+        .map((r) => r['device_id'] as String)
         .toSet();
-    if (known.contains(deviceName) || known.length < limit) return;
+    if (known.contains(deviceId) || known.length < limit) return;
     throw ApiError(402, 'الاشتراك بيسمح بـ $limit أجهزة بس، وكلهم مستخدمين. اخرج من جهاز قديم أو كبّر الاشتراك');
   }
 }

@@ -4,7 +4,7 @@ part of 'api_server.dart';
 /// اللي معاه الكود بس يقدر يطلب على الترابيزة دي، والكود ممكن يتغير لو اتسرب.
 extension _TableRoutes on OrderlyServer {
   void _registerTableRoutes(Router r) {
-    r.get('/api/floor', _authed((req, u) => _floorJson(), only: floorRoles));
+    r.get('/api/floor', _authed((req, u) => _cachedScreen(req, _floorJson), only: floorRoles));
     r.post('/api/areas', _authed(_saveArea, only: {'owner'}));
     r.patch('/api/areas/<id>', _authed(_saveArea, only: {'owner'}));
     r.post('/api/tables', _authed(_saveTable, only: {'owner'}));
@@ -106,8 +106,8 @@ extension _TableRoutes on OrderlyServer {
 
   String? _validArea(Object? id) {
     if (id == null || id == '') return null;
-    if (db.selectOne('SELECT id FROM areas WHERE id = ? AND active = 1', [id]) == null) throw ApiError(400, 'المكان مش موجود');
-    return id as String;
+    if (id is! String || db.selectOne('SELECT id FROM areas WHERE id = ? AND active = 1', [id]) == null) throw ApiError(400, 'المكان مش موجود');
+    return id;
   }
 
   Future<Object?> _saveTable(Request req, AuthUser u) async {
@@ -121,7 +121,7 @@ extension _TableRoutes on OrderlyServer {
         db.execute(
           'INSERT INTO tables(id, area_id, name, seats, qr_key, sort, created_at, updated_at) '
           'VALUES(?, ?, ?, ?, ?, (SELECT COALESCE(MAX(sort), 0) + 1 FROM tables), ?, ?)',
-          [_uuid.v4(), _validArea(body['areaId']), name, (body['seats'] as int? ?? 4).clamp(1, 50), _newTableKey(), now, now],
+          [_uuid.v4(), _validArea(body['areaId']), name, (_field<int>(body, 'seats') ?? 4).clamp(1, 50), _newTableKey(), now, now],
         );
         return;
       }
@@ -141,7 +141,7 @@ extension _TableRoutes on OrderlyServer {
       }
       db.execute('UPDATE tables SET updated_at = ? WHERE id = ?', [now, id]);
     });
-    _audit(u.id, id == null ? 'table.create' : 'table.update', 'table', id, body['name'] as String?);
+    _audit(u.id, id == null ? 'table.create' : 'table.update', 'table', id, _optionalText(body, 'name'));
     _broadcast('tables');
     return _floorJson();
   }
@@ -149,11 +149,11 @@ extension _TableRoutes on OrderlyServer {
   /// إضافة كذا ترابيزة مرة واحدة (مثلاً من 1 لـ 20).
   Future<Object?> _bulkTables(Request req, AuthUser u) async {
     final body = await _body(req);
-    final from = body['from'] as int? ?? 1, to = body['to'] as int? ?? 0;
+    final from = _field<int>(body, 'from') ?? 1, to = _field<int>(body, 'to') ?? 0;
     if (from < 1 || to < from || to - from > 200) throw ApiError(400, 'الأرقام مش صحيحة');
-    final prefix = (body['prefix'] as String? ?? '').trim();
+    final prefix = (_field<String>(body, 'prefix') ?? '').trim();
     final area = _validArea(body['areaId']);
-    final seats = (body['seats'] as int? ?? 4).clamp(1, 50);
+    final seats = (_field<int>(body, 'seats') ?? 4).clamp(1, 50);
     var added = 0;
     db.transaction(() {
       final now = nowIso();

@@ -19,6 +19,7 @@
 | Works on any internet (Wi-Fi or mobile data) | Happy-hour promotions, loyalty points by phone number |
 | | Reports: real profit, peak hours, menu engineering, voids |
 | | Printable QR cards with the cafe's name and logo |
+| | Notifications on phones and PC with a sound per type (new order, table call, transfer, ready, kitchen, print problem), also with the screen locked on Android |
 
 | | |
 |---|---|
@@ -55,9 +56,15 @@ Waiter phones • Bar / kitchen tablet • Ticket printers
 ```
 cd source
 flutter test                       # server + logic tests (temporary folders)
+flutter test test_stress           # worst-case suite: races, floods, fuzzing, attacks, broken backups (temporary folders)
 flutter test test_cloud            # live Firebase end-to-end test (cleans up after itself)
 flutter test test_visual --update-goldens   # render UI screenshots
 powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe>   # 5-minute load test
+powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe> -Script spike.js   # sudden spike + junk requests
+powershell -ExecutionPolicy Bypass -File test_load\run_monitored.ps1 -K6 <k6.exe> -Prometheus <prometheus.exe> -Grafana <grafana.exe>   # same, with live Prometheus + Grafana
+cd test_web; npm install; cd ..; powershell -ExecutionPolicy Bypass -File test_web\run.ps1   # customer QR menu in Chromium/WebKit/Firefox (Playwright, Firebase mocked) + real-server contract
+powershell -ExecutionPolicy Bypass -File test_security\zap_scan.ps1 -Zap <zap.cmd>   # OWASP ZAP active scan on a temporary server
+flutter build apk --debug --target-platform android-x64; powershell -ExecutionPolicy Bypass -File test_android\run.ps1 -Avd <avd>   # real app on an emulator (Appium), worst-case flows
 powershell -ExecutionPolicy Bypass -File tool\build_release.ps1   # Setup.exe + APKs
 ```
 

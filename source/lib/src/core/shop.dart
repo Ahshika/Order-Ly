@@ -20,7 +20,8 @@ class ShopProfile {
         cafeId = (j['cloud'] as Map?)?['cafeId'] as String?,
         cloudLastSync = parseDate((j['cloud'] as Map?)?['lastSync']),
         cloudError = ((j['cloud'] as Map?)?['lastError'] as String?)?.isEmpty ?? true ? null : (j['cloud'] as Map)['lastError'] as String,
-        cloudLive = (j['cloud'] as Map?)?['live'] as bool? ?? false;
+        cloudLive = (j['cloud'] as Map?)?['live'] as bool? ?? false,
+        dbRecovery = (j['dbRecovery'] as Map?)?.cast<String, dynamic>();
 
   final String name;
   final String? phone;
@@ -33,6 +34,9 @@ class ShopProfile {
   final DateTime? cloudLastSync;
   final String? cloudError;
   final bool cloudLive;
+
+  /// لو السيرفر رجع لنسخة احتياطية لوحده لأن قاعدة البيانات باظت (لحد ما المالك يقول "فهمت").
+  final Map<String, dynamic>? dbRecovery;
 
   int intSetting(String key, [int def = 0]) => settings[key] as int? ?? def;
   bool boolSetting(String key, [bool def = false]) => settings[key] as bool? ?? def;

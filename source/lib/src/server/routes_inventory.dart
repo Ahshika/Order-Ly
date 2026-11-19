@@ -89,9 +89,10 @@ extension _InventoryRoutes on OrderlyServer {
   /// وصل جديد (بيتجمع على الموجود)، أو جرد (الكمية الفعلية)، أو هالك، أو تعديل يدوي.
   Future<Object?> _adjustIngredient(Request req, AuthUser u) async {
     final id = req.params['id']!;
+    // الـ body الأول: الجرد بيتحسب من الكمية الحالية، فلازم تبقى بعد ما الطلب يوصل كله مش قبله
+    final body = await _body(req);
     final ing = db.selectOne('SELECT * FROM ingredients WHERE id = ?', [id]);
     if (ing == null) throw ApiError(404, 'الخامة دي مش موجودة');
-    final body = await _body(req);
     final reason = body['reason'];
     if (!const {'receive', 'count', 'waste', 'adjust'}.contains(reason)) throw ApiError(400, 'سبب التعديل مش صحيح');
     final current = (ing['qty'] as num).toDouble();
@@ -182,7 +183,7 @@ extension _InventoryRoutes on OrderlyServer {
     final table = col == 'item_id' ? 'items' : 'modifier_options';
     if (db.selectOne('SELECT id FROM $table WHERE id = ?', [id]) == null) throw ApiError(404, 'مش موجود');
     final body = await _body(req);
-    final lines = (body['lines'] as List? ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+    final lines = (_field<List>(body, 'lines') ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
     db.transaction(() {
       db.execute('DELETE FROM recipes WHERE $col = ?', [id]);
       final seen = <String>{};
@@ -250,6 +251,9 @@ extension _InventoryRoutes on OrderlyServer {
 
   /// صنف اتلغى قبل ما يتحضر: الخامات بترجع المخزون.
   void _returnStock(Map<String, Object?> line, String? userId) {
+    // طلب QR لسه مستني موافقة: خاماته ما اتخصمتش أصلاً (الخصم بيحصل عند القبول)، فمفيش حاجة ترجع
+    final order = db.selectOne('SELECT status FROM orders WHERE id = ?', [line['order_id']]);
+    if (order == null || order['status'] == 'pending') return;
     final qty = line['qty'] as int;
     final usage = <String, double>{};
     void add(String ing, num q) => usage.update(ing, (v) => v + q * qty, ifAbsent: () => q * qty.toDouble());
@@ -355,9 +359,9 @@ extension _InventoryRoutes on OrderlyServer {
   Future<Object?> _createPurchase(Request req, AuthUser u) async {
     await _requireLicense();
     final body = await _body(req);
-    final supplierId = body['supplierId'] as String?;
+    final supplierId = _field<String>(body, 'supplierId');
     if (supplierId != null && db.selectOne('SELECT id FROM suppliers WHERE id = ?', [supplierId]) == null) throw ApiError(400, 'المورد مش موجود');
-    final lines = (body['lines'] as List? ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+    final lines = (_field<List>(body, 'lines') ?? const []).whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
     if (lines.isEmpty) throw ApiError(400, 'ضيف خامة واحدة على الأقل');
     final paid = body['paidCents'] is int ? body['paidCents'] as int : 0;
     final id = _uuid.v4();
@@ -368,7 +372,7 @@ extension _InventoryRoutes on OrderlyServer {
       db.execute('INSERT INTO purchases(id, number, supplier_id, total_cents, paid_cents, note, user_id, created_at) VALUES(?, ?, ?, 0, 0, ?, ?, ?)',
           [id, number, supplierId, _optionalText(body, 'note'), u.id, now]);
       for (final l in lines) {
-        final ing = db.selectOne('SELECT * FROM ingredients WHERE id = ?', [l['ingredientId']]);
+        final ing = l['ingredientId'] is String ? db.selectOne('SELECT * FROM ingredients WHERE id = ?', [l['ingredientId']]) : null;
         if (ing == null) throw ApiError(400, 'فيه خامة مش موجودة');
         final qty = _num(l['qty'], 'الكمية', min: 0.0001);
         final lineTotal = l['totalCents'];

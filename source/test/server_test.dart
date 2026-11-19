@@ -59,10 +59,10 @@ void main() {
 
   test('login, me, logout', () async {
     await setupShop();
-    await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'wrong'}), 401);
+    await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'wrong', 'deviceId': 'test-device-01'}), 401);
 
     // اسم المستخدم مش حساس لحالة الحروف
-    final res = await api.post('/api/auth/login', {'username': 'AHMED', 'password': 'secret123'});
+    final res = await api.post('/api/auth/login', {'username': 'AHMED', 'password': 'secret123', 'deviceId': 'test-device-01'});
     api.token = res['token'] as String;
     final me = await api.get('/api/auth/me');
     expect(me['user']['role'], 'owner');
@@ -74,9 +74,9 @@ void main() {
   test('login is throttled after repeated failures', () async {
     await setupShop();
     for (var i = 0; i < 5; i++) {
-      await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'nope'}), 401);
+      await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'nope', 'deviceId': 'test-device-01'}), 401);
     }
-    await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123'}), 429);
+    await expectApiError(api.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123', 'deviceId': 'test-device-01'}), 429);
   });
 
   test('owner manages users; waiter cannot', () async {
@@ -97,14 +97,14 @@ void main() {
     expect((list['users'] as List).length, 2);
 
     final tech = ApiClient(api.baseUrl);
-    final login = await tech.post('/api/auth/login', {'username': 'mohamed', 'password': 'tech1234'});
+    final login = await tech.post('/api/auth/login', {'username': 'mohamed', 'password': 'tech1234', 'deviceId': 'test-device-01'});
     tech.token = login['token'] as String;
     await expectApiError(tech.get('/api/users'), 403);
 
     // إيقاف الحساب بيخرجه من الأجهزة فوراً
     await api.patch('/api/users/$techId', {'active': false});
     await expectApiError(tech.get('/api/auth/me'), 401);
-    await expectApiError(tech.post('/api/auth/login', {'username': 'mohamed', 'password': 'tech1234'}), 403);
+    await expectApiError(tech.post('/api/auth/login', {'username': 'mohamed', 'password': 'tech1234', 'deviceId': 'test-device-01'}), 403);
     tech.close();
   });
 
@@ -119,7 +119,7 @@ void main() {
   test('changing password keeps current session and revokes others', () async {
     final first = await setupShop();
     final other = ApiClient(api.baseUrl);
-    other.token = (await other.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123'}))['token'] as String;
+    other.token = (await other.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123', 'deviceId': 'test-device-01'}))['token'] as String;
 
     api.token = first;
     await expectApiError(api.post('/api/auth/password', {'currentPassword': 'bad', 'newPassword': 'newpass1'}), 400);
@@ -144,7 +144,7 @@ void main() {
     await server.start();
     api.close();
     api = ApiClient('http://127.0.0.1:${server.port}');
-    final res = await api.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123'});
+    final res = await api.post('/api/auth/login', {'username': 'ahmed', 'password': 'secret123', 'deviceId': 'test-device-01'});
     expect(res['user']['name'], 'أحمد');
   });
 }

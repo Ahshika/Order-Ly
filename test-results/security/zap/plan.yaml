@@ -1,0 +1,128 @@
+env:
+  contexts:
+    - name: orderly
+      urls: ["http://127.0.0.1:18795"]
+      includePaths: ['http://127\.0\.0\.1:18795.*']
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: replacer
+    parameters: { deleteAllRules: true }
+    rules:
+      - description: auth
+        matchType: req_header
+        matchString: Authorization
+        replacementString: "Bearer 7We2flf1-SsWxUUoZ2LxZ9pyrbEfPho0srWeetQ0YWE"
+  - type: requestor
+    requests:
+    - url: "http://127.0.0.1:18795/api/info"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/auth/me"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/shop"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/menu"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/floor"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/checks"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/checks/8f6caf25-be89-4c48-9be7-09256072d831"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/checks?status=all&q=1"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/orders"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/orders?status=active"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/kds"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/live"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/calls"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/register"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/register/history"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/pay-methods"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/customers?q=010"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/users"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/audit?limit=5"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/ingredients"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/suppliers"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/purchases"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/reports/summary"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/reports/today"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/promotions"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/feedback"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/backups"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/license"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/files/x"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/print/claim?stations=receipt"
+      method: GET
+    - url: "http://127.0.0.1:18795/api/auth/login"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"username":"owner","password":"wrong-pass"}'
+    - url: "http://127.0.0.1:18795/api/checks"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"type":"takeaway","customerName":"zap","note":"n"}'
+    - url: "http://127.0.0.1:18795/api/checks/8f6caf25-be89-4c48-9be7-09256072d831/orders"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"lines":[{"itemId":"fd8317f1-b789-46b4-9331-ba043506cc5b","qty":1,"note":"x"}]}'
+    - url: "http://127.0.0.1:18795/api/checks/8f6caf25-be89-4c48-9be7-09256072d831/customer"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"phone":"01012345678","name":"zap"}'
+    - url: "http://127.0.0.1:18795/api/checks/8f6caf25-be89-4c48-9be7-09256072d831/print"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"kind":"bill"}'
+    - url: "http://127.0.0.1:18795/api/order-items/438b6aa5-b078-4694-a1aa-20e1e093d6b5/status"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"status":"ready"}'
+    - url: "http://127.0.0.1:18795/api/orders/4fcc6500-14c1-4ad1-9091-f1c8168af042/ready"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{}'
+    - url: "http://127.0.0.1:18795/api/register/moves"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"type":"expense","amountCents":100,"note":"zap"}'
+    - url: "http://127.0.0.1:18795/api/suppliers"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"name":"zap","phone":"0100","notes":"n"}'
+    - url: "http://127.0.0.1:18795/api/ingredients"
+      method: POST
+      headers: ["Content-Type: application/json"]
+      data: '{"name":"zap","unit":"g","qty":5}'
+  - type: passiveScan-wait
+    parameters: { maxDuration: 2 }
+  - type: activeScan
+    parameters: { context: orderly, maxScanDurationInMins: 12, maxRuleDurationInMins: 2, threadPerHost: 4 }
+  - type: passiveScan-wait
+    parameters: { maxDuration: 2 }
+  - type: report
+    parameters: { template: traditional-html, reportDir: "D:/Project/Programes/Order Ly/.claude/worktrees/comprehensive-stress-testing-f1539b/test-results/security/zap", reportFile: zap-report }
+  - type: report
+    parameters: { template: traditional-json, reportDir: "D:/Project/Programes/Order Ly/.claude/worktrees/comprehensive-stress-testing-f1539b/test-results/security/zap", reportFile: zap-report }

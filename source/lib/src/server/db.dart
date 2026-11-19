@@ -11,13 +11,31 @@ class AppDb {
 
   static AppDb open(String path) {
     final db = sqlite3.open(path);
-    db.execute('PRAGMA journal_mode = WAL;');
-    db.execute('PRAGMA foreign_keys = ON;');
-    db.execute('PRAGMA busy_timeout = 5000;');
-    db.execute('PRAGMA synchronous = NORMAL;');
-    final appDb = AppDb._(db);
-    appDb._migrate();
-    return appDb;
+    try {
+      db.execute('PRAGMA journal_mode = WAL;');
+      db.execute('PRAGMA foreign_keys = ON;');
+      db.execute('PRAGMA busy_timeout = 5000;');
+      db.execute('PRAGMA synchronous = NORMAL;');
+      final appDb = AppDb._(db);
+      appDb._migrate();
+      return appDb;
+    } catch (_) {
+      // لو الملف بايظ لازم نقفله، وإلا ويندوز مش هيسيبنا ننقله ونرجّع نسخة
+      db.close();
+      rethrow;
+    }
+  }
+
+  /// الجداول الأساسية بتتقري من غير أخطاء؟ (false = الملف بايظ لدرجة إن الشغل مش هينفع)
+  bool usable() {
+    try {
+      for (final t in const ['settings', 'shop', 'users', 'checks', 'orders', 'order_items', 'payments', 'cash_moves']) {
+        raw.select('SELECT COUNT(*) FROM $t');
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   void _migrate() {
@@ -614,5 +632,15 @@ const _migrations = <String>[
     SELECT id, branch_id, name, username, password_hash, role, active, created_at, updated_at FROM users;
   DROP TABLE users;
   ALTER TABLE users_new RENAME TO users;
+  ''',
+
+  // v8: رقم مميز لكل طلب من موبايل الويتر/الكاشير، عشان لو الرد ضاع والطلب اتبعت تاني مايتسجلش مرتين،
+  // وفهارس لحد طلبات الـ QR (لكل عميل ولكل ترابيزة)، والجهاز بيتعرف برقمه المميز مش باسمه
+  '''
+  ALTER TABLE orders ADD COLUMN request_id TEXT;
+  CREATE UNIQUE INDEX idx_orders_request ON orders(request_id) WHERE request_id IS NOT NULL;
+  CREATE INDEX idx_orders_client ON orders(client_id, created_at);
+  CREATE INDEX idx_orders_table_status ON orders(table_id, status);
+  ALTER TABLE sessions ADD COLUMN device_id TEXT;
   ''',
 ];

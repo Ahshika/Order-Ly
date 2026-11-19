@@ -700,7 +700,7 @@ void main() {
     final m = await buildMenu();
     await api.post('/api/users', {'name': 'كريم', 'username': 'karim', 'password': 'karim123', 'role': 'waiter'});
     final waiter = ApiClient('http://127.0.0.1:${server.port}');
-    waiter.token = (await waiter.post('/api/auth/login', {'username': 'karim', 'password': 'karim123'}))['token'] as String;
+    waiter.token = (await waiter.post('/api/auth/login', {'username': 'karim', 'password': 'karim123', 'deviceId': 'test-device-01'}))['token'] as String;
     await api.post('/api/tables', {'name': '1'});
     final t = (await waiter.get('/api/floor'))['tables'] as List;
     final checkId = (await waiter.post('/api/checks', {'type': 'dine_in', 'tableId': t.single['id']}))['check']['id'] as String;
@@ -787,7 +787,7 @@ void main() {
     server = OrderlyServer(dataDir: dir.path, requestedPort: 0, cloudSync: false);
     await server.start();
     api = ApiClient('http://127.0.0.1:${server.port}');
-    api.token = (await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123'}))['token'] as String;
+    api.token = (await api.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceId': 'test-device-01'}))['token'] as String;
     final items = (await api.get('/api/menu'))['items'] as List;
     expect(items.any((i) => i['id'] == m['cake']), true);
     final latte = items.firstWhere((i) => i['id'] == m['latte']);

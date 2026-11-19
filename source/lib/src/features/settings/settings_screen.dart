@@ -20,6 +20,7 @@ import 'backup_screen.dart';
 import 'cafe_settings_screen.dart';
 import 'license_screen.dart';
 import 'logs_screen.dart';
+import 'notification_settings.dart';
 import 'pay_methods_screen.dart';
 
 final _localIpsProvider = FutureProvider<List<String>>((ref) => localIpAddresses());
@@ -393,15 +394,7 @@ class _DeviceSettingsCardState extends ConsumerState<_DeviceSettingsCard> {
           ),
         ],
         const Divider(height: 1),
-        SwitchListTile(
-          secondary: const Icon(Icons.notifications_active_rounded),
-          title: const Text('صوت تنبيه للطلبات الجديدة'),
-          value: config.alertSound,
-          onChanged: (v) async {
-            await config.setAlertSound(v);
-            setState(() {});
-          },
-        ),
+        const NotificationSettingsTiles(),
       ]),
     );
   }

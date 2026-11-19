@@ -14,6 +14,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
+import 'package:sqlite3/sqlite3.dart' show OpenMode, SqliteException, sqlite3;
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -52,6 +53,9 @@ const floorRoles = {'owner', 'supervisor', 'cashier', 'waiter'};
 /// أقصى عدد طلبات على شاشة المطبخ مرة واحدة (الأقدم الأول)، عشان الشاشة متتقلش لو المطبخ اتملى.
 const kdsLimit = 200;
 
+/// أكبر طلب مقبول. أكبر حاجة حقيقية: صورة صنف 8 ميجا بالـ base64 (حوالي 11 ميجا).
+const maxBodyBytes = 12 * 1024 * 1024;
+
 const _uuid = Uuid();
 
 String nowIso() => DateTime.now().toUtc().toIso8601String();
@@ -72,6 +76,9 @@ class AuthUser {
   String get role => row['role'] as String;
   bool get isOwner => role == 'owner';
   bool get isManager => managerRoles.contains(role);
+
+  /// الرقم المميز للجهاز اللي الجلسة دي عليه.
+  String? get deviceId => row['session_device'] as String?;
 }
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
@@ -86,6 +93,10 @@ class OrderlyServer {
   CloudSync? _cloud;
   Timer? _jobsTimer;
   Timer? _firstJobTimer;
+  Timer? _backupTimer;
+
+  /// نسخة احتياطية شغالة دلوقتي (عشان نسختين مايتعملوش في نفس اللحظة).
+  Future<void>? _backupRunning;
 
   /// البورت الفعلي (بيفرق عن requestedPort لو طلبنا 0 في الاختبارات).
   int get port => _http?.port ?? requestedPort;
@@ -97,11 +108,22 @@ class OrderlyServer {
   final _sockets = <WebSocketChannel>{};
   final _loginFailures = <String, _Failures>{};
 
+  /// آخر مرة "آخر ظهور" اتكتب لكل جلسة: كان بيتكتب في قاعدة البيانات مع كل طلب (كتابة زيادة في كل قراية).
+  final _lastSeenWritten = <String, DateTime>{};
+
+  /// آخر الإشعارات (وقتها، ونصه) عشان الجهاز اللي اتصاله قطع ثواني ياخد اللي فاته لما يرجع.
+  final _recentNotifications = <(DateTime, String, String)>[];
+  static const _notifyReplayWindow = Duration(minutes: 3);
+
+  /// ردود الشاشات اللي كل الأجهزة بتسأل عليها كل ثانية (الصالة، المطبخ، الأرقام اللايف، الحسابات المفتوحة).
+  /// بتتحسب مرة واحدة وتتبعت للكل، وبتتمسح مع أي تغيير ([_broadcast]) أو بعد ثانيتين بالكتير.
+  final _screenCache = <String, (DateTime, String)>{};
+
   Future<void> start() async {
     await initializeDateFormatting('ar');
     await Directory(dataDir).create(recursive: true);
     applyPendingRestore(dataDir);
-    db = AppDb.open(p.join(dataDir, 'orderly.db'));
+    db = _openOrRecover();
     if (db.setting('server_id') == null) db.setSetting('server_id', _uuid.v4());
     _log.write('INFO', 'السيرفر اشتغل ($appName $appVersion)');
     final health = db.integrity();
@@ -110,7 +132,8 @@ class OrderlyServer {
 
     final handler = const Pipeline().addMiddleware(_errors()).addHandler(_router().call);
     try {
-      _http = await shelf_io.serve(handler, InternetAddress.anyIPv4, requestedPort, shared: false);
+      // من غير X-Powered-By: مفيش داعي نقول لأي حد على الشبكة السيرفر مكتوب بإيه
+      _http = await shelf_io.serve(handler, InternetAddress.anyIPv4, requestedPort, shared: false, poweredByHeader: null);
     } on SocketException {
       db.close();
       throw ApiError(500, 'البورت $requestedPort مستخدم. غالباً البرنامج مفتوح بالفعل على الجهاز ده.');
@@ -129,17 +152,22 @@ class OrderlyServer {
 
     if (cloudSync) _cloud = CloudSync(this)..start();
 
-    // شغل بيتكرر: النسخ الاحتياطي اليومي، وتنضيف الطباعة القديمة
+    // شغل بيتكرر: الصيانة وتنضيف الطباعة القديمة كل ساعة، والنسخ الاحتياطي بيتكشف عليه كل 10 دقايق
+    // (عشان لو المالك اختار "كل ساعة" النسخة متتأخرش)
     Future<void> jobs() async {
       db.maintenance();
-      await _runBackupIfDue();
       _cleanupPrintJobs();
+      await _runBackupIfDue();
     }
 
     Future<void> safeJobs() => jobs().catchError((Object e, StackTrace st) => _log.error('الشغل الدوري: $e', st));
     _jobsTimer = Timer.periodic(const Duration(hours: 1), (_) => safeJobs());
     _firstJobTimer = Timer(const Duration(minutes: 1), safeJobs);
+    _backupTimer = Timer.periodic(const Duration(minutes: 10), (_) => _runBackupIfDue());
   }
+
+  /// كشف النسخ الاحتياطي اللي بيحصل كل 10 دقايق، بس دلوقتي (للاختبارات).
+  Future<void> runBackupCheckNow() => _runBackupIfDue();
 
   /// مزامنة فورية مع صفحة التتبع (للاختبارات وزرار "مزامنة دلوقتي").
   Future<void> syncNow() async => _cloud?.runNow();
@@ -160,8 +188,13 @@ class OrderlyServer {
     _cloud?.stop();
     _jobsTimer?.cancel();
     _firstJobTimer?.cancel();
+    _backupTimer?.cancel();
+    // نستنى أي نسخة احتياطية شغالة قبل ما نقفل قاعدة البيانات
+    if (_backupRunning != null) await _backupRunning;
     _discovery?.close();
-    for (final s in _sockets) {
+    // نسخة من القايمة: كل اتصال بيشيل نفسه منها أول ما يتقفل، فاللفّ عليها مباشرة كان بيوقّع الإيقاف
+    // (ومعاه قاعدة البيانات ماكانتش بتتقفل صح)
+    for (final s in _sockets.toList()) {
       await s.sink.close();
     }
     await _http?.close(force: true);
@@ -236,19 +269,30 @@ class OrderlyServer {
 
   AuthUser _authenticate(Request req) {
     final header = req.headers['authorization'];
+    // التوكن في الرابط بيتقبل في الـ WebSocket بس (مفيش طريقة تانية تبعته فيه).
+    // في أي مكان تاني الروابط بتتسجل في اللوجات والسكرين شوت، فالتوكن لازم في الهيدر.
     final token = header != null && header.startsWith('Bearer ')
         ? header.substring(7)
-        : req.url.queryParameters['token'];
+        : req.url.path == 'api/ws'
+            ? req.url.queryParameters['token']
+            : null;
     if (token == null || token.isEmpty) throw ApiError(401, 'لازم تسجل دخول الأول');
 
     final tokenHash = sha256Hex(token);
     final row = db.selectOne(
-      'SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?',
+      'SELECT u.*, s.device_id AS session_device FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?',
       [tokenHash],
     );
     if (row == null) throw ApiError(401, 'الجلسة انتهت، سجل دخول تاني');
     if (row['active'] != 1) throw ApiError(401, 'الحساب ده متوقف، كلم صاحب الكافيه');
-    db.execute('UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?', [nowIso(), tokenHash]);
+    // "آخر ظهور" بيتستخدم لحد الأجهزة (آخر 30 يوم)، فكفاية يتكتب مرة كل دقيقة
+    final now = DateTime.now();
+    final written = _lastSeenWritten[tokenHash];
+    if (written == null || now.difference(written).inSeconds >= 60) {
+      db.execute('UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?', [nowIso(), tokenHash]);
+      if (_lastSeenWritten.length > 5000) _lastSeenWritten.clear();
+      _lastSeenWritten[tokenHash] = now;
+    }
     return AuthUser(row, tokenHash);
   }
 
@@ -297,7 +341,7 @@ class OrderlyServer {
     _audit(userId, 'shop.setup', 'shop', shopId, shopName);
     db.setSetting('trial_started', nowIso());
     final user = db.selectOne('SELECT * FROM users WHERE id = ?', [userId])!;
-    return {'token': _createSession(userId, body['deviceName']), 'user': _publicUser(user)};
+    return {'token': _createSession(userId, body['deviceName'], body['deviceId']), 'user': _publicUser(user)};
   }
 
   Future<Object?> _login(Request req) async {
@@ -309,8 +353,10 @@ class OrderlyServer {
     }
 
     final body = await _body(req);
-    final username = (body['username'] as String? ?? '').trim().toLowerCase();
-    final password = body['password'] as String? ?? '';
+    final username = (_field<String>(body, 'username') ?? '').trim().toLowerCase();
+    final password = _field<String>(body, 'password') ?? '';
+    final deviceName = _field<String>(body, 'deviceName');
+    final deviceId = _field<String>(body, 'deviceId');
     final user = db.selectOne('SELECT * FROM users WHERE username = ?', [username]);
 
     if (user == null || !verifyPassword(password, user['password_hash'] as String)) {
@@ -324,15 +370,19 @@ class OrderlyServer {
     }
     if (user['active'] != 1) throw ApiError(403, 'الحساب ده متوقف، كلم صاحب الكافيه');
 
-    await _checkDeviceLimit(body['deviceName'] as String?);
+    // كل جهاز بيتعرف برقمه المميز (مش باسمه: الموبايلات ممكن يبقى ليها نفس الاسم، والاسم ممكن ميتبعتش أصلاً)
+    if (deviceId == null || deviceId.length < 8 || deviceId.length > 64) {
+      throw ApiError(400, 'نسخة البرنامج دي قديمة. حدّث البرنامج على الجهاز ده وجرّب تاني');
+    }
+    await _checkDeviceLimit(deviceId);
     _loginFailures.remove(ip);
-    _audit(user['id'] as String, 'auth.login', 'user', user['id'] as String, body['deviceName'] as String?);
-    return {'token': _createSession(user['id'] as String, body['deviceName']), 'user': _publicUser(user)};
+    _audit(user['id'] as String, 'auth.login', 'user', user['id'] as String, deviceName);
+    return {'token': _createSession(user['id'] as String, deviceName, deviceId), 'user': _publicUser(user)};
   }
 
   Future<Object?> _changeOwnPassword(Request req, AuthUser u) async {
     final body = await _body(req);
-    if (!verifyPassword(body['currentPassword'] as String? ?? '', u.row['password_hash'] as String)) {
+    if (!verifyPassword(_field<String>(body, 'currentPassword') ?? '', u.row['password_hash'] as String)) {
       throw ApiError(400, 'كلمة السر الحالية غلط');
     }
     final password = _validPassword(body['newPassword']);
@@ -345,12 +395,12 @@ class OrderlyServer {
     return {'ok': true};
   }
 
-  String _createSession(String userId, Object? deviceName) {
+  String _createSession(String userId, Object? deviceName, [Object? deviceId]) {
     final token = randomToken();
     final now = nowIso();
     db.execute(
-      'INSERT INTO sessions(token_hash, user_id, device_name, created_at, last_seen_at) VALUES(?, ?, ?, ?, ?)',
-      [sha256Hex(token), userId, deviceName is String ? deviceName : null, now, now],
+      'INSERT INTO sessions(token_hash, user_id, device_name, device_id, created_at, last_seen_at) VALUES(?, ?, ?, ?, ?, ?)',
+      [sha256Hex(token), userId, deviceName is String ? deviceName : null, deviceId is String && deviceId.length <= 64 ? deviceId : null, now, now],
     );
     return token;
   }
@@ -386,9 +436,9 @@ class OrderlyServer {
 
   Future<Object?> _updateUser(Request req, AuthUser u) async {
     final id = req.params['id']!;
+    final body = await _body(req);
     final target = db.selectOne('SELECT * FROM users WHERE id = ?', [id]);
     if (target == null) throw ApiError(404, 'الموظف ده مش موجود');
-    final body = await _body(req);
 
     final name = body.containsKey('name') ? _requiredText(body, 'name', 'الاسم') : target['name'] as String;
     final role = body.containsKey('role') ? _validRole(body['role']) : target['role'] as String;
@@ -470,14 +520,24 @@ class OrderlyServer {
 
   FutureOr<Response> _webSocket(Request req) {
     _authenticate(req);
+    // since = آخر وقت (بساعة السيرفر) الجهاز شاف فيه حاجة قبل ما الاتصال يقطع
+    final since = DateTime.tryParse(req.url.queryParameters['since'] ?? '');
     return webSocketHandler((WebSocketChannel ch, String? _) {
       _sockets.add(ch);
       ch.stream.listen((_) {}, onDone: () => _sockets.remove(ch), onError: (_) => _sockets.remove(ch));
+      // ساعة السيرفر عشان الجهاز يقولنا "since" بيها المرة الجاية (ساعات الموبايلات ممكن تبقى مختلفة)
+      ch.sink.add(jsonEncode({'type': 'hello', 'at': nowIso()}));
+      if (since != null) {
+        for (final n in _recentNotifications) {
+          if (n.$1.isAfter(since)) ch.sink.add(n.$3);
+        }
+      }
     })(req);
   }
 
   /// بيبلّغ كل الأجهزة المتصلة إن فيه حاجة اتغيرت عشان تحدّث الشاشة.
   void _broadcast(String topic) {
+    _screenCache.clear();
     if (const {'shop', 'menu', 'tables', 'checks', 'orders', 'payments', 'calls', 'stock'}.contains(topic)) _cloud?.kick(topic);
     final msg = jsonEncode({'type': 'changed', 'topic': topic});
     for (final s in _sockets.toList()) {
@@ -489,21 +549,101 @@ class OrderlyServer {
     }
   }
 
+  /// إشعار للموظفين (بيطلع على الموبايلات والكمبيوتر بصوت). [roles] = مين يستلمه، و[goTo] = الشاشة اللي تتفتح لو داس عليه.
+  /// بيتبعت بعد ما العملية تتسجل (مش جوه الـ transaction) عشان مايطلعش إشعار لحاجة اترجعت.
+  void _notify(String kind, String title, String body, Set<String> roles, {String? goTo}) {
+    final at = nowIso();
+    final msg = jsonEncode({
+      'type': 'notify',
+      'id': _uuid.v4(),
+      'kind': kind,
+      'title': title,
+      'body': body,
+      'roles': roles.toList(),
+      'goTo': ?goTo,
+      'at': at,
+    });
+    // آخر الإشعارات بتتحفظ شوية: الموبايل اللي الواي فاي بتاعه قطع ثواني ياخدها لما يرجع
+    _recentNotifications.add((DateTime.parse(at), at, msg));
+    final cutoff = DateTime.now().toUtc().subtract(_notifyReplayWindow);
+    _recentNotifications.removeWhere((n) => n.$1.isBefore(cutoff));
+    if (_recentNotifications.length > 200) _recentNotifications.removeRange(0, _recentNotifications.length - 200);
+    for (final s in _sockets.toList()) {
+      try {
+        s.sink.add(msg);
+      } catch (_) {
+        _sockets.remove(s);
+      }
+    }
+  }
+
+  String _placeName(String? tableId, {String? customerName}) {
+    final t = tableId == null ? null : db.selectOne('SELECT name FROM tables WHERE id = ?', [tableId]);
+    return t != null ? 'ترابيزة ${t['name']}' : (customerName == null ? 'تيك أواي' : 'تيك أواي • $customerName');
+  }
+
+  /// طلب اتبعت للبار/المطبخ (من الكاشير/الويتر أو QR اتقبل).
+  void _notifyKitchen(String orderId) {
+    final o = db.selectOne('SELECT number, table_id, guest_name, check_id FROM orders WHERE id = ?', [orderId]);
+    if (o == null) return;
+    final n = db.selectOne("SELECT COALESCE(SUM(qty), 0) AS n FROM order_items WHERE order_id = ? AND status <> 'void'", [orderId])!['n'];
+    final customer = o['check_id'] == null ? null : db.selectOne('SELECT customer_name FROM checks WHERE id = ?', [o['check_id']])?['customer_name'] as String?;
+    _notify('kitchen_new', 'طلب #${o['number']} للتحضير', '${_placeName(o['table_id'] as String?, customerName: o['guest_name'] as String? ?? customer)} • $n صنف', const {'kitchen'},
+        goTo: 'kds');
+  }
+
   // ---------------------------------------------------------------- helpers
+
+  /// رد شاشة من الكاش لو لسه صالح، أو بيحسبه ويحفظه. المفتاح = المسار بالـ query (مش بيفرق بين الموظفين).
+  Response _cachedScreen(Request req, Object? Function() build) {
+    final key = '${req.url}';
+    final now = DateTime.now();
+    final hit = _screenCache[key];
+    if (hit != null && now.difference(hit.$1).inMilliseconds < 2000) return _jsonText(200, hit.$2);
+    final text = jsonEncode(build());
+    if (_screenCache.length > 200) _screenCache.clear();
+    _screenCache[key] = (now, text);
+    return _jsonText(200, text);
+  }
+
+  Response _jsonText(int status, String text) => Response(
+        status,
+        body: text,
+        headers: {'content-type': 'application/json; charset=utf-8', 'x-content-type-options': 'nosniff'},
+      );
 
   Response _json(int status, Object? body) => Response(
         status,
         body: jsonEncode(body),
-        headers: {'content-type': 'application/json; charset=utf-8'},
+        headers: {'content-type': 'application/json; charset=utf-8', 'x-content-type-options': 'nosniff'},
       );
 
+  /// بيقرا الـ body بحد أقصى [maxBodyBytes]، عشان أي جهاز على الواي فاي (حتى من غير تسجيل دخول)
+  /// مايقدرش يخلي السيرفر يحمّل في الذاكرة طلب ضخم ويقع.
   Future<Map<String, dynamic>> _body(Request req) async {
-    final text = await req.readAsString();
-    if (text.isEmpty) return {};
+    if ((req.contentLength ?? 0) > maxBodyBytes) throw ApiError(413, 'البيانات المبعوتة كبيرة جداً');
+    final bytes = BytesBuilder(copy: false);
     try {
-      final decoded = jsonDecode(text);
+      await for (final chunk in req.read()) {
+        bytes.add(chunk);
+        if (bytes.length > maxBodyBytes) throw ApiError(413, 'البيانات المبعوتة كبيرة جداً');
+      }
+    } on HttpException {
+      // الموبايل فصل (واي فاي ضعيف) قبل ما الطلب يكمل: مش خطأ في السيرفر
+      throw ApiError(400, 'الاتصال اتقطع قبل ما البيانات توصل، جرّب تاني');
+    }
+    if (bytes.isEmpty) return {};
+    try {
+      final decoded = jsonDecode(utf8.decode(bytes.takeBytes()));
       if (decoded is Map<String, dynamic>) return decoded;
     } catch (_) {}
+    throw ApiError(400, 'البيانات المبعوتة مش مفهومة');
+  }
+
+  /// قيمة من الطلب بالنوع المطلوب (أو null لو مش مبعوتة). لو جاية بنوع تاني يبقى الطلب نفسه غلط (400) مش عطل في السيرفر.
+  T? _field<T>(Map<String, dynamic> body, String key) {
+    final v = body[key];
+    if (v == null || v is T) return v as T?;
     throw ApiError(400, 'البيانات المبعوتة مش مفهومة');
   }
 
@@ -511,14 +651,14 @@ class OrderlyServer {
       (req.context['shelf.io.connection_info'] as HttpConnectionInfo?)?.remoteAddress.address ?? 'unknown';
 
   String _requiredText(Map<String, dynamic> body, String key, String label) {
-    final v = (body[key] as String? ?? '').trim();
+    final v = (_field<String>(body, key) ?? '').trim();
     if (v.isEmpty) throw ApiError(400, 'لازم تكتب $label');
     if (v.length > 200) throw ApiError(400, '$label طويل جداً');
     return v;
   }
 
   String? _optionalText(Map<String, dynamic> body, String key) {
-    final v = (body[key] as String? ?? '').trim();
+    final v = (_field<String>(body, key) ?? '').trim();
     return v.isEmpty ? null : v;
   }
 

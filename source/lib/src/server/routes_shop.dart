@@ -98,6 +98,8 @@ extension _ShopRoutes on OrderlyServer {
       'logoBase64': logo.existsSync() ? base64.encode(logo.readAsBytesSync()) : null,
       'settings': _cafe,
       'menuBaseUrl': menuSiteUrl,
+      // لو قاعدة البيانات كانت باظت والسيرفر رجع لنسخة احتياطية لوحده (الشاشة الرئيسية بتنبّه المالك)
+      'dbRecovery': _recoveryInfo(),
       'cloud': {
         'cafeId': db.setting('cloud_uid'),
         'lastSync': db.setting('cloud_last_sync'),
@@ -158,7 +160,7 @@ extension _ShopRoutes on OrderlyServer {
     final body = await _body(req);
     final List<int> bytes;
     try {
-      bytes = base64.decode(body['png'] as String? ?? '');
+      bytes = base64.decode(_field<String>(body, 'png') ?? '');
     } catch (_) {
       throw ApiError(400, 'الصورة مش صحيحة');
     }
@@ -197,7 +199,7 @@ extension _ShopRoutes on OrderlyServer {
 
   List<int> _decodeImageBody(Map<String, dynamic> body) {
     try {
-      final bytes = base64.decode(body['base64'] as String? ?? '');
+      final bytes = base64.decode(_field<String>(body, 'base64') ?? '');
       if (bytes.isEmpty) throw ApiError(400, 'مفيش صورة');
       if (bytes.length > 8 * 1024 * 1024) throw ApiError(400, 'الصورة كبيرة جداً (أقصى حاجة 8 ميجا)');
       return bytes;
@@ -218,6 +220,8 @@ extension _ShopRoutes on OrderlyServer {
     final row = db.selectOne('SELECT * FROM files WHERE id = ?', [id]);
     final f = File(p.join(_filesDir.path, p.basename(id)));
     if (row == null || !f.existsSync()) throw ApiError(404, 'الملف مش موجود');
+    // صور التحويلات فيها بيانات العميل وفلوسه: للي بيشتغلوا على الحسابات بس. صور المنيو للكل.
+    if (row['kind'] == 'proof' && !cashRoles.contains(u.role)) throw ApiError(403, 'صورة التحويل للكاشير بس');
     return Response.ok(f.readAsBytesSync(), headers: {
       'content-type': row['mime'] as String,
       'cache-control': 'private, max-age=31536000, immutable',
@@ -229,7 +233,10 @@ extension _ShopRoutes on OrderlyServer {
 Future<List<int>?> shrinkInBackground(List<int> bytes, int maxSide, int quality) => Isolate.run(() => shrinkToJpeg(bytes, maxSide, quality));
 
 String _logoInIsolate(List<int> bytes) {
-  final decoded = img.decodeImage(Uint8List.fromList(bytes));
+  final data = Uint8List.fromList(bytes);
+  final info = img.findDecoderForData(data)?.startDecode(data);
+  if (info == null || info.width * info.height > maxDecodePixels) return '';
+  final decoded = img.decodeImage(data);
   if (decoded == null) return '';
   final small = decoded.width > 160 ? img.copyResize(decoded, width: 160) : decoded;
   return base64.encode(img.encodePng(small));
@@ -237,9 +244,17 @@ String _logoInIsolate(List<int> bytes) {
 
 Future<String> smallLogoInBackground(List<int> bytes) => Isolate.run(() => _logoInIsolate(bytes));
 
-/// تصغير صورة لأقصى عرض/طول [maxSide] وتحويلها JPEG. null لو الملف مش صورة.
+/// أكبر صورة بنرضى نفكّها (50 ميجابكسل ≈ 150 ميجا في الذاكرة). أي موبايل بيصغّر الصورة قبل ما يبعتها فده كفاية جداً.
+const maxDecodePixels = 50 * 1000 * 1000;
+
+/// تصغير صورة لأقصى عرض/طول [maxSide] وتحويلها JPEG. null لو الملف مش صورة أو أبعاده ضخمة.
 List<int>? shrinkToJpeg(List<int> bytes, int maxSide, int quality) {
-  final decoded = img.decodeImage(Uint8List.fromList(bytes));
+  final data = Uint8List.fromList(bytes);
+  // "قنبلة صور": ملف صغير جداً (100 كيلو) لكن أبعاده ضخمة، فكّه بياكل مئات الميجات وممكن يوقّع السيرفر.
+  // بنقرا الأبعاد من الهيدر بس الأول، وصور التحويل جاية من النت (أي حد معاه كود ترابيزة).
+  final info = img.findDecoderForData(data)?.startDecode(data);
+  if (info == null || info.width <= 0 || info.height <= 0 || info.width * info.height > maxDecodePixels) return null;
+  final decoded = img.decodeImage(data);
   if (decoded == null) return null;
   var image = decoded;
   if (image.width > maxSide || image.height > maxSide) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/api_client.dart';
 import '../../core/cafe_models.dart';
@@ -33,6 +34,10 @@ class CheckScreen extends ConsumerStatefulWidget {
 class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProviderStateMixin {
   final _draft = <DraftLine>[];
   final _orderNote = TextEditingController();
+
+  /// رقم مميز للطلب اللي لسه ما اتبعتش: لو الإرسال فشل والويتر داس تاني، السيرفر يعرف إنه نفس الطلب
+  /// ومايسجلوش مرتين (مثلاً الطلب وصل والرد هو اللي ضاع في الواي فاي). بيتغير لما الأصناف تتغير.
+  String? _requestId;
   bool _busy = false;
   late final _tabs = TabController(length: 2, vsync: this);
 
@@ -48,6 +53,7 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
 
   void _add(DraftLine line) {
     setState(() {
+      _requestId = null;
       final same = _draft.where((d) => d.key == line.key).firstOrNull;
       if (same != null) {
         same.qty += line.qty;
@@ -55,9 +61,7 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
         _draft.add(line);
       }
     });
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('اتضاف: ${line.item.name}'), duration: const Duration(milliseconds: 900)));
+    showToast(context, 'اتضاف: ${line.item.name}', kind: ToastKind.success, duration: const Duration(milliseconds: 1400));
   }
 
   Future<void> _run(Future<void> Function() action, {String? done}) async {
@@ -75,15 +79,43 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
   }
 
   Future<void> _send() => _run(() async {
-        await _api.post('/api/checks/${widget.checkId}/orders', {
-          'lines': _draft.map((d) => d.toJson()).toList(),
-          if (_orderNote.text.trim().isNotEmpty) 'note': _orderNote.text.trim(),
-        });
-        setState(() {
-          _draft.clear();
-          _orderNote.clear();
-        });
+        await _postDraft(widget.checkId);
+        _clearDraft();
       }, done: 'الطلب اتبعت للبار/المطبخ');
+
+  Future<Map<String, dynamic>> _postDraft(String checkId) {
+    _requestId ??= const Uuid().v4();
+    return _api.post('/api/checks/$checkId/orders', {
+      'lines': _draft.map((d) => d.toJson()).toList(),
+      if (_orderNote.text.trim().isNotEmpty) 'note': _orderNote.text.trim(),
+      'requestId': _requestId,
+    });
+  }
+
+  void _clearDraft() => setState(() {
+        _draft.clear();
+        _orderNote.clear();
+        _requestId = null;
+      });
+
+  /// الحساب اتقفل من جهاز تاني والويتر لسه معاه أصناف ما اتبعتتش: يفتح حساب جديد (لنفس الترابيزة) ويبعتها عليه.
+  Future<void> _sendToNewCheck(CheckSummary c) async {
+    String? newId;
+    await _run(() async {
+      final opened = await _api.post('/api/checks', {
+        'type': c.type,
+        if (c.tableId != null) 'tableId': c.tableId,
+        if (c.tableId == null && c.customerName != null) 'customerName': c.customerName,
+        if (c.tableId == null && c.customerPhone != null) 'customerPhone': c.customerPhone,
+      });
+      newId = (opened['check'] as Map)['id'] as String;
+      await _postDraft(newId!);
+      _clearDraft();
+    }, done: 'الأصناف اتبعتت على حساب جديد');
+    if (newId != null && mounted) {
+      Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (_) => CheckScreen(checkId: newId!)));
+    }
+  }
 
   Future<void> _pay(CheckDetail d) async {
     final paidAll = await showDialog<bool>(context: context, builder: (_) => PaymentDialog(detail: d));
@@ -303,10 +335,19 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(_draft[i].qty == 1 ? Icons.delete_outline_rounded : Icons.remove_rounded),
-                      onPressed: () => setState(() => _draft[i].qty == 1 ? _draft.removeAt(i) : _draft[i].qty--),
+                      onPressed: () => setState(() {
+                        _requestId = null;
+                        _draft[i].qty == 1 ? _draft.removeAt(i) : _draft[i].qty--;
+                      }),
                     ),
                     Text('${_draft[i].qty}', style: const TextStyle().bold),
-                    IconButton(visualDensity: VisualDensity.compact, icon: const Icon(Icons.add_rounded), onPressed: () => setState(() => _draft[i].qty++)),
+                    IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.add_rounded),
+                        onPressed: () => setState(() {
+                              _requestId = null;
+                              _draft[i].qty++;
+                            })),
                     SizedBox(width: 74, child: Text(money(_draft[i].totalCents), textAlign: TextAlign.end)),
                   ]),
                 ),
@@ -318,6 +359,20 @@ class _CheckScreenState extends ConsumerState<CheckScreen> with SingleTickerProv
         ]),
       ),
       _Totals(check: c, payments: d.payments),
+      // الحساب اتقفل من جهاز تاني والأصناف دي لسه ما اتبعتتش: من غير الزرار ده كانت بتفضل معلّقة
+      if (!c.isOpen && _draft.isNotEmpty)
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text('الأصناف اللي ما اتبعتتش لسه معاك. تقدر تبعتها على حساب جديد${c.tableName != null ? ' لترابيزة ${c.tableName}' : ''}:',
+                  style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 6),
+              BusyButton(label: 'ابعتها على حساب جديد (${money(draftTotal)})', icon: Icons.add_circle_rounded, busy: _busy, onPressed: () => _sendToNewCheck(c)),
+            ]),
+          ),
+        ),
       if (c.isOpen)
         SafeArea(
           top: false,
@@ -534,7 +589,8 @@ class _PendingPaymentCardState extends ConsumerState<PendingPaymentCard> {
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (p.proofFileId != null)
+          // صورة التحويل فيها بيانات العميل: السيرفر بيوريها للكاشير بس
+          if (p.proofFileId != null && canConfirm)
             InkWell(
               onTap: () => showImageViewer(context, p.proofFileId!, title: 'صورة التحويل • ${money(p.amountCents)}'),
               child: ClipRRect(borderRadius: BorderRadius.circular(8), child: ServerImage(p.proofFileId!, width: 70, height: 100)),
@@ -545,7 +601,7 @@ class _PendingPaymentCardState extends ConsumerState<PendingPaymentCard> {
               height: 100,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: purple.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-              child: const Text('من غير صورة', textAlign: TextAlign.center, style: TextStyle(fontSize: 11)),
+              child: Text(p.proofFileId != null ? 'صورة التحويل للكاشير بس' : 'من غير صورة', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11)),
             ),
           const SizedBox(width: 10),
           Expanded(

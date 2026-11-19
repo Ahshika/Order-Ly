@@ -41,7 +41,7 @@ void main() {
   Future<ApiClient> login(String username, String password, String role) async {
     await owner.post('/api/users', {'name': username, 'username': username, 'password': password, 'role': role});
     final c = ApiClient(base);
-    c.token = (await c.post('/api/auth/login', {'username': username, 'password': password}))['token'] as String;
+    c.token = (await c.post('/api/auth/login', {'username': username, 'password': password, 'deviceId': 'test-device-01'}))['token'] as String;
     return c;
   }
 
@@ -72,6 +72,9 @@ void main() {
 
     // نرجّع الملف لنسخة ما قبل "مسؤول شفت" عشان الـ migration تتنفذ تاني على بيانات حقيقية
     final raw = sqlite3.open(p.join(dir.path, 'orderly.db'));
+    // ومن غير الأعمدة اللي اتضافت بعدها (v8)، عشان الملف يبقى فعلاً زي نسخة قديمة
+    raw.execute('DROP INDEX idx_orders_request; DROP INDEX idx_orders_client; DROP INDEX idx_orders_table_status;'
+        'ALTER TABLE orders DROP COLUMN request_id; ALTER TABLE sessions DROP COLUMN device_id;');
     raw.userVersion = 6;
     raw.close();
 
@@ -80,7 +83,7 @@ void main() {
     base = 'http://127.0.0.1:${server.port}';
     owner.close();
     owner = ApiClient(base);
-    owner.token = (await owner.post('/api/auth/login', {'username': 'owner', 'password': 'owner123'}))['token'] as String;
+    owner.token = (await owner.post('/api/auth/login', {'username': 'owner', 'password': 'owner123', 'deviceId': 'test-device-01'}))['token'] as String;
 
     final users = (await owner.get('/api/users'))['users'] as List;
     expect(users.map((u) => u['username']), containsAll(['owner', 'ali']));

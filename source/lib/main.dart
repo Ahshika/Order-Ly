@@ -9,12 +9,14 @@ import 'src/app.dart';
 import 'src/core/app_config.dart';
 import 'src/core/app_info.dart';
 import 'src/core/diagnostics.dart';
+import 'src/core/notifications.dart';
 import 'src/core/session.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final config = await AppConfig.load();
   await _startDiagnostics();
+  await NotificationCenter.init();
   runApp(ProviderScope(
     // الأخطاء بنعرضها للمستخدم بنفسنا، فمش عايزين Riverpod يعيد المحاولة لوحده
     retry: (_, _) => null,

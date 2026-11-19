@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import 'toast.dart';
+
+export 'toast.dart' show ToastKind, showToast;
 
 /// لوجو Order Ly: فنجان قهوة جوه مربع بزوايا مدورة، وعلامة طلب صغيرة.
 class OrderlyLogo extends StatelessWidget {
@@ -143,15 +146,9 @@ class BusyButton extends StatelessWidget {
 
 String errorText(Object e) => e is ApiException ? e.message : 'حصل خطأ غير متوقع: $e';
 
-void showMessage(BuildContext context, String message, {bool error = false}) {
-  final scheme = Theme.of(context).colorScheme;
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: error ? scheme.error : null,
-    ));
-}
+/// رسالة صغيرة من يمين الشاشة بتختفي لوحدها (شوف [showToast]).
+void showMessage(BuildContext context, String message, {bool error = false}) =>
+    showToast(context, message, kind: error ? ToastKind.error : ToastKind.success);
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle(this.text, {super.key});

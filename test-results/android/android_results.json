@@ -1,0 +1,142 @@
+{
+  "generatedAt": "2026-11-19T17:47:31",
+  "device": "Android emulator, AVD fiberlens_phone (Pixel 7, Android 14 / API 34, x86_64), started with -read-only so the AVD is unchanged",
+  "app": "Order Ly 1.0.7 + fixes + notifications; the same 11 flows on the debug APK and on the release APK (the one that is sold)",
+  "server": "test_load/load_server_test.dart on the host, port 18797 (emulator reaches it as 10.0.2.2)",
+  "tools": "Appium 4.0.0 + UiAutomator2 9.2.2, scripted in test_android/run_flows.py (Python stdlib only); run with test_android/run.ps1 (APK=... for another build)",
+  "results": [
+    {
+      "scenario": "connect by IP + login (device id sent) [release]",
+      "status": "PASS",
+      "evidence": "floor shown; server كافيه التيست",
+      "screenshot": "a1_floor.png"
+    },
+    {
+      "scenario": "order with required size + extras [release]",
+      "status": "PASS",
+      "evidence": "phone 125 EGP, server 12500 piastres",
+      "screenshot": "a2_order.png"
+    },
+    {
+      "scenario": "another device adds an order → phone updates live [release]",
+      "status": "PASS",
+      "evidence": "new total visible within 10 s, no refresh",
+      "screenshot": "a3_live.png"
+    },
+    {
+      "scenario": "Wi-Fi cut: lasting banner, draft kept, reconnect, no duplicate [release]",
+      "status": "PASS",
+      "evidence": "banner after 3s, still shown 6s after the failed send: True, draft kept: True, banner gone 4s after Wi-Fi back, server orders: 3",
+      "screenshot": "a4_after_reconnect.png"
+    },
+    {
+      "scenario": "check closed on another device → unsent items sent to a new check [release]",
+      "status": "PASS",
+      "evidence": "old check closed, new check on table 1 = 6500 piastres (expected 6500)",
+      "screenshot": "a5_new_check.png"
+    },
+    {
+      "scenario": "rotate + 6 s in background [release]",
+      "status": "PASS",
+      "evidence": "landscape floor: True, still logged in after resume: True"
+    },
+    {
+      "scenario": "GPRS network (7 KB/s): open table + send order [release]",
+      "status": "PASS",
+      "evidence": "6.1s end to end",
+      "screenshot": "a7_gprs.png"
+    },
+    {
+      "scenario": "app open: order ready → side notice (with sound) [release]",
+      "status": "PASS",
+      "evidence": "notice 'طلب #… جاهز' shown on the right",
+      "screenshot": "n1_toast.png"
+    },
+    {
+      "scenario": "print failed → red notice for the cashier [release]",
+      "status": "PASS",
+      "evidence": "notice 'الطباعة فشلت …' shown",
+      "screenshot": "n3_problem.png"
+    },
+    {
+      "scenario": "Android background service keeps the connection (lock screen) [release]",
+      "status": "PASS",
+      "evidence": "foreground service running: True, fixed notification shown: True"
+    },
+    {
+      "scenario": "app in background: system notification + our sound; tap opens Orders [release]",
+      "status": "PASS",
+      "evidence": "in tray: True, channel sound order_ready: True, tap brought the app back: True",
+      "screenshot": "n2_after_tap.png"
+    },
+    {
+      "scenario": "connect by IP + login (device id sent) [debug]",
+      "status": "PASS",
+      "evidence": "floor shown; server كافيه التيست",
+      "screenshot": "a1_floor.png"
+    },
+    {
+      "scenario": "order with required size + extras [debug]",
+      "status": "PASS",
+      "evidence": "phone 125 EGP, server 12500 piastres",
+      "screenshot": "a2_order.png"
+    },
+    {
+      "scenario": "another device adds an order → phone updates live [debug]",
+      "status": "PASS",
+      "evidence": "new total visible within 10 s, no refresh",
+      "screenshot": "a3_live.png"
+    },
+    {
+      "scenario": "Wi-Fi cut: lasting banner, draft kept, reconnect, no duplicate [debug]",
+      "status": "PASS",
+      "evidence": "banner after 3s, still shown 6s after the failed send: True, draft kept: True, banner gone 4s after Wi-Fi back, server orders: 3",
+      "screenshot": "a4_after_reconnect.png"
+    },
+    {
+      "scenario": "check closed on another device → unsent items sent to a new check [debug]",
+      "status": "PASS",
+      "evidence": "old check closed, new check on table 1 = 6500 piastres (expected 6500)",
+      "screenshot": "a5_new_check.png"
+    },
+    {
+      "scenario": "rotate + 6 s in background [debug]",
+      "status": "PASS",
+      "evidence": "landscape floor: True, still logged in after resume: True"
+    },
+    {
+      "scenario": "GPRS network (7 KB/s): open table + send order [debug]",
+      "status": "PASS",
+      "evidence": "4.9s end to end",
+      "screenshot": "a7_gprs.png"
+    },
+    {
+      "scenario": "app open: order ready → side notice (with sound) [debug]",
+      "status": "PASS",
+      "evidence": "notice 'طلب #… جاهز' shown on the right",
+      "screenshot": "n1_toast.png"
+    },
+    {
+      "scenario": "print failed → red notice for the cashier [debug]",
+      "status": "PASS",
+      "evidence": "notice 'الطباعة فشلت …' shown",
+      "screenshot": "n3_problem.png"
+    },
+    {
+      "scenario": "Android background service keeps the connection (lock screen) [debug]",
+      "status": "PASS",
+      "evidence": "foreground service running: True, fixed notification shown: True"
+    },
+    {
+      "scenario": "app in background: system notification + our sound; tap opens Orders [debug]",
+      "status": "PASS",
+      "evidence": "in tray: True, channel sound order_ready: True, tap brought the app back: True",
+      "screenshot": "n2_after_tap.png"
+    }
+  ],
+  "notTested": [
+    "real phones / tablets (the emulator only)",
+    "the actual loudness of the sound in a noisy room (the channel/sound file is verified, not heard)",
+    "Windows desktop notifications on screen (the Windows build compiles; the app was not run on this PC so as not to touch its real data)"
+  ]
+}

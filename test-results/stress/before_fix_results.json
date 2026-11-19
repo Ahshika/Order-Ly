@@ -1,0 +1,289 @@
+{
+  "generatedAt": "2026-11-19T12:49:13.288088",
+  "results": [
+    {
+      "scenario": "race.add_order_vs_close",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "closedCheckUnpaidCents": 0
+    },
+    {
+      "scenario": "race.discount_vs_close",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "totalAtClose": 10000,
+      "totalAfter": 5000,
+      "discountAfter": 5000
+    },
+    {
+      "scenario": "race.void_item_vs_close",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "totalAtClose": 10000,
+      "totalAfter": 0,
+      "paid": 10000
+    },
+    {
+      "scenario": "race.split_vs_close",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "openChecksAfter": 1
+    },
+    {
+      "scenario": "race.merge_vs_close",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "sourceStatusAfter": "void"
+    },
+    {
+      "scenario": "flood.300_orders_same_check",
+      "status": "PASS",
+      "errors": 0,
+      "ms": 3882,
+      "subtotal": 3000000,
+      "expected": 3000000,
+      "uniqueOrderNumbers": true
+    },
+    {
+      "scenario": "flood.same_table_open",
+      "status": "PASS",
+      "openChecks": 1
+    },
+    {
+      "scenario": "flood.double_payment",
+      "status": "PASS",
+      "succeeded": 1,
+      "rejected": 19,
+      "paid": 20000,
+      "drawerSales": 20000
+    },
+    {
+      "scenario": "flood.close_vs_void",
+      "status": "PASS",
+      "outcomes": [
+        "close-failed",
+        "void"
+      ],
+      "finalStatus": "void"
+    },
+    {
+      "scenario": "flood.websockets_400",
+      "status": "PASS",
+      "messagesReceived": 99813,
+      "writeMsFor100Orders": 12281,
+      "infoLatencyMs": 82,
+      "rssMB": 272
+    },
+    {
+      "scenario": "dos.slowloris_1000",
+      "status": "PASS",
+      "infoLatencyMs": 1
+    },
+    {
+      "scenario": "inventory.void_pending_qr_order",
+      "status": "FAIL",
+      "stockAfter": 1050.0,
+      "expected": 1000
+    },
+    {
+      "scenario": "inventory.void_accepted_order",
+      "status": "PASS",
+      "stockAfter": 500.0
+    },
+    {
+      "scenario": "money.max_values",
+      "status": "PASS",
+      "subtotal": 1188000000000,
+      "total": 2673000000000,
+      "expectedTotal": 2673000000000
+    },
+    {
+      "scenario": "money.absurd_numbers",
+      "status": "PASS",
+      "negativeDiscountStatus": 400,
+      "infinityAmountStatus": 400,
+      "total": 0
+    },
+    {
+      "scenario": "money.confirm_overpayment",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "overpaidCents": 4995000
+    },
+    {
+      "scenario": "authz.matrix",
+      "status": "PASS",
+      "checks": 134,
+      "leaks": []
+    },
+    {
+      "scenario": "security.sql_injection",
+      "status": "PASS",
+      "problems": []
+    },
+    {
+      "scenario": "fuzz.wrong_types",
+      "status": "FAIL",
+      "requests": 564,
+      "serverErrors": 191,
+      "examples": [
+        "POST /api/auth/login [all-keys=int] -> 500",
+        "POST /api/auth/login [all-keys=float] -> 500",
+        "POST /api/auth/login [all-keys=bool] -> 500",
+        "POST /api/auth/login [all-keys=list] -> 500",
+        "POST /api/auth/login [all-keys=map] -> 500",
+        "POST /api/auth/login [all-keys=lines-of-junk] -> 500",
+        "POST /api/auth/password [all-keys=int] -> 500",
+        "POST /api/auth/password [all-keys=float] -> 500",
+        "POST /api/auth/password [all-keys=bool] -> 500",
+        "POST /api/auth/password [all-keys=list] -> 500",
+        "POST /api/auth/password [all-keys=map] -> 500",
+        "POST /api/auth/password [all-keys=lines-of-junk] -> 500",
+        "POST /api/users [all-keys=int] -> 500",
+        "POST /api/users [all-keys=float] -> 500",
+        "POST /api/users [all-keys=bool] -> 500",
+        "POST /api/users [all-keys=list] -> 500",
+        "POST /api/users [all-keys=map] -> 500",
+        "POST /api/users [all-keys=lines-of-junk] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=int] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=float] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=bool] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=list] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=map] -> 500",
+        "PATCH /api/users/bf18fb6f-5ca6-4409-b922-ab7c7569f8f7 [all-keys=lines-of-junk] -> 500",
+        "PATCH /api/shop [all-keys=int] -> 500",
+        "PATCH /api/shop [all-keys=float] -> 500",
+        "PATCH /api/shop [all-keys=bool] -> 500",
+        "PATCH /api/shop [all-keys=list] -> 500",
+        "PATCH /api/shop [all-keys=map] -> 500",
+        "PATCH /api/shop [all-keys=lines-of-junk] -> 500",
+        "POST /api/stations [all-keys=int] -> 500",
+        "POST /api/stations [all-keys=float] -> 500",
+        "POST /api/stations [all-keys=bool] -> 500",
+        "POST /api/stations [all-keys=list] -> 500",
+        "POST /api/stations [all-keys=map] -> 500",
+        "POST /api/stations [all-keys=lines-of-junk] -> 500",
+        "POST /api/categories [all-keys=int] -> 500",
+        "POST /api/categories [all-keys=float] -> 500",
+        "POST /api/categories [all-keys=bool] -> 500",
+        "POST /api/categories [all-keys=list] -> 500",
+        "POST /api/categories [all-keys=map] -> 500",
+        "POST /api/categories [all-keys=lines-of-junk] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=int] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=float] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=bool] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=list] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=map] -> 500",
+        "PUT /api/items/57079ae5-e349-4f98-add2-a08a587ae7ca/image [all-keys=lines-of-junk] -> 500",
+        "POST /api/modifier-groups [all-keys=int] -> 500",
+        "POST /api/modifier-groups [all-keys=float] -> 500",
+        "POST /api/modifier-groups [all-keys=bool] -> 500",
+        "POST /api/modifier-groups [all-keys=list] -> 500",
+        "POST /api/modifier-groups [all-keys=map] -> 500",
+        "POST /api/modifier-groups [all-keys=lines-of-junk] -> 500",
+        "POST /api/menu/sort [all-keys=lines-of-junk] -> 500",
+        "POST /api/areas [all-keys=int] -> 500",
+        "POST /api/areas [all-keys=float] -> 500",
+        "POST /api/areas [all-keys=bool] -> 500",
+        "POST /api/areas [all-keys=list] -> 500",
+        "POST /api/areas [all-keys=map] -> 500",
+        "POST /api/areas [all-keys=lines-of-junk] -> 500",
+        "POST /api/tables [all-keys=int] -> 500",
+        "POST /api/tables [all-keys=float] -> 500",
+        "POST /api/tables [all-keys=bool] -> 500",
+        "POST /api/tables [all-keys=list] -> 500",
+        "POST /api/tables [all-keys=map] -> 500",
+        "POST /api/tables [all-keys=lines-of-junk] -> 500",
+        "POST /api/tables/bulk [all-keys=float] -> 500",
+        "POST /api/tables/bulk [all-keys=bool] -> 500",
+        "POST /api/tables/bulk [all-keys=list] -> 500",
+        "POST /api/tables/bulk [all-keys=map] -> 500",
+        "POST /api/tables/bulk [all-keys=huge-string] -> 500",
+        "POST /api/tables/bulk [all-keys=lines-of-junk] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=int] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=float] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=bool] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=list] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=map] -> 500",
+        "PATCH /api/tables/c42a0062-7d3e-4ffb-ba17-e285458f3b59 [all-keys=lines-of-junk] -> 500",
+        "POST /api/checks [all-keys=int] -> 500"
+      ],
+      "dbIntegrity": "ok"
+    },
+    {
+      "scenario": "fuzz.qr_messages",
+      "status": "PASS",
+      "messages": 500,
+      "threwInsideIngest": 169,
+      "ordersWithoutItems": 0,
+      "dbIntegrity": "ok",
+      "note": "a throw is caught by CloudSync._handle and the message is deleted"
+    },
+    {
+      "scenario": "qr.flood",
+      "status": "PASS",
+      "replayStored": 1,
+      "sameClientAccepted": 8,
+      "rotatingClientIdsPending": 200,
+      "note": "per-phone limit is keyed on a client-chosen id: rotating it bypasses the limit (design limitation, needs Firebase-side rate limit)"
+    },
+    {
+      "scenario": "dos.huge_unauth_body",
+      "status": "FAIL",
+      "httpStatus": 400,
+      "rssGrowthMB": 161,
+      "peakRssMB": 454
+    },
+    {
+      "scenario": "dos.image_bomb",
+      "status": "FAIL",
+      "fileKB": 117,
+      "decodedMegapixels": 100,
+      "ms": 1699,
+      "peakRssGrowthMB": 95,
+      "refused": false
+    },
+    {
+      "scenario": "security.bruteforce_lock",
+      "status": "PASS",
+      "lockedAfter": 5
+    },
+    {
+      "scenario": "restore.garbage_db",
+      "status": "FAIL",
+      "httpStatus": 200,
+      "note": "if staged, the server cannot start again after restart"
+    },
+    {
+      "scenario": "restore.zip_slip",
+      "status": "PASS",
+      "escapedFiles": []
+    },
+    {
+      "scenario": "resilience.corrupt_db",
+      "status": "INFO",
+      "started": false,
+      "error": "SqliteException(11): while executing, database disk image is malformed, database disk image is malformed (code 11)"
+    },
+    {
+      "scenario": "resilience.stop_under_load",
+      "status": "PASS",
+      "completedBeforeStop": 0,
+      "ordersStored": 0,
+      "halfOrders": 0,
+      "dbIntegrity": "ok"
+    },
+    {
+      "scenario": "race.double_confirm_transfer",
+      "status": "FAIL",
+      "secondHttpStatus": 200,
+      "note": "run separately on an unmodified checkout of HEAD 1e5f382 (test added after the first run)"
+    },
+    {
+      "scenario": "race.double_register_open",
+      "status": "FAIL",
+      "openShifts": 2,
+      "note": "run separately on an unmodified checkout of HEAD 1e5f382 (test added after the first run)"
+    }
+  ]
+}
