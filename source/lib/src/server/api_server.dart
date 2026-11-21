@@ -29,6 +29,7 @@ import 'passwords.dart';
 
 part 'backup_service.dart';
 part 'cloud_sync.dart';
+part 'routes_branches.dart';
 part 'routes_checks.dart';
 part 'routes_inventory.dart';
 part 'routes_license.dart';
@@ -178,6 +179,9 @@ class OrderlyServer {
 
   String get takeawayKey => _takeawayKey;
 
+  /// ملخص الفرع اللي بيتبعت للفرع الرئيسي (للاختبارات).
+  Future<Map<String, Object?>> branchSummaryForTests() => _branchSummary();
+
   /// بيمسح كل بيانات الكافيه من Firebase (للاختبارات بس).
   Future<void> cleanupCloudForTests() async => _cloud?.deleteEverything();
 
@@ -229,6 +233,7 @@ class OrderlyServer {
     _registerBackupRoutes(r);
     _registerReportRoutes(r);
     _registerLicenseRoutes(r);
+    _registerBranchRoutes(r);
 
     r.get('/api/ws', _webSocket);
     r.all('/<ignored|.*>', (Request _) => _json(404, {'error': 'المسار ده مش موجود'}));

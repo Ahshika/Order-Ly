@@ -16,6 +16,7 @@ import 'package:orderly/src/core/providers.dart';
 import 'package:orderly/src/core/session.dart';
 import 'package:orderly/src/core/shop.dart';
 import 'package:orderly/src/core/theme.dart';
+import 'package:orderly/src/features/branches/branches_screen.dart';
 import 'package:orderly/src/features/check/check_screen.dart';
 import 'package:orderly/src/features/home/home_shell.dart';
 import 'package:orderly/src/features/inventory/inventory_screen.dart';
@@ -130,6 +131,32 @@ final _kds = [
   }),
 ];
 
+Json _summary(String branch, int today, List<int> days, {bool register = true, int qr = 0, int low = 0, int? licenseDays}) => {
+      'v': 1, 'name': 'كافيه الندى', 'branch': branch, 'app': '1.2.0',
+      'today': {'n': today ~/ 9000, 't': today}, 'yesterday': {'n': 31, 't': days[5]}, 'month': {'n': 812, 't': days.fold(0, (s, d) => s + d) * 3},
+      'days': days,
+      'open': {'n': 5, 't': 61500, 'busy': 4, 'tables': 12},
+      'reg': register ? {'at': _ago(300), 'by': 'سارة', 'cash': 412000} : null,
+      'qr': qr, 'kds': 3, 'calls': 0, 'pays': qr > 0 ? 1 : 0, 'voids': 4500, 'low': low, 'devs': 4,
+      'top': [{'n': 'لاتيه', 'q': 42}, {'n': 'شاي بالنعناع', 'q': 35}, {'n': 'تشيز كيك', 'q': 18}],
+      'lic': {'s': 'active', 'd': licenseDays ?? 200},
+    };
+
+final _branchesMain = <String, dynamic>{
+  'role': 'main', 'cloud': true, 'code': 'K7QD-M2XP-9HAT', 'stale': false, 'limit': 3, 'used': 3,
+  'branches': [
+    {'uid': 'a', 'me': true, 'name': 'كافيه الندى', 'branch': 'الفرع الرئيسي', 'online': true, 'at': _ago(0),
+      'summary': _summary('الفرع الرئيسي', 742000, [510000, 620000, 580000, 700000, 690000, 810000, 742000])},
+    {'uid': 'b', 'me': false, 'name': 'كافيه الندى', 'branch': 'فرع مدينة نصر', 'online': true, 'at': _ago(1),
+      'summary': _summary('فرع مدينة نصر', 388500, [300000, 280000, 350000, 410000, 390000, 455000, 388500], qr: 2, low: 3)},
+    {'uid': 'c', 'me': false, 'name': 'كافيه الندى', 'branch': 'فرع المعادي', 'online': false, 'at': _ago(95),
+      'summary': _summary('فرع المعادي', 120000, [200000, 180000, 0, 220000, 260000, 240000, 120000], register: false, licenseDays: 5)},
+  ],
+  'requests': [
+    {'uid': 'd', 'name': 'كافيه الندى', 'branch': 'فرع الشيخ زايد', 'at': _ago(2)},
+  ],
+};
+
 Future<void> _loadFonts() async {
   Future<void> load(String family, String path) async {
     final loader = FontLoader(family)..addFont(Future.value(ByteData.sublistView(File(path).readAsBytesSync())));
@@ -141,7 +168,8 @@ Future<void> _loadFonts() async {
   await load('MaterialIcons', '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
 }
 
-Future<void> _shot(WidgetTester tester, String name, Widget home, Size size, {Brightness brightness = Brightness.light, Role role = Role.owner}) async {
+Future<void> _shot(WidgetTester tester, String name, Widget home, Size size,
+    {Brightness brightness = Brightness.light, Role role = Role.owner, Json? branches}) async {
   SharedPreferences.setMockInitialValues({});
   final config = await AppConfig.load();
   tester.view.physicalSize = size;
@@ -159,6 +187,7 @@ Future<void> _shot(WidgetTester tester, String name, Widget home, Size size, {Br
       liveProvider.overrideWith((ref) async => LiveCounts({'pendingOrders': 1, 'openCalls': 1, 'pendingPayments': 1, 'readyOrders': 1, 'registerOpen': true})),
       checkProvider.overrideWith((ref, id) async => _check),
       kdsProvider.overrideWith((ref, s) async => _kds),
+      branchesProvider.overrideWith((ref) async => branches ?? _branchesMain),
       ordersProvider.overrideWith((ref, s) async => s == 'pending' ? [_check.orders[1]] : _kds),
       pendingPaymentsProvider.overrideWith((ref) async => _check.payments),
       callsProvider.overrideWith((ref) async => [ServiceCall({'id': 'cl', 'type': 'waiter', 'tableName': '9', 'createdAt': _ago(2)})]),
@@ -211,4 +240,8 @@ void main() {
     await _shot(t, 'add_stock', Scaffold(body: Center(child: AddStockDialog(ingredient: Ingredient({'id': 'i', 'name': 'لبن', 'unit': 'ml', 'qty': 4000, 'unitCost': 3.5, 'lowStock': 1000})))), const Size(700, 520));
   });
   testWidgets('register', (t) => _shot(t, 'register_desktop', const RegisterScreen(), desktop));
+  testWidgets('branches main desktop', (t) => _shot(t, 'branches_desktop', const BranchesScreen(), const Size(1366, 1100)));
+  testWidgets('branches main phone dark', (t) => _shot(t, 'branches_phone_dark', const BranchesScreen(), const Size(400, 1600), brightness: Brightness.dark));
+  testWidgets('branches not linked', (t) => _shot(t, 'branches_none', const BranchesScreen(), phone, branches: {'role': 'none', 'cloud': true, 'rejected': false, 'removed': false}));
+  testWidgets('branches waiting', (t) => _shot(t, 'branches_pending', const BranchesScreen(), phone, branches: {'role': 'pending', 'cloud': true, 'code': 'K7QD-M2XP-9HAT'}));
 }

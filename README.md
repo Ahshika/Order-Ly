@@ -20,6 +20,7 @@
 | | Reports: real profit, peak hours, menu engineering, voids |
 | | Printable QR cards with the cafe's name and logo |
 | | Notifications on phones and PC with a sound per type (new order, table call, transfer, ready, kitchen, print problem), also with the screen locked on Android |
+| | Branches: link several cafes with a code and see each one's sales, open checks, register and top items from the main branch |
 
 | | |
 |---|---|
@@ -43,7 +44,11 @@ Customer phone ──► Firebase Hosting (menu page) ──► Firebase Realtim
 Cashier PC: Order Ly app + local server (SQLite) ◄────────┘
      ▲  Wi-Fi (works offline)
 Waiter phones • Bar / kitchen tablet • Ticket printers
+
+Other branch PC ──► Firebase (chains/{code}: summary every minute) ──► main branch "الفروع" screen
 ```
+
+Each branch is its own server with its own database. The main branch makes a link code, the other branch types it and the main branch approves. Only a short summary is shared (sales, open checks, register, top items); menus, checks and staff stay per branch.
 
 ## Project layout
 
@@ -57,7 +62,7 @@ Waiter phones • Bar / kitchen tablet • Ticket printers
 cd source
 flutter test                       # server + logic tests (temporary folders)
 flutter test test_stress           # worst-case suite: races, floods, fuzzing, attacks, broken backups (temporary folders)
-flutter test test_cloud            # live Firebase end-to-end test (cleans up after itself)
+flutter test test_cloud            # live Firebase end-to-end tests: QR ordering and branch linking (clean up after themselves)
 flutter test test_visual --update-goldens   # render UI screenshots
 powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe>   # 5-minute load test
 powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe> -Script spike.js   # sudden spike + junk requests
