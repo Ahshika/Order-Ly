@@ -181,6 +181,24 @@ Cost: none. No Firebase Cloud Messaging: it would need the paid Blaze plan, or a
 - This work folder is so deep (`.claude\worktrees\…`) that the Windows build exceeds the 260-character path limit. It builds through a temporary `subst` drive; your normal project folder doesn't have this problem.
 - After a build through `subst`, delete `.dart_tool\flutter_build` and `.dart_tool\hooks_runner` (generated caches).
 
+## Round 5: branches (2026-11-21, branch `claude/multi-branch`)
+
+**New feature.** Several cafes (each its own server PC and database) under one owner. The main branch creates a link code. Another branch types the code, which sends a join request, and the main branch approves or rejects it. Each linked branch sends a short summary to Firebase at most once a minute, and only when it changed (plus a heartbeat every 5 minutes): sales for today, yesterday, this month and the last 7 days; open checks; busy tables; the register; QR orders and transfers waiting; voids; low stock; devices online; top items; subscription state. Only the main branch can read the summaries. The owner sees them under "الفروع" in the side menu. Nothing else moves between branches: menu, checks and staff stay per branch.
+
+| What | Result |
+|---|---|
+| Local tests (`test/branches_test.dart`, no internet) | **6/6**: code format, owner-only access (supervisor, cashier, waiter and kitchen get 403, no token gets 401), bad input → 400 before anything goes online, saved states, trial = 2 branches, and the summary numbers against real checks and payments. Names are clipped so the summary stays under the 20,000-character rule. |
+| Live Firebase (`test_cloud/branches_cloud_test.dart`) | **1/1**, against the deployed rules, with two temporary cafes and an outside account. Checked: link, approve, summary arrives with the right sales, remove, re-link, and the main branch deleting the link (the branch notices by itself). Refused by the rules: an outsider reading the chain, approving itself, writing a summary, taking over the owner field, replacing or deleting another branch's request, a fake time, too-long or extra fields, a bad code format, or a chain that doesn't exist. A linked branch can't read the chain, can't change its own approval, can't write an oversized summary or another branch's summary, and can't write after it was removed. Every temporary account and record is deleted afterwards. |
+| Subscription limit | The main branch's `branches` count limits approvals, counting itself (402 above the limit). The trial now allows 2 (you chose this). |
+| Regression | `flutter test` **79/79**; worst-case **32/32**; the old live Firebase test **1/1**; screenshots **13/13** (4 new branch screens). Analyzer: only the 4 old info notes. |
+| Found and fixed along the way | `realtime.dart`: after logout, the closed connection still scheduled a reconnect timer. It was harmless (`connect()` returns at once), but it left a timer behind. It's now skipped once the connection is closed. |
+| Firebase | `firebase deploy --only database` (you approved it). Hosting and the customer menu were not touched. |
+| Secrets | gitleaks: only the public Firebase web key (it ships inside the app by design) and copies of it in build caches. |
+
+Evidence: `branches/local.txt`, `branches/firebase_live.txt`; screenshots in `source/test_visual/shots/branches_*.png`.
+
+**Not tested:** two real PCs in two places (the live test runs both servers on this laptop against the real Firebase); a branch with a wrong clock (the "online" check uses Firebase server time, but the "today" sales use the branch PC's clock); many branches at once (the rules have no count limit, and the main branch enforces the subscription number when it approves).
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.
@@ -201,3 +219,4 @@ Paid tools: NONE · Paid subscriptions: NONE · Paid APIs: NONE · Paid cloud se
 - `web/` — Playwright HTML report (`report/`), `playwright.json`, captured messages, `contract_results.json`
 - `load/ramp-monitored/` — k6 + Prometheus export + Grafana screenshot and importable dashboard
 - `android/` — `android_results.json`, screenshots of each worst case, Appium/emulator logs
+- `branches/` — round 5: local and live Firebase branch tests

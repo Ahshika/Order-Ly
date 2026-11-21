@@ -10,6 +10,7 @@ import '../../core/session.dart';
 import '../../core/shop.dart';
 import '../../core/theme.dart';
 import '../../widgets/common.dart';
+import '../branches/branches_screen.dart';
 import '../checks/checks_history_screen.dart';
 import '../customers/customers_screen.dart';
 import '../floor/floor_screen.dart';
@@ -52,6 +53,7 @@ final _destinations = <_Destination>[
   _Destination('stock', 'المخزون', Icons.inventory_2_outlined, Icons.inventory_2_rounded, () => const InventoryScreen(), roles: _cash),
   _Destination('customers', 'العملاء', Icons.loyalty_outlined, Icons.loyalty_rounded, () => const CustomersScreen(), roles: _cash),
   _Destination('reports', 'التقارير', Icons.insights_outlined, Icons.insights_rounded, () => const ReportsScreen(), roles: {Role.owner}),
+  _Destination('branches', 'الفروع', Icons.store_mall_directory_outlined, Icons.store_mall_directory_rounded, () => const BranchesScreen(), roles: {Role.owner}),
   _Destination('users', 'الموظفين', Icons.badge_outlined, Icons.badge_rounded, () => const UsersScreen(), roles: {Role.owner}),
   _Destination('settings', 'الإعدادات', Icons.settings_outlined, Icons.settings_rounded, () => const SettingsScreen()),
 ];

@@ -32,6 +32,11 @@ class CloudSync {
   DateTime _idTokenExpiry = DateTime(2000);
   String? _uid;
 
+  /// الفروع (routes_branches.dart): آخر قراية للربط، وآخر مرة الملخص اتبعت، وآخر تأكد إن الفرع لسه مربوط.
+  (DateTime, Map<String, Object?>)? _chainCache;
+  DateTime? _chainSyncedAt;
+  DateTime? _membershipCheckedAt;
+
   AppDb get db => server.db;
 
   void start() {
@@ -62,6 +67,8 @@ class CloudSync {
     }
     _dirty.addAll(['shop', 'menu', 'tables', 'checks']);
     _sent.clear();
+    _chainSyncedAt = null;
+    _membershipCheckedAt = null;
     await _run();
     await _pollInbox();
   }
@@ -105,6 +112,8 @@ class CloudSync {
     } finally {
       _busy = false;
     }
+    // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
+    if (!_stopped && _idToken != null) await _syncChain();
   }
 
   String _errorText(Object e) =>
@@ -166,7 +175,7 @@ class CloudSync {
   Future<void> _patch(Map<String, Object?> updates) async {
     if (updates.isEmpty) return;
     final res = await _http.patch(_url(''), body: jsonEncode(updates), headers: {'content-type': 'application/json'}).timeout(const Duration(seconds: 30));
-    if (res.statusCode != 200) throw Exception('RTDB ${res.statusCode}: ${res.body}');
+    if (res.statusCode != 200) throw RtdbError(res.statusCode, res.body);
   }
 
   /// بيضيف المسار للتحديث لو اتغير عن آخر مرة اتبعت.
@@ -514,6 +523,14 @@ class CloudSync {
     _busy = true;
     try {
       await _token();
+      final role = db.setting('chain_role') ?? '';
+      if (role.isNotEmpty) {
+        try {
+          await leaveChain(role, _cid);
+        } on ApiError {
+          // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
+        }
+      }
       await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc']) '$root/$_uid': null});
       await _http.post(
         Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$firebaseApiKey'),

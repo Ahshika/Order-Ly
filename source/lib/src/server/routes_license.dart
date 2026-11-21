@@ -63,7 +63,8 @@ extension _LicenseRoutes on OrderlyServer {
       'expiresAt': trialEnd.toIso8601String(),
       'daysLeft': trialEnd.difference(now).inDays,
       'devices': 3,
-      'branches': 1,
+      // فرعين عشان اللي بيجرّب يقدر يجرّب ربط الفروع
+      'branches': 2,
     };
   }
 

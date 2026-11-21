@@ -67,6 +67,8 @@ final realtimeProvider = StreamProvider<RealtimeEvent>((ref) {
         } catch (_) {}
       },
       onDone: () {
+        // الاتصال اتقفل عشان إحنا قفلناه (خروج من الحساب): مفيش داعي نرجع نتصل
+        if (disposed) return;
         online(false);
         reconnect = Timer(const Duration(seconds: 3), connect);
       },

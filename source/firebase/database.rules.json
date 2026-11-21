@@ -6,6 +6,9 @@
   //   والكافيه بس اللي يقرا ويمسح.
   // - proof/$uid/$id: صورة التحويل اللي العميل رفعها (نفس شروط inbox).
   // - trackt/$uid/$key: حساب الترابيزة، trackc/$uid/$client: طلبات كل عميل. اللي معاه الكود بس يقرا.
+  // - chains/$cid: ربط الفروع. $cid = كود الربط اللي عمله الفرع الرئيسي (owner). الرئيسي بس يقرا ويكتب الكل.
+  //   أي فرع معاه الكود يبعت طلب ربط في req/$uid بتاعه بس، والرئيسي يوافق (members/$uid).
+  //   الفرع المربوط بس يكتب ملخصه في b/$uid، ويقدر يفصل نفسه، ويقرا حالة طلبه وربطه هو بس.
   "rules": {
     ".read": false,
     ".write": false,
@@ -73,6 +76,49 @@
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",
         "$cid": { ".read": true }
+      }
+    },
+
+    "chains": {
+      "$cid": {
+        ".read": "auth != null && data.child('owner').val() === auth.uid",
+        ".write": "auth != null && data.child('owner').val() === auth.uid",
+        "owner": {
+          ".write": "auth != null && !data.exists() && newData.val() === auth.uid && $cid.matches(/^[A-HJ-NP-Z2-9]{12}$/)"
+        },
+        "req": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid && root.child('chains').child($cid).child('owner').exists() && root.child('chains').child($cid).child('owner').val() !== $uid && !root.child('chains').child($cid).child('members').child($uid).exists()",
+            ".validate": "newData.hasChildren(['name', 'branch', 'at'])",
+            "name": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "branch": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 80" },
+            "at": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "members": {
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid && !newData.exists()",
+            ".validate": "newData.hasChildren(['at'])",
+            "at": { ".validate": "newData.isNumber()" },
+            "name": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "branch": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "main": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "$other": { ".validate": false }
+          }
+        },
+        "b": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('chains').child($cid).child('members').child($uid).exists()",
+            ".validate": "newData.hasChildren(['j', 'at'])",
+            "j": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+            "at": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "$other": { ".validate": false }
       }
     }
   }
