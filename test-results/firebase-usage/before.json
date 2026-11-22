@@ -1,0 +1,28 @@
+{
+  "label": "before",
+  "at": "2026-11-23T00:38:48.041316",
+  "cashier": {
+    "setupBytes": 139809,
+    "setupRequests": 4,
+    "ordersBytes": 78463,
+    "ordersRequests": 26,
+    "bytesPerOrder": 3923,
+    "echoBytes": 78459
+  },
+  "nodes": {
+    "pub": 62253,
+    "pubHasLogo": true,
+    "logo": 0,
+    "menu": 2051,
+    "images": 12,
+    "avgImage": 7139,
+    "avgTrackc": 104,
+    "avgTrackt": 300
+  },
+  "customer": {
+    "newVisitBytes": 903024,
+    "returningVisitBytes": 686803,
+    "avgVisitBytes": 794913
+  },
+  "trackcDocs": 20
+}

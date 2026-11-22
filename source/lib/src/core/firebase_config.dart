@@ -8,3 +8,20 @@ const rtdbUrl = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabas
 
 /// موقع منيو العملاء (اللي الـ QR بيفتحه) ودليل الاستخدام.
 const menuSiteUrl = 'https://orderly-yvzug.web.app';
+
+/// العناوين اللي السيرفر بيكلمها على Firebase. الاختبارات بتحط Firebase وهمي على الجهاز.
+class FirebaseEndpoints {
+  const FirebaseEndpoints({
+    required this.apiKey,
+    required this.rtdb,
+    this.auth = 'https://identitytoolkit.googleapis.com',
+    this.token = 'https://securetoken.googleapis.com',
+  });
+
+  final String apiKey;
+  final String rtdb;
+  final String auth;
+  final String token;
+
+  static const live = FirebaseEndpoints(apiKey: firebaseApiKey, rtdb: rtdbUrl);
+}

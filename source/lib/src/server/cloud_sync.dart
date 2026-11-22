@@ -13,7 +13,9 @@ class CloudSync {
   CloudSync(this.server);
 
   final OrderlyServer server;
-  final _http = http.Client();
+
+  /// الاتصال بيفضل مفتوح دقيقتين (المزامنة كل دقيقة): كل اتصال جديد بيكلّف حوالي 3.5 كيلو تشفير على حساب Firebase.
+  final http.Client _http = IOClient(HttpClient()..idleTimeout = const Duration(minutes: 2));
   http.Client? _streamClient;
   Timer? _pushTimer;
   Timer? _pollTimer;
@@ -38,9 +40,10 @@ class CloudSync {
   DateTime? _membershipCheckedAt;
 
   AppDb get db => server.db;
+  FirebaseEndpoints get _fb => server.firebase;
 
   void start() {
-    if (firebaseApiKey.isEmpty) return;
+    if (_fb.apiKey.isEmpty) return;
     // كل دقيقة: العروض اللي بتبدأ وتخلص بالساعة، وإن الكافيه لسه شغال
     _pushTimer = Timer.periodic(const Duration(minutes: 1), (_) => kick('tick'));
     _pollTimer = Timer.periodic(const Duration(seconds: 20), (_) {
@@ -126,7 +129,7 @@ class CloudSync {
     final refresh = db.setting('cloud_refresh_token');
     if (refresh != null && refresh.isNotEmpty) {
       final res = await _http.post(
-        Uri.parse('https://securetoken.googleapis.com/v1/token?key=$firebaseApiKey'),
+        Uri.parse('${_fb.token}/v1/token?key=${_fb.apiKey}'),
         body: {'grant_type': 'refresh_token', 'refresh_token': refresh},
       ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
@@ -146,7 +149,7 @@ class CloudSync {
     }
     final res = await _http
         .post(
-          Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:$endpoint?key=$firebaseApiKey'),
+          Uri.parse('${_fb.auth}/v1/accounts:$endpoint?key=${_fb.apiKey}'),
           headers: {'content-type': 'application/json'},
           body: jsonEncode({'email': email, 'password': password, 'returnSecureToken': true}),
         )
@@ -170,12 +173,22 @@ class CloudSync {
   }
 
   Uri _url(String path, [Map<String, String>? query]) =>
-      Uri.parse('$rtdbUrl/$path.json').replace(queryParameters: {'auth': _idToken!, ...?query});
+      Uri.parse('${_fb.rtdb}/$path.json').replace(queryParameters: {'auth': _idToken!, ...?query});
+
+  /// كتابة من غير ما Firebase يرجّع اللي اتكتب (print=silent): الرد 204 فاضي بدل نسخة كاملة بتتحسب تنزيل.
+  Uri _writeUrl(String path) => _url(path, const {'print': 'silent'});
+
+  static bool _ok(int status) => status == 200 || status == 204;
 
   Future<void> _patch(Map<String, Object?> updates) async {
     if (updates.isEmpty) return;
-    final res = await _http.patch(_url(''), body: jsonEncode(updates), headers: {'content-type': 'application/json'}).timeout(const Duration(seconds: 30));
-    if (res.statusCode != 200) throw RtdbError(res.statusCode, res.body);
+    final res = await _http.patch(_writeUrl(''), body: jsonEncode(updates), headers: {'content-type': 'application/json'}).timeout(const Duration(seconds: 30));
+    if (!_ok(res.statusCode)) throw RtdbError(res.statusCode, res.body);
+  }
+
+  Future<void> _delete(String path) async {
+    final res = await _http.delete(_writeUrl(path)).timeout(const Duration(seconds: 20));
+    if (!_ok(res.statusCode)) throw RtdbError(res.statusCode, res.body);
   }
 
   /// بيضيف المسار للتحديث لو اتغير عن آخر مرة اتبعت.
@@ -203,7 +216,8 @@ class CloudSync {
       'branch': shop['branchName'],
       'phone': shop['phone'],
       'address': shop['address'],
-      'logo': _smallLogo(),
+      // اللوجو لوحده في cafes/{uid}/logo (pub بيتقري كل دقيقة)، وهنا رقم نسخته بس عشان الصفحة تعرف إنه اتغير
+      'lv': _smallLogo() == null ? null : sha256Hex(_smallLogo()!).substring(0, 12),
       'welcome': s['qrWelcome'],
       'wifi': (s['wifiName'] as String? ?? '').isEmpty ? null : {'n': s['wifiName'], 'p': s['wifiPassword']},
       'langs': s['menuLanguages'],
@@ -227,6 +241,7 @@ class CloudSync {
       'off': off.isEmpty ? null : off,
     };
     _put(updates, 'cafes/$_uid/pub', pub);
+    _put(updates, 'cafes/$_uid/logo', _smallLogo());
     // نبضة كل 5 دقايق: الصفحة بتعرف منها إن كمبيوتر الكافيه شغال
     final last = DateTime.tryParse(_sent['seen-at'] ?? '');
     if (last == null || DateTime.now().difference(last).inMinutes >= 5) {
@@ -234,6 +249,9 @@ class CloudSync {
       updates['cafes/$_uid/seen'] = {'.sv': 'timestamp'};
     }
   }
+
+  /// أطول ضلع لصورة الصنف على النت: الكارت 92px والموبايلات 2x، يعني 184px كفاية، والصورة الكبيرة في شاشة الصنف مقبولة.
+  static const _thumbSide = 240;
 
   String? _logoCache;
   String? _smallLogo() => _logoCache == null || _logoCache!.isEmpty ? null : _logoCache;
@@ -286,14 +304,19 @@ class CloudSync {
       updates['cafes/$_uid/mv'] = version;
     }
 
-    // صور الأصناف: نسخة صغيرة لكل صورة، بتتبعت مرة واحدة بس
+    // صور الأصناف: نسخة صغيرة لكل صورة، بتتبعت مرة واحدة بس.
+    // لو مقاس النسخة اتغير (نسخة أقدم من البرنامج كانت بتبعت أكبر) بتتبعت كلها تاني مرة واحدة.
     final wanted = {for (final i in menu['items'] as List) if ((i as Map)['img'] != null) i['img'] as String};
+    if (db.setting('cloud_img_size') != '$_thumbSide') {
+      db.setSetting('cloud_imgs', '[]');
+      db.setSetting('cloud_img_size', '$_thumbSide');
+    }
     final sentImgs = ((jsonDecode(db.setting('cloud_imgs') ?? '[]') as List).cast<String>()).toSet();
     for (final id in wanted.difference(sentImgs).take(15)) {
       final f = File(p.join(server._filesDir.path, id));
       if (!f.existsSync()) continue;
       final bytes = f.readAsBytesSync();
-      final thumb = await shrinkInBackground(bytes, 360, 62);
+      final thumb = await shrinkInBackground(bytes, _thumbSide, 60);
       if (thumb == null) continue;
       updates['img/$_uid/$id'] = base64.encode(thumb);
       sentImgs.add(id);
@@ -349,6 +372,14 @@ class CloudSync {
       "SELECT DISTINCT client_id FROM orders WHERE client_id IS NOT NULL AND created_at > ?",
       [since],
     );
+    // العميل اللي آخر طلب ليه عدّى عليه 3 ساعات: متابعته بتتمسح من النت (كانت بتفضل للأبد)
+    final current = {for (final c in clients) c['client_id'] as String};
+    final previous = ((jsonDecode(db.setting('cloud_track_clients') ?? '[]') as List).cast<String>()).toSet();
+    for (final gone in previous.difference(current)) {
+      updates['trackc/$_uid/$gone'] = null;
+      _sent.remove('trackc/$_uid/$gone');
+    }
+    db.setSetting('cloud_track_clients', jsonEncode(current.toList()));
     for (final c in clients) {
       final clientId = c['client_id'] as String;
       final orders = db.select('SELECT * FROM orders WHERE client_id = ? AND created_at > ? ORDER BY created_at', [clientId, since]);
@@ -368,7 +399,16 @@ class CloudSync {
         };
       }
       final pays = db.select("SELECT p.cloud_id, p.status, p.reject_reason, p.amount_cents FROM payments p WHERE p.cloud_id IS NOT NULL AND p.created_at > ? AND p.payer = ?", [since, clientId]);
+      // حساب ترابيزة العميل جوه متابعته هو: الصفحة بتفتح اتصال واحد بس بدل اتنين (الكتابة ببلاش، والتنزيل واحد)
+      final table = db.selectOne(
+        "SELECT c.*, t.qr_key FROM orders o JOIN checks c ON c.id = o.check_id JOIN tables t ON t.id = c.table_id "
+        "WHERE o.client_id = ? AND o.created_at > ? AND c.type = 'dine_in' ORDER BY o.created_at DESC LIMIT 1",
+        [clientId, since],
+      );
       _put(updates, 'trackc/$_uid/$clientId', {
+        // v2: فيه tb، والصفحة مش محتاجة تسمع على trackt
+        'v': 2,
+        'tb': table == null ? null : {'k': table['qr_key'], ..._billDoc(table)},
         'orders': doc.isEmpty ? null : doc,
         'pays': pays.isEmpty ? null : {for (final p in pays) p['cloud_id'] as String: {'s': p['status'], 'r': p['reject_reason'], 'a': p['amount_cents']}},
       });
@@ -491,9 +531,9 @@ class CloudSync {
         } catch (e) {
           stderr.writeln('cloud message $cloudId: $e');
         }
-        if (msg['p'] == true) await _http.delete(_url('proof/$_uid/$cloudId')).timeout(const Duration(seconds: 20));
+        if (msg['p'] == true) await _delete('proof/$_uid/$cloudId');
       }
-      await _http.delete(_url('inbox/$_uid/$cloudId')).timeout(const Duration(seconds: 20));
+      await _delete('inbox/$_uid/$cloudId');
       kick('orders');
     } catch (e) {
       db.setSetting('cloud_last_error', _errorText(e));
@@ -533,7 +573,7 @@ class CloudSync {
       }
       await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc']) '$root/$_uid': null});
       await _http.post(
-        Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$firebaseApiKey'),
+        Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},
         body: jsonEncode({'idToken': _idToken}),
       );

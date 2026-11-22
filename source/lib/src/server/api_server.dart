@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:image/image.dart' as img;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path/path.dart' as p;
@@ -84,13 +85,14 @@ class AuthUser {
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
 class OrderlyServer {
-  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true});
+  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase = FirebaseEndpoints.live});
 
   final String dataDir;
   final int requestedPort;
 
   /// المزامنة مع منيو العملاء على Firebase (بتتقفل في الاختبارات).
   final bool cloudSync;
+  final FirebaseEndpoints firebase;
   CloudSync? _cloud;
   Timer? _jobsTimer;
   Timer? _firstJobTimer;

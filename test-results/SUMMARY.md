@@ -199,6 +199,48 @@ Evidence: `branches/local.txt`, `branches/firebase_live.txt`; screenshots in `so
 
 **Not tested:** two real PCs in two places (the live test runs both servers on this laptop against the real Firebase); a branch with a wrong clock (the "online" check uses Firebase server time, but the "today" sales use the branch PC's clock); many branches at once (the rules have no count limit, and the main branch enforces the subscription number when it approves).
 
+## Round 6: less Firebase usage (phase 1, 2026-11-23, not committed)
+
+**What changed:**
+
+- **Logo in its own node.** It moved out of `cafes/{uid}/pub` into `cafes/{uid}/logo`. `pub` now carries only its version (`lv`). The menu page downloads the logo once and keeps it on the phone.
+- **Silent writes.** Every cashier write uses `print=silent`, so Firebase replies with an empty 204 instead of sending the data back.
+- **Connection kept open.** The cashier's HTTPS connection stays open for 2 minutes, so it no longer pays a new TLS handshake on every sync.
+- **Smaller item photos.** They are now 240 px instead of 360 px. If an older version had uploaded them bigger, they are uploaded again once.
+- **Old tracking deleted.** A customer whose last order is more than 3 hours old gets their tracking (`trackc`) deleted. Before, it stayed forever.
+- **One live connection per phone.** Tracking v2 carries the table bill (`tb`), so a phone listens on a single stream. `trackt` is still written, for phones that have not ordered yet and for older pages.
+- **Connections close when hidden.** The menu page closes its live connections when the screen is locked or hidden, and reopens them when the customer comes back.
+- **Smaller transfer screenshots.** Max 1000 px and about 300 KB, instead of 1280 px and 700 KB.
+- **Rules.** `cafes/$uid/logo` is now public read.
+
+**How it was measured:** a new fake Firebase (`source/test/support/fake_firebase.dart`) counts every byte sent back to the caller. That is what Firebase bills as download.
+
+| Measured (`test/cloud_usage_test.dart`: 12 item photos, a logo, 20 QR orders) | Before | After |
+|---|---|---|
+| `pub` (read every minute by every open menu page) | 62,253 B (logo inside) | **355 B** |
+| Data Firebase sent back to the cashier for 20 orders | 78,463 B | **4 B** |
+| Data sent back during the first menu upload | 139,809 B | **8 B** |
+| Average item photo | 7,139 B | 4,888 B (this test's photos are simple; real photos are bigger and shrink by about the same ratio) |
+| New customer, 10 minutes on screen, 30 photos | 903,024 B | **216,751 B** |
+| Returning customer (photos and menu already on the phone) | 686,803 B | **6,150 B** |
+
+**Results:**
+
+| Test | Result |
+|---|---|
+| `flutter test test/` | **85/85** (79 old + 6 new), exit 0 |
+| New `test/cloud_sync_test.dart` | **5/5**: every write is silent and nothing comes back; the logo node and `lv` (and both are removed when the logo is deleted); photos at 240 px and re-sent after an upgrade; tracking v2 has the table bill, and tracking older than 3 h is deleted while active customers stay; takeaway has no table bill |
+| New `test/cloud_usage_test.dart` | 1/1 (writes the numbers above) |
+| Analyzer | only the 3 old info notes |
+| Playwright menu tests (14 old + 7 new, × Chromium/Pixel 7, WebKit/iPhone 14, Firefox) | **63/63**, 0 flaky, and the real-server contract test passed too. First run was BLOCKED (`node_modules` missing); restored with `npm ci` (you approved; `@playwright/test` 1.64.0 from the lockfile, no browser download). Before that `npx` had pulled a `playwright` package into the npm cache by itself; it was not used. |
+| Measured in the browser | 10 minutes on screen: `pub` downloaded 12 times = **5,964 B** in total, logo **once** (60,013 B), nothing again after a reload. A transfer screenshot (1170×2532 receipt) uploads at **110–126 KB**. A 46 MB random-noise photo (worst case) uploads at 164–263 KB (before: up to 700 KB). While the screen is off: **0 requests** for 7 seconds, and the live connection and `pub` come back when the customer returns. |
+| `test_cloud/` (real Firebase) | NOT RUN: it writes to the real project |
+| Deploy | NOT DONE: the rules and `menu.html` are not deployed yet |
+
+**Order of release:** the new `menu.html` and rules must be deployed **before** any cashier PC gets the new app. The new page still reads the logo from `pub` (older cashiers) and still listens on `trackt` when tracking has no `v: 2`. An old page with a new cashier would show no logo.
+
+Evidence: `phase1/flutter-test.log`, `phase1/web-run.log`, `firebase-usage/before.json`, `firebase-usage/after.json`.
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.
