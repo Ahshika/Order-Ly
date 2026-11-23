@@ -1,3 +1,5 @@
+import 'package:barcode_widget/barcode_widget.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +12,6 @@ import '../../core/format.dart';
 import '../../core/session.dart';
 import '../../core/shop.dart';
 import '../../core/theme.dart';
-import '../../server/api_server.dart' show serverPort;
 import '../../server/discovery.dart';
 import '../../widgets/common.dart';
 import '../../core/providers.dart';
@@ -239,6 +240,28 @@ class _ServerAddresses extends ConsumerWidget {
                 ],
               ),
             ),
+          if (ips.isNotEmpty && !kIsWeb) ...[
+            const Divider(height: 24),
+            Text('الموظفين اللي معاهم أيفون', style: text.titleSmall?.bold),
+            const SizedBox(height: 4),
+            Text(
+              'يفتحوا الكاميرا ويصوّروا الكود ده (لازم يبقوا على واي فاي الكافيه)، وبعدين من Safari: '
+              'زرار المشاركة ← "إضافة إلى الشاشة الرئيسية". هيفتح زي الأبلكيشن من غير ما يتسطب حاجة.',
+              style: text.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.all(10),
+                child: BarcodeWidget(barcode: Barcode.qrCode(), data: 'http://${ips.first}:$serverPort', width: 150, height: 150),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Center(child: SelectableText('http://${ips.first}:$serverPort', textDirection: TextDirection.ltr)),
+            const SizedBox(height: 4),
+            Text('ثبّت عنوان الكمبيوتر ده في الراوتر (IP ثابت)، عشان الكود يفضل شغال.', style: text.bodySmall),
+          ],
         ],
       ),
     );

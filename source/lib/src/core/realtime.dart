@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -43,10 +45,9 @@ final realtimeProvider = StreamProvider<RealtimeEvent>((ref) {
     if (disposed) return;
     // ping كل 5 ثواني: لو الواي فاي قطع من غير ما الاتصال يتقفل رسمي، بنعرف في ثواني مش دقايق
     final uri = api.webSocketUri();
-    channel = IOWebSocketChannel.connect(
-      serverTime == null ? uri : uri.replace(queryParameters: {...uri.queryParameters, 'since': serverTime}),
-      pingInterval: const Duration(seconds: 5),
-    );
+    final target = serverTime == null ? uri : uri.replace(queryParameters: {...uri.queryParameters, 'since': serverTime});
+    // المتصفح (نسخة الويب) مابيدعمش ping من البرنامج: السيرفر بيقفل الاتصال الميت، وبنرجع نتصل لوحدنا
+    channel = kIsWeb ? WebSocketChannel.connect(target) : IOWebSocketChannel.connect(target, pingInterval: const Duration(seconds: 5));
     // أول ما الاتصال يرجع بعد ما قطع (السيرفر رجع، أو الواي فاي رجع): كل الشاشات تتحدّث
     channel!.ready.then((_) {
       online(true);

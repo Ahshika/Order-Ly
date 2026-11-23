@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -45,6 +47,11 @@ Future<void> printCheckHere(BuildContext context, WidgetRef ref, String checkId)
 
 /// اختيار طابعة لمحطة على الجهاز ده.
 Future<void> pickStationPrinter(BuildContext context, WidgetRef ref, String stationId, String label) async {
+  // المتصفح مايقدرش يطبع لوحده على طابعة من غير ما يسأل، فنسخة الويب مابتبقاش "جهاز طباعة"
+  if (kIsWeb) {
+    showMessage(context, 'الطباعة على الطابعات بتتم من الكمبيوتر أو موبايل أندرويد. اختار الطابعة من هناك، والطلبات اللي بتتعمل من هنا هتتطبع عليها.', error: true);
+    return;
+  }
   final printer = await Printing.pickPrinter(context: context, title: 'اختار طابعة $label');
   if (printer == null) return;
   await ref.read(appConfigProvider).setPrintStation(stationId, printer.url, printer.name);

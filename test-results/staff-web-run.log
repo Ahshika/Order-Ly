@@ -1,0 +1,10 @@
+
+Running 4 tests using 1 worker
+
+  ok 1 [webkit-iphone] › staff\staff.spec.js:33:1 › opens from the cashier PC with no internet, waiter logs in and sees the floor (4.2s)
+  ok 2 [webkit-iphone] › staff\staff.spec.js:61:1 › home-screen tags for the iPhone are in place (1.5s)
+  ok 3 [chromium-android] › staff\staff.spec.js:33:1 › opens from the cashier PC with no internet, waiter logs in and sees the floor (4.2s)
+  ok 4 [chromium-android] › staff\staff.spec.js:61:1 › home-screen tags for the iPhone are in place (837ms)
+
+  4 passed (11.9s)
+playwright exit=0  server exit=0

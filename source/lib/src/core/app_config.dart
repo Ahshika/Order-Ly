@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'dart:convert';
 import 'dart:io';
 
@@ -51,6 +52,7 @@ class AppConfig {
   String get deviceId => _prefs.getString(_kDeviceId)!;
 
   String get deviceName {
+    if (kIsWeb) return defaultTargetPlatform == TargetPlatform.iOS ? 'iPhone / iPad (ويب)' : 'متصفح (ويب)';
     final os = Platform.isWindows ? 'Windows' : Platform.isAndroid ? 'Android' : Platform.operatingSystem;
     return '$os - ${Platform.localHostname}';
   }
@@ -59,7 +61,7 @@ class AppConfig {
   String get themeMode => _prefs.getString(_kThemeMode) ?? 'system';
   Future<void> setThemeMode(String value) => _prefs.setString(_kThemeMode, value);
 
-  static bool get canHostServer => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  static bool get canHostServer => !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 }
 
 extension DeviceSettings on AppConfig {

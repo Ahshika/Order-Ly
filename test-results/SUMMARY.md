@@ -293,6 +293,47 @@ Evidence: `move/flutter-test.log`, `move/web-run.log`, `move/cloud-live.log`, `w
 
 Evidence: `phase3/flutter-test.log`, `phase3/stress.log`, `phase3/cloud-live.log`, `phase3/visual.log`.
 
+## Round 9: phase 4, staff web app for iPhone (2026-11-23)
+
+**What changed:**
+
+- **The same Flutter app now builds for the web** (`flutter build web --release --no-web-resources-cdn`). Everything is bundled, including CanvasKit, so nothing loads from the internet.
+- **The cashier PC serves it** on its own port (`lib/src/server/web_app.dart`):
+  - no path traversal;
+  - correct types (`application/wasm`);
+  - ETag/304, `no-cache`, nosniff;
+  - pages without an extension fall back to `index.html`;
+  - unknown `/api/...` paths are still JSON 404;
+  - a clear Arabic message when the web folder is missing.
+- **App code is web-safe without changing Android/Windows:**
+  - Every `Platform.*` call has a `kIsWeb` guard in front of it.
+  - The embedded server is a conditional import (`server_launcher.dart`): sqlite3/ffi can't compile for the web.
+  - `serverPort` moved to `app_info.dart`.
+  - On the web, the session's server is the page's own origin.
+  - The browser WebSocket is used on the web.
+  - On the web, the app does not try to be a print station.
+  - The logs screen and the barcode camera say they are not available on the web.
+- **iPhone home-screen:** Arabic page, the app icon, `apple-mobile-web-app-capable`, manifest. `?a11y=1` turns on semantics, for VoiceOver users and for the tests.
+- **Server settings** show a QR code and the steps for staff with an iPhone.
+- `tool/build_release.ps1` puts the web build in `web/` next to the exe, so the installer ships it.
+
+| Test | Result |
+|---|---|
+| `test/web_app_test.dart` | **4/4**: page, types, 304, deep links; **no file outside the web folder** (`..`, `%2e%2e`, `%2f`, `%5c`, drive letters, and a raw socket request); API unchanged; missing web folder |
+| `test_web/staff` (Playwright, real server, **internet blocked**) | **4/4** on WebKit/iPhone 14 and Chromium/Pixel 7: the login screen in about 1.2 s / 1.5 s, the waiter logs in, and the floor shows the 4 tables from the server. **0 requests left the cafe PC.** No page errors. The server recorded the logins as "متصفح (ويب)". The home-screen tags, manifest and icon are served. |
+| `flutter test test/` | **107/107** |
+| `test_stress` | **32/32** |
+| `test_visual` | 10/13: the same 3 time-dependent screenshots as round 8 |
+| Builds | `flutter build windows --release` OK; `flutter build apk --release` OK (91.2 MB); `flutter build web` OK (45 MB on disk; a phone downloads only one renderer: about 5.5 MB JS + 7 MB wasm, once, over the cafe Wi-Fi) |
+
+**Not tested:**
+
+- **A real iPhone.** WebKit on Windows is close but not the same, especially Arabic typing with the iOS keyboard and older iPhones. Please test on a real phone.
+- The installed Windows app finding `web/` next to the exe (the folder lookup is covered with an explicit folder in the tests).
+- Font fallback for a character outside Cairo (for example an emoji) would try Google Fonts and, with no internet, show a box.
+
+Evidence: `phase4/`, `staff-web/` (report, screenshots of the floor on both engines), `staff-web-run.log`, `web-build.log`.
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

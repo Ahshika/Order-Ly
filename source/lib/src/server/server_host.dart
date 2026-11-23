@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import '../core/diagnostics.dart';
+import '../core/app_info.dart';
 import 'api_server.dart';
 
 /// بيشغّل سيرفر الكافيه في Isolate منفصل عشان الشاشة ما تهنجش أثناء شغل قاعدة البيانات.

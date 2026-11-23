@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -55,7 +56,8 @@ class NotificationCenter {
 
   /// مرة واحدة أول ما البرنامج يفتح. لو المكتبة مش شغالة على الجهاز ده (أو فشلت) البرنامج بيكمل عادي بالرسايل جوه بس.
   static Future<void> init() async {
-    if (!(Platform.isAndroid || Platform.isWindows)) return;
+    // الويب: مفيش إشعارات نظام (الأيفون بيوقف الصفحة في الخلفية)، بس تنبيه وصوت والصفحة مفتوحة
+    if (kIsWeb || !(Platform.isAndroid || Platform.isWindows)) return;
     try {
       await _plugin.initialize(
         settings: const InitializationSettings(
@@ -91,7 +93,7 @@ class NotificationCenter {
   /// أول مرة: نطلب إذن الإشعارات (أندرويد 13+ بيسأل المستخدم).
   Future<void> askPermissionOnce() async {
     final config = _ref.read(appConfigProvider);
-    if (!Platform.isAndroid || config.askedNotifyPermission) return;
+    if (kIsWeb || !Platform.isAndroid || config.askedNotifyPermission) return;
     await config.setAskedNotifyPermission();
     try {
       await _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
@@ -164,7 +166,7 @@ class NotificationCenter {
         DiagLog.app?.write('NOTIFY', 'الإشعار ماطلعش: $e');
       }
     }
-    if (Platform.isWindows && config.alertSound) await playSound(kind);
+    if (!kIsWeb && Platform.isWindows && config.alertSound) await playSound(kind);
   }
 
   Future<void> playSound(String kind) async {
@@ -193,7 +195,7 @@ class BackgroundConnection {
   static bool _configured = false;
 
   static Future<void> update({required bool loggedIn, required bool wanted}) async {
-    if (!Platform.isAndroid) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       final running = await FlutterForegroundTask.isRunningService;
       if (!(loggedIn && wanted)) {

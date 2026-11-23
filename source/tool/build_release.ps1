@@ -22,6 +22,13 @@ foreach ($dll in 'msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll') {
   Copy-Item (Join-Path $env:WINDIR "System32\$dll") $release -Force
 }
 
+# نسخة الويب للموظفين (الأيفون): السيرفر بيقدّمها من فولدر web جنب البرنامج. كل حاجة جواها (من غير نت).
+flutter build web --release --no-web-resources-cdn
+if ($LASTEXITCODE -ne 0) { throw 'Web build failed' }
+$webOut = Join-Path $release 'web'
+if (Test-Path $webOut) { Remove-Item $webOut -Recurse -Force }
+Copy-Item (Join-Path $root 'build\web') $webOut -Recurse
+
 $iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $iscc) { throw 'Inno Setup مش متسطب' }
 & $iscc "/DAppVersion=$version" "/DOutputDir=$builds" (Join-Path $root 'installer\orderly.iss')

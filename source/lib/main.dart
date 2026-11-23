@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show SemanticsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,6 +19,8 @@ Future<void> main() async {
   final config = await AppConfig.load();
   await _startDiagnostics();
   await NotificationCenter.init();
+  // نسخة الويب: ?a11y=1 في العنوان بيشغّل قارئ الشاشة من الأول (للموظف اللي بيستخدم VoiceOver، والاختبارات)
+  if (kIsWeb && Uri.base.queryParameters['a11y'] == '1') SemanticsBinding.instance.ensureSemantics();
   runApp(ProviderScope(
     // الأخطاء بنعرضها للمستخدم بنفسنا، فمش عايزين Riverpod يعيد المحاولة لوحده
     retry: (_, _) => null,
@@ -27,6 +31,8 @@ Future<void> main() async {
 
 /// سجل المشاكل ومراقب التعليق (لو حاجة فيهم فشلت، البرنامج بيكمل عادي).
 Future<void> _startDiagnostics() async {
+  // المتصفح مالوش فولدر للسجل ولا Isolate للمراقب: الأخطاء بتظهر في الـ console بتاعه
+  if (kIsWeb) return;
   try {
     final dir = await getApplicationSupportDirectory();
     final log = DiagLog.app = DiagLog.openIn(dir.path, 'app');

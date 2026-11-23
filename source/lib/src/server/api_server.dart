@@ -41,8 +41,8 @@ part 'routes_payments.dart';
 part 'routes_reports.dart';
 part 'routes_shop.dart';
 part 'routes_tables.dart';
+part 'web_app.dart';
 
-const serverPort = 8753;
 const roles = {'owner', 'supervisor', 'cashier', 'waiter', 'kitchen'};
 
 /// اللي بيقدروا يشتغلوا على الحسابات والفلوس
@@ -87,7 +87,8 @@ class AuthUser {
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
 class OrderlyServer {
-  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase});
+  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase, String? webDir})
+      : webDir = webDir ?? _WebApp._findWebDir();
 
   final String dataDir;
   final int requestedPort;
@@ -97,6 +98,9 @@ class OrderlyServer {
 
   /// للاختبارات (Firebase وهمي). null = المشروع اللي في كود التفعيل، أو الأساسي.
   final FirebaseEndpoints? firebase;
+
+  /// فولدر نسخة الويب للموظفين (web_app.dart)، أو null لو مش موجودة.
+  final String? webDir;
 
   /// مشروع Firebase اللي المحل ده بيستخدمه: من كود التفعيل لو فيه، وإلا الأساسي.
   Future<FirebaseEndpoints> _resolveFirebase() async {
@@ -265,7 +269,8 @@ class OrderlyServer {
     _registerBranchRoutes(r);
 
     r.get('/api/ws', _webSocket);
-    r.all('/<ignored|.*>', (Request _) => _json(404, {'error': 'المسار ده مش موجود'}));
+    // أي مسار تاني: نسخة الويب للموظفين (الأيفون)، و/api/... اللي مش موجود 404
+    r.all('/<ignored|.*>', (Request req) => req.url.path.startsWith('api/') ? _json(404, {'error': 'المسار ده مش موجود'}) : _webApp(req));
     return r;
   }
 

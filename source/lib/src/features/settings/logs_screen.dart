@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -30,6 +31,13 @@ class _LogsScreenState extends State<LogsScreen> {
   }
 
   Future<void> _load() async {
+    if (kIsWeb) {
+      setState(() {
+        _text = 'سجل المشاكل بيتحفظ على الأجهزة اللي عليها البرنامج نفسه (الكمبيوتر وأندرويد)، مش على نسخة الويب.';
+        _loading = false;
+      });
+      return;
+    }
     final dir = Directory(DiagLog.logsDir((await getApplicationSupportDirectory()).path));
     final files = dir.existsSync() ? (dir.listSync().whereType<File>().where((f) => f.path.contains('.log')).toList()..sort((a, b) => a.path.compareTo(b.path))) : <File>[];
     final buf = StringBuffer();

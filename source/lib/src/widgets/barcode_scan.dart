@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// مسح باركود أو QR بكاميرا الموبايل. على الكمبيوتر بيستخدم سكانر USB (بيكتب في خانة البحث).
-bool get cameraScanSupported => Platform.isAndroid || Platform.isIOS;
+/// على الويب الكاميرا محتاجة https، ونسخة الموظفين بتشتغل http جوه الكافيه: الكود بيتكتب بالإيد.
+bool get cameraScanSupported => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
 Future<String?> scanBarcode(BuildContext context) =>
     Navigator.push<String>(context, MaterialPageRoute(fullscreenDialog: true, builder: (_) => const _ScanPage()));
