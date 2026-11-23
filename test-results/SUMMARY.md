@@ -250,9 +250,11 @@ Evidence: `phase1/flutter-test.log`, `phase1/web-run.log`, `firebase-usage/befor
 | New main project `orderly-cafe-28129` (account ahmedhassanshika655, Spark, no card) | Realtime Database in europe-west1, web app registered, rules and menu page deployed. Checked from outside: `pub`, `menu`, `logo` and `trackt` 200; `inbox`, `cafes` and `chains` 401; the live page points at the new database. |
 | Code moved to the new project | `firebase_config.dart`, `menu.html`, `.firebaserc` (+ `firebase login:use` 655 for that folder), and the test constants. `flutter test` **89/89**, Playwright **66/66** on 3 browsers, contract test OK |
 | Existing installs | An install that was on the old project can't sign in on the new one, so it makes a new account by itself (phase 2) and re-sends everything. |
-| **Open** | Email/Password sign-in on `orderly-cafe-28129` is not enabled yet (`OPERATION_NOT_ALLOWED`). Until it is, no cashier can connect to the new project. The real end-to-end test (`test_cloud`) has not been run on it. An empty Google Cloud project `orderly-cafes` (no Firebase, no billing) was also left from the first try. |
+| Email/Password on the new project | Enabled by you. A probe account was created and deleted at once. |
+| Live end-to-end on the new project (`test_cloud/cloud_test.dart`, `test_cloud/branches_cloud_test.dart`) | **2/2**, against the deployed rules: phone → Firebase → cashier, status back to the phone, and the branch link with every rule refusal. Afterwards the database is empty (`null`) and **0** sign-in accounts are left. |
+| Still open | An empty Google Cloud project `orderly-cafes` (no Firebase, no billing) is left from the first try. The old project `orderly-yvzug` (account 667) is untouched, with its 9 empty test sign-in accounts. |
 
-Evidence: `move/flutter-test.log`, `move/web-run.log`, `web-move/`, `phase2/flutter-test.log`.
+Evidence: `move/flutter-test.log`, `move/web-run.log`, `move/cloud-live.log`, `web-move/`, `phase2/flutter-test.log`.
 
 ## Not tested
 
