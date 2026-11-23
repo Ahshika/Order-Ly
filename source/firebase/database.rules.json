@@ -9,6 +9,7 @@
   // - chains/$cid: ربط الفروع. $cid = كود الربط اللي عمله الفرع الرئيسي (owner). الرئيسي بس يقرا ويكتب الكل.
   //   أي فرع معاه الكود يبعت طلب ربط في req/$uid بتاعه بس، والرئيسي يوافق (members/$uid).
   //   الفرع المربوط بس يكتب ملخصه في b/$uid، ويقدر يفصل نفسه، ويقرا حالة طلبه وربطه هو بس.
+  // - rep/$uid/$يوم: تقرير كل يوم شغل وكل وردية (JSON نص في j). الكافيه بس يكتب ويقرا (المالك من بره في مرحلة جاية).
   "rules": {
     ".read": false,
     ".write": false,
@@ -77,6 +78,31 @@
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",
         "$cid": { ".read": true }
+      }
+    },
+
+    "rep": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "$day": {
+          ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+          "day": {
+            ".validate": "newData.hasChildren(['j', 'at'])",
+            "j": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+            "at": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          },
+          "shifts": {
+            "$sid": {
+              ".validate": "$sid.length <= 40 && newData.hasChildren(['j', 'at'])",
+              "j": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+              "at": { ".validate": "newData.val() === now" },
+              "$other": { ".validate": false }
+            }
+          },
+          "$other": { ".validate": false }
+        }
       }
     },
 

@@ -36,10 +36,8 @@ extension _CheckRoutes on OrderlyServer {
 
   // ---------------------------------------------------------------- helpers
 
-  String _today() {
-    final n = DateTime.now();
-    return '${n.year}-${n.month.toString().padLeft(2, '0')}-${n.day.toString().padLeft(2, '0')}';
-  }
+  /// تاريخ يوم الشغل دلوقتي (ترقيم الطلبات بيبدأ من 1 مع كل يوم شغل، مش الساعة 12 بالليل).
+  String _today() => BusinessDay.keyOf(_bday.dateOf(DateTime.now()));
 
   Map<String, Object?> _loadCheck(String id, {bool open = false}) {
     final c = db.selectOne('SELECT * FROM checks WHERE id = ?', [id]);

@@ -33,6 +33,10 @@ const defaultCafeSettings = <String, Object?>{
   // قيمة النقطة الواحدة لما تتصرف (بالقروش)
   'loyaltyPointValue': 25,
   'loyaltyMinRedeem': 100,
+  // ----- يوم الشغل (business_day.dart): من / لـ، ولو متساويين = 24 ساعة واليوم بيخلص الساعة دي.
+  // 00:00 لـ 00:00 = من 12 بالليل لـ 12 بالليل (زي النسخ القديمة)
+  'dayOpen': '00:00',
+  'dayClose': '00:00',
 };
 
 extension _ShopRoutes on OrderlyServer {
@@ -86,6 +90,9 @@ extension _ShopRoutes on OrderlyServer {
   int _cafeInt(String key) => _cafe[key] as int? ?? defaultCafeSettings[key] as int;
   bool _cafeBool(String key) => _cafe[key] as bool? ?? defaultCafeSettings[key] as bool;
 
+  /// يوم الشغل حسب ساعات الكافيه.
+  BusinessDay get _bday => BusinessDay.fromSettings(_cafe['dayOpen'], _cafe['dayClose']);
+
   Map<String, Object?> _shopJson() {
     final shop = db.selectOne('SELECT * FROM shop LIMIT 1');
     final branch = db.selectOne('SELECT * FROM branches WHERE is_local = 1 LIMIT 1');
@@ -97,6 +104,8 @@ extension _ShopRoutes on OrderlyServer {
       'branchName': branch?['name'],
       'logoBase64': logo.existsSync() ? base64.encode(logo.readAsBytesSync()) : null,
       'settings': _cafe,
+      // تاريخ يوم الشغل دلوقتي (التقارير بتبدأ منه، مش من تاريخ الكمبيوتر)
+      'businessDate': BusinessDay.keyOf(_bday.dateOf(DateTime.now())),
       'menuBaseUrl': menuSiteUrl,
       // لو قاعدة البيانات كانت باظت والسيرفر رجع لنسخة احتياطية لوحده (الشاشة الرئيسية بتنبّه المالك)
       'dbRecovery': _recoveryInfo(),
@@ -145,6 +154,7 @@ extension _ShopRoutes on OrderlyServer {
             if (key == 'receiptPaper' && !receiptPapers.contains(v)) throw ApiError(400, 'مقاس الورق مش صحيح');
             if (key == 'qrApproval' && !const {'manual', 'auto'}.contains(v)) throw ApiError(400, 'اختيار مش صحيح');
             if (key == 'menuLanguages' && !const {'ar', 'ar_en', 'en'}.contains(v)) throw ApiError(400, 'اختيار مش صحيح');
+            if ((key == 'dayOpen' || key == 'dayClose') && BusinessDay.parseMinutes(v) == null) throw ApiError(400, 'الساعة لازم تكون زي 21:00');
             current[key] = v.trim();
           }
         });

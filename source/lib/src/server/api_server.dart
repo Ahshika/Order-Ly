@@ -20,6 +20,7 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../core/app_info.dart';
+import '../core/business_day.dart';
 import '../core/diagnostics.dart';
 import '../core/firebase_config.dart';
 import '../core/format.dart';
@@ -32,6 +33,7 @@ part 'backup_service.dart';
 part 'cloud_sync.dart';
 part 'routes_branches.dart';
 part 'routes_checks.dart';
+part 'routes_day_reports.dart';
 part 'routes_inventory.dart';
 part 'routes_license.dart';
 part 'routes_menu.dart';
@@ -202,6 +204,12 @@ class OrderlyServer {
   /// بيمسح كل بيانات الكافيه من Firebase (للاختبارات بس).
   Future<void> cleanupCloudForTests() async => _cloud?.deleteEverything();
 
+  /// الدورة العادية اللي بتحصل كل دقيقة (من غير ما تنسى اللي اتبعت قبل كده)، للاختبارات.
+  Future<void> cloudTickForTests() async {
+    _cloud?.kick('tick');
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+  }
+
   /// كأن توكن Firebase خلص (بيعيش ساعة) عشان المزامنة الجاية تجدده (للاختبارات).
   void expireCloudTokenForTests() => _cloud?._idToken = null;
 
@@ -252,6 +260,7 @@ class OrderlyServer {
     _registerInventoryRoutes(r);
     _registerBackupRoutes(r);
     _registerReportRoutes(r);
+    _registerDayReportRoutes(r);
     _registerLicenseRoutes(r);
     _registerBranchRoutes(r);
 
@@ -563,7 +572,7 @@ class OrderlyServer {
   /// بيبلّغ كل الأجهزة المتصلة إن فيه حاجة اتغيرت عشان تحدّث الشاشة.
   void _broadcast(String topic) {
     _screenCache.clear();
-    if (const {'shop', 'menu', 'tables', 'checks', 'orders', 'payments', 'calls', 'stock'}.contains(topic)) _cloud?.kick(topic);
+    if (const {'shop', 'menu', 'tables', 'checks', 'orders', 'payments', 'calls', 'stock', 'register'}.contains(topic)) _cloud?.kick(topic);
     final msg = jsonEncode({'type': 'changed', 'topic': topic});
     for (final s in _sockets.toList()) {
       try {

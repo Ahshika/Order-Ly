@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/business_day.dart';
 import '../../core/cafe_models.dart';
 import '../../core/image_shrink.dart';
 import '../../core/format.dart';
@@ -113,6 +114,59 @@ class _CafeSettingsScreenState extends ConsumerState<CafeSettingsScreen> {
     }
   }
 
+  Future<void> _pickTime(String key, {String? alsoKey}) async {
+    final m = BusinessDay.parseMinutes(_s[key]) ?? 0;
+    final t = await showTimePicker(context: context, initialTime: TimeOfDay(hour: m ~/ 60, minute: m % 60));
+    if (t == null) return;
+    setState(() {
+      _s[key] = BusinessDay.formatMinutes(t.hour * 60 + t.minute);
+      if (alsoKey != null) _s[alsoKey] = _s[key];
+    });
+  }
+
+  /// يوم الشغل: ساعات الكافيه، أو 24 ساعة وساعة نهاية اليوم (business_day.dart).
+  List<Widget> _workHours() {
+    final open = _s['dayOpen'] as String? ?? '00:00';
+    final close = _s['dayClose'] as String? ?? '00:00';
+    final bd = BusinessDay.fromSettings(open, close);
+    final allDay = bd.allDay;
+    Widget time(String label, String key, {String? alsoKey}) => ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.schedule_rounded),
+          title: Text(label),
+          trailing: OutlinedButton(onPressed: () => _pickTime(key, alsoKey: alsoKey), child: Text(_s[key] as String? ?? '00:00', textDirection: TextDirection.ltr)),
+        );
+    return [
+      SegmentedButton<bool>(
+        segments: const [
+          ButtonSegment(value: false, label: Text('شغالين بمواعيد'), icon: Icon(Icons.access_time_rounded)),
+          ButtonSegment(value: true, label: Text('24 ساعة'), icon: Icon(Icons.all_inclusive_rounded)),
+        ],
+        selected: {allDay},
+        onSelectionChanged: (v) => setState(() {
+          if (v.first) {
+            _s['dayClose'] = _s['dayOpen'] = open == close ? open : '06:00';
+          } else {
+            _s['dayOpen'] = '09:00';
+            _s['dayClose'] = '02:00';
+          }
+        }),
+      ),
+      const SizedBox(height: 6),
+      if (allDay)
+        time('اليوم بيخلص الساعة', 'dayClose', alsoKey: 'dayOpen')
+      else ...[
+        time('بنفتح الساعة', 'dayOpen'),
+        time('بنقفل الساعة', 'dayClose'),
+      ],
+      Text(
+        'تقرير اليوم وترقيم الطلبات بيبدأوا من جديد الساعة ${BusinessDay.formatMinutes(bd.cutoff)}، '
+        'فالبيع بعد 12 بالليل بيتحسب على نفس يوم الشغل. والمالك بيوصله تقرير مع كل قفل درج وتقرير لكل يوم لوحده.',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    ];
+  }
+
   Widget _switch(String key, String title, {String? subtitle, bool def = false}) => SwitchListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(title),
@@ -163,6 +217,8 @@ class _CafeSettingsScreenState extends ConsumerState<CafeSettingsScreen> {
               const SizedBox(height: 10),
               TextField(controller: _address, decoration: const InputDecoration(labelText: 'العنوان')),
             ]),
+            const SizedBox(height: 12),
+            SectionCard(title: 'يوم الشغل', icon: Icons.schedule_rounded, children: _workHours()),
             const SizedBox(height: 12),
             SectionCard(title: 'الخدمة والضريبة', icon: Icons.percent_rounded, children: [
               Row(children: [

@@ -24,6 +24,12 @@ class FakeFirebase {
   final _streams = <(String, HttpResponse, FakeRequest)>[];
   final _users = <String, String>{}; // email → uid
   final _deleted = <String>{};
+
+  /// زي قواعد بترفض: أي كتابة فيها مسار من دول بتترفض كلها (401)، زي Firebase.
+  bool Function(String path)? rejectWrite;
+
+  /// الكتابات الجاية كام واحدة تفشل (503) كأن النت قطع.
+  int failWrites = 0;
   var _nextUid = 0;
 
   /// زي مسح الحساب من Firebase Console.
@@ -146,6 +152,24 @@ class FakeFirebase {
       await res.flush();
       _streams.add((dbPath, res, rec));
       return;
+    }
+
+    if (req.method != 'GET') {
+      if (failWrites > 0) {
+        failWrites--;
+        res.statusCode = 503;
+        await res.close();
+        return;
+      }
+      final paths = req.method == 'PATCH'
+          ? (jsonDecode(body) as Map).keys.map((k) => dbPath.isEmpty ? '$k' : '$dbPath/$k')
+          : [dbPath];
+      if (rejectWrite != null && paths.any(rejectWrite!)) {
+        res.statusCode = 401;
+        res.write('{"error":"Permission denied"}');
+        await res.close();
+        return;
+      }
     }
 
     Object? echo;

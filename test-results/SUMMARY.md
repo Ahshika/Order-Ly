@@ -256,6 +256,43 @@ Evidence: `phase1/flutter-test.log`, `phase1/web-run.log`, `firebase-usage/befor
 
 Evidence: `move/flutter-test.log`, `move/web-run.log`, `move/cloud-live.log`, `web-move/`, `phase2/flutter-test.log`.
 
+## Round 8: phase 3, the business day and a report for every shift and day (2026-11-23)
+
+**What changed:**
+
+- **Working hours** (`dayOpen`, `dayClose`) are set in "بيانات الكافيه". "24 ساعة" means one end-of-day time. The day ends at a single cutoff in the middle of the hours the cafe is closed (`lib/src/core/business_day.dart`). The default 00:00–00:00 keeps the old midnight day.
+- **Everything uses the business day:**
+  - order numbers (`_today`)
+  - the reports screen (a date without a time = the start of that business day)
+  - the cashier's "today"
+  - the branch summary (`bd` + the day labels)
+- **New endpoints** (owner only):
+  - `/api/reports/day?date=`: sales, payment methods, check types, sources, hours, expenses by category, voids (who and why), discounts, top 20 items, feedback, the shifts with counted vs expected cash, open checks and low stock.
+  - `/api/reports/shift/<id>`: one shift.
+- **Reports go to Firebase** under `rep/{cafe}/{day}/day` and `.../shifts/{id}`:
+  - today's report on every register change;
+  - yesterday's whenever it changes (this is the final report once the day ends, plus any later correction);
+  - days missed while the PC was off (up to 31).
+- **Rules:** `rep/$uid` is readable and writable only by the cafe itself, with day-key and size validation. Owner access from outside comes in phase 5.
+- **Robustness:**
+  - Reports go in their own write, so a refused report never blocks the menu or order tracking.
+  - **Bug fixed (it predates this phase):** a write that failed (internet dropping for a moment) left the data marked as sent, so a customer's order status could stay stale until it changed again. Now it is sent again on the next normal cycle.
+
+| Test | Result |
+|---|---|
+| `flutter test test/` | **103/103**. New: `business_day_test` (7), `day_reports_test` (5), plus 2 in `cloud_sync_test`: refused reports don't stop the menu; a failed write is re-sent (checked to **fail without the fix**) |
+| Worst-case suite `test_stress` | **32/32** |
+| Live Firebase on `orderly-cafe-28129` | First run **failed**. The rules put write access on each day, so the cafe could not delete its whole `rep/{uid}`, and its cleanup (one atomic write) was refused entirely. Fixed (write access on `rep/$uid`, validation on each day) and redeployed. Then **2/2**, and the database is empty afterwards. |
+| Screen tests `test_visual` | 10/13. `check_desktop`, `kds_desktop` and `register_desktop` differ by 0.01–0.05% of pixels. **The same 3 fail on the commit before this phase** (checked in a separate worktree), and the pixel count changes from run to run: those screens show the current time. Not caused by phase 3. The QR card PDFs were regenerated with the new site address. |
+| Playwright | Not re-run: `menu.html` did not change in this phase (66/66 in round 7) |
+
+**Still open:**
+
+- 4 empty sign-in accounts on `orderly-cafe-28129`, left by the failed live run. Delete them in Authentication → Users.
+- The rules on the new project are deployed. The customer page did not change.
+
+Evidence: `phase3/flutter-test.log`, `phase3/stress.log`, `phase3/cloud-live.log`, `phase3/visual.log`.
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

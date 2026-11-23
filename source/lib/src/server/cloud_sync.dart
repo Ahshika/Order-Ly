@@ -110,6 +110,19 @@ class CloudSync {
     final topics = {..._dirty};
     _dirty.clear();
     try {
+      await _pushCafe(topics);
+      await _pushReports(topics);
+    } finally {
+      _busy = false;
+    }
+    // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
+    if (!_stopped && _idToken != null) await _syncChain();
+  }
+
+  /// المنيو والترابيزات ومتابعة العملاء. لو الكتابة فشلت (النت قطع لحظة)، اللي اتعلّم "اتبعت" بيرجع يتبعت في الدورة الجاية.
+  Future<void> _pushCafe(Set<String> topics) async {
+    final sentBefore = Map.of(_sent);
+    try {
       await _token();
       final updates = <String, Object?>{};
       if (topics.contains('shop')) _logoCache = null;
@@ -122,13 +135,32 @@ class CloudSync {
       db.setSetting('cloud_last_sync', nowIso());
       db.setSetting('cloud_last_error', '');
     } catch (e) {
+      _sent
+        ..clear()
+        ..addAll(sentBefore);
       _dirty.addAll(topics);
       db.setSetting('cloud_last_error', _errorText(e));
-    } finally {
-      _busy = false;
     }
-    // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
-    if (!_stopped && _idToken != null) await _syncChain();
+  }
+
+  /// تقارير المالك في كتابة لوحدها: Firebase بيرفض الكتابة كلها لو جزء منها اترفض،
+  /// فأي مشكلة في التقارير ماتوقفش منيو العملاء ومتابعة الطلبات.
+  Future<void> _pushReports(Set<String> topics) async {
+    if (_uid == null || _idToken == null || _stopped) return;
+    final sentBefore = Map.of(_sent);
+    try {
+      final reports = <String, Object?>{};
+      final reportDay = _addReports(reports, topics);
+      await _patch(reports);
+      db.setSetting('report_last_day', reportDay);
+      db.setSetting('report_last_error', '');
+    } catch (e) {
+      _sent
+        ..clear()
+        ..addAll(sentBefore);
+      if (topics.contains('register')) _dirty.add('register');
+      db.setSetting('report_last_error', _errorText(e));
+    }
   }
 
   String _errorText(Object e) =>
@@ -455,6 +487,43 @@ class CloudSync {
     }
   }
 
+  // ---------------------------------------------------------------- push: تقارير المالك
+
+  /// تقرير كل يوم شغل (rep/{cafe}/{يوم}/day) وكل وردية اتقفلت (rep/{cafe}/{يوم}/shifts/{id}).
+  /// - النهارده: مع كل حركة درج (فتح، مصروف، قفل)، فالمالك بيشوف اليوم لحد آخر تسليم.
+  /// - امبارح: كل دورة، بس بيتبعت لو اتغير (التقرير النهائي أول ما اليوم يخلص، وأي تصحيح بعدها).
+  /// - لو الكمبيوتر كان مقفول كام يوم، الأيام اللي فاتت بتتبعت (لحد شهر).
+  /// بيرجع تاريخ النهارده عشان يتحفظ بعد ما الكتابة تنجح.
+  String _addReports(Map<String, Object?> updates, Set<String> topics) {
+    final bd = server._bday;
+    final today = bd.dateOf(DateTime.now());
+    DateTime day(int offset) => DateTime(today.year, today.month, today.day + offset);
+    final days = <DateTime>{day(-1)};
+    if (topics.contains('register')) days.add(today);
+    final last = BusinessDay.parseKey(db.setting('report_last_day'));
+    if (last != null) {
+      for (var d = DateTime(last.year, last.month, last.day); d.isBefore(day(-1)) && days.length < 32; d = DateTime(d.year, d.month, d.day + 1)) {
+        days.add(d);
+      }
+    }
+    for (final d in days) {
+      _putReport(updates, 'rep/$_uid/${BusinessDay.keyOf(d)}/day', server._dayReport(d));
+    }
+    final since = DateTime.now().toUtc().subtract(const Duration(hours: 48)).toIso8601String();
+    for (final s in db.select('SELECT * FROM register_sessions WHERE closed_at IS NOT NULL AND closed_at > ?', [since])) {
+      final r = server._shiftReport(s);
+      _putReport(updates, 'rep/$_uid/${r['date']}/shifts/${s['id']}', r);
+    }
+    return BusinessDay.keyOf(today);
+  }
+
+  void _putReport(Map<String, Object?> updates, String path, Map<String, Object?> report) {
+    final j = jsonEncode(report);
+    if (_sent[path] == j) return;
+    _sent[path] = j;
+    updates[path] = {'j': j, 'at': {'.sv': 'timestamp'}};
+  }
+
   Map<String, Object?> _billDoc(Map<String, Object?> c) {
     final items = db.select(
       "SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.check_id = ? AND oi.status <> 'void' AND o.status NOT IN ('pending', 'rejected', 'cancelled') ORDER BY oi.created_at",
@@ -611,7 +680,7 @@ class CloudSync {
           // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
         }
       }
-      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc']) '$root/$_uid': null});
+      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep']) '$root/$_uid': null});
       await _http.post(
         Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},

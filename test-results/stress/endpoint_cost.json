@@ -24,11 +24,11 @@
     "POST order": 4.56
   },
   "run": {
-    "GET /api/floor": 1.55,
-    "GET /api/kds": 2.82,
-    "GET /api/live": 1.24,
-    "GET /api/checks": 1.98,
-    "GET /api/info (no auth)": 1.06,
-    "POST order": 3.37
+    "GET /api/floor": 2.64,
+    "GET /api/kds": 4.07,
+    "GET /api/live": 1.76,
+    "GET /api/checks": 2.67,
+    "GET /api/info (no auth)": 1.79,
+    "POST order": 5.54
   }
 }

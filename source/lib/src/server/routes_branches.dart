@@ -74,9 +74,13 @@ extension _BranchRoutes on OrderlyServer {
 
   /// ملخص شغل الفرع ده اللي بيتبعت للفرع الرئيسي. الأسماء مختصرة عشان المساحة على Firebase.
   Future<Map<String, Object?>> _branchSummary() async {
+    // كله بيوم الشغل: "النهارده" في كافيه بيقفل 3 الفجر هي السهرة كلها
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final bd = _bday;
+    final day = bd.dateOf(now);
+    DateTime dayStart(int offset) => bd.startOf(DateTime(day.year, day.month, day.day + offset));
+    final today = dayStart(0);
+    final tomorrow = dayStart(1);
     String iso(DateTime d) => d.toUtc().toIso8601String();
 
     Map<String, Object?> sales(DateTime from, DateTime to) {
@@ -99,11 +103,13 @@ extension _BranchRoutes on OrderlyServer {
       'name': names.shop,
       'branch': names.branch,
       'app': appVersion,
+      // تاريخ يوم الشغل (الشاشة بتكتب أسامي الأيام منه)
+      'bd': BusinessDay.keyOf(day),
       'today': sales(today, tomorrow),
-      'yesterday': sales(DateTime(now.year, now.month, now.day - 1), today),
-      'month': sales(DateTime(now.year, now.month), tomorrow),
+      'yesterday': sales(dayStart(-1), today),
+      'month': sales(bd.startOf(DateTime(day.year, day.month)), tomorrow),
       // مبيعات آخر 7 أيام (الأقدم الأول، والنهارده آخر واحد)
-      'days': [for (var i = 6; i >= 0; i--) sales(DateTime(now.year, now.month, now.day - i), DateTime(now.year, now.month, now.day - i + 1))['t']],
+      'days': [for (var i = 6; i >= 0; i--) sales(dayStart(-i), dayStart(-i + 1))['t']],
       'open': {
         'n': open['n'],
         't': open['t'],

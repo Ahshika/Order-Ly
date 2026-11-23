@@ -167,6 +167,30 @@ void main() {
     expect(((qr['tables'] as List).first as Map)['url'], endsWith('?d=127.0.0.1'));
   });
 
+  test('reports refused by the rules do not stop the menu and order tracking', () async {
+    fb.rejectWrite = (path) => path.startsWith('rep/');
+    await order('r1', 'client-dddddddddd', keys.first);
+    expect(fb.get('trackc/$uid/client-dddddddddd'), isNotNull);
+    expect(server.cloudError, anyOf(isNull, isEmpty));
+    expect(server.db.setting('report_last_error'), contains('401'));
+    // القواعد اتصلحت: التقارير بتتبعت في الدورة الجاية
+    fb.rejectWrite = null;
+    await server.syncNow();
+    expect(fb.get('rep/$uid'), isNotNull);
+    expect(server.db.setting('report_last_error'), isEmpty);
+  });
+
+  test('a write that failed (internet dropped) is sent again on the next sync', () async {
+    final o = await order('n1', 'client-eeeeeeeeee', keys.first);
+    fb.failWrites = 10; // النت قطع
+    await api.post('/api/orders/${o['id']}/served');
+    await Future<void>.delayed(const Duration(seconds: 2));
+    expect(((fb.get('trackc/$uid/client-eeeeeeeeee') as Map)['orders'] as Map).values.single['s'], 'accepted');
+    fb.failWrites = 0; // النت رجع
+    await server.cloudTickForTests(); // الدورة العادية كل دقيقة (مش runNow اللي بيبعت كل حاجة من الأول)
+    expect(((fb.get('trackc/$uid/client-eeeeeeeeee') as Map)['orders'] as Map).values.single['s'], 'served');
+  });
+
   test('takeaway customer: no table bill in the tracking', () async {
     await order('t1', 'client-cccccccccc', server.takeawayKey);
     final doc = fb.get('trackc/$uid/client-cccccccccc') as Map;

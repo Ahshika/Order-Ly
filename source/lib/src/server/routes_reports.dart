@@ -13,20 +13,30 @@ extension _ReportRoutes on OrderlyServer {
     r.get('/api/feedback', _authed(_listFeedback, only: {'owner'}));
   }
 
+  /// الفترة المطلوبة. التاريخ من غير ساعة (زي ما شاشة التقارير بتبعت) = بداية يوم الشغل بتاعه.
   ({String from, String to}) _range(Request req) {
     final q = req.url.queryParameters;
-    final now = DateTime.now();
-    final from = DateTime.tryParse(q['from'] ?? '') ?? DateTime(now.year, now.month, now.day);
-    final to = DateTime.tryParse(q['to'] ?? '') ?? from.add(const Duration(days: 1));
+    final bd = _bday;
+    DateTime? asDay(String? v) {
+      final t = DateTime.tryParse(v ?? '');
+      if (t == null) return null;
+      final local = t.isUtc ? t.toLocal() : t;
+      final dateOnly = local.hour == 0 && local.minute == 0 && local.second == 0 && local.millisecond == 0;
+      return dateOnly ? bd.startOf(local) : local;
+    }
+
+    final today = bd.dateOf(DateTime.now());
+    final from = asDay(q['from']) ?? bd.startOf(today);
+    final to = asDay(q['to']) ?? bd.rangeOf(bd.dateOf(from)).$2;
     if (!to.isAfter(from)) throw ApiError(400, 'الفترة مش صحيحة');
     return (from: from.toUtc().toIso8601String(), to: to.toUtc().toIso8601String());
   }
 
   /// ملخص سريع لليوم (للكاشير): المبيعات، والحسابات، والأصناف الأكتر.
   Object? _reportToday(Request req, AuthUser u) {
-    final now = DateTime.now();
-    final from = DateTime(now.year, now.month, now.day).toUtc().toIso8601String();
-    final to = DateTime(now.year, now.month, now.day + 1).toUtc().toIso8601String();
+    final (start, end) = _bday.rangeOf(_bday.dateOf(DateTime.now()));
+    final from = start.toUtc().toIso8601String();
+    final to = end.toUtc().toIso8601String();
     final s = db.selectOne(
       "SELECT COUNT(*) AS n, COALESCE(SUM(total_cents), 0) AS total FROM checks WHERE status = 'closed' AND closed_at >= ? AND closed_at < ?",
       [from, to],
@@ -105,9 +115,9 @@ extension _ReportRoutes on OrderlyServer {
       checksByHour[h]++;
     }
     final byDay = <String, int>{};
+    final bd = _bday;
     for (final r in db.select('SELECT closed_at, total_cents FROM checks c WHERE $closed', [from, to])) {
-      final d = DateTime.parse(r['closed_at'] as String).toLocal();
-      final key = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      final key = BusinessDay.keyOf(bd.dateOf(DateTime.parse(r['closed_at'] as String)));
       byDay[key] = (byDay[key] ?? 0) + (r['total_cents'] as int);
     }
 
