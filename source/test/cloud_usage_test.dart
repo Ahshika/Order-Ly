@@ -1,5 +1,5 @@
 // استهلاك Firebase (التنزيل اللي بيتحاسب عليه) لكافيه بيشتغل: Firebase وهمي على الجهاز بيعدّ كل بايت.
-// النتيجة بتتكتب في test-results/firebase-usage/<USAGE_LABEL>.json عشان نقارن قبل وبعد أي تعديل.
+// النتيجة بتتكتب في test-results/firebase-usage/<USAGE_LABEL>.json (لو USAGE_LABEL متحدد) عشان نقارن قبل وبعد أي تعديل.
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -143,8 +143,11 @@ void main() {
       'customer': {'newVisitBytes': newVisit, 'returningVisitBytes': returningVisit, 'avgVisitBytes': (newVisit + returningVisit) ~/ 2},
       'trackcDocs': trackc.length,
     };
-    final out = Directory('../test-results/firebase-usage')..createSync(recursive: true);
-    File('${out.path}/${report['label']}.json').writeAsStringSync(const JsonEncoder.withIndent('  ').convert(report));
+    // الملف بيتكتب بس لما نطلب قياس (USAGE_LABEL)، عشان التشغيل العادي مايسيبش ملفات
+    if (Platform.environment['USAGE_LABEL'] != null) {
+      final out = Directory('../test-results/firebase-usage')..createSync(recursive: true);
+      File('${out.path}/${report['label']}.json').writeAsStringSync(const JsonEncoder.withIndent('  ').convert(report));
+    }
     // ignore: avoid_print
     print(const JsonEncoder.withIndent('  ').convert(report));
   }, timeout: const Timeout(Duration(minutes: 5)));

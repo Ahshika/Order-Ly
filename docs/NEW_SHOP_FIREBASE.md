@@ -1,7 +1,7 @@
 # محل جديد على مشروع Firebase خاص بيه
 
 > ليه؟ حدود Firebase المجانية (360 ميجا تحميل في اليوم، و100 اتصال في نفس اللحظة) **لكل مشروع لوحده**.
-> المحل اللي له مشروع بتاعه مابيقاسمش حد الحدود دي. صفحة منيو العملاء بتفضل واحدة لكل المحلات على المشروع الأساسي `orderly-yvzug`،
+> المحل اللي له مشروع بتاعه مابيقاسمش حد الحدود دي. صفحة منيو العملاء بتفضل واحدة لكل المحلات على المشروع الأساسي `orderly-cafe-28129` (أكونت ahmedhassanshika655)،
 > وبتعرف داتابيز المحل من اللينك (`?d=`)، فمش محتاج ترفع الصفحة على مشروع المحل.
 
 ## 1. صاحب المحل (أو إنت بجيميله)
@@ -43,5 +43,5 @@ powershell -ExecutionPolicy Bypass -File tool\deploy_shop_firebase.ps1 -Project 
 ```
 وصفحة المنيو بترفعها مرة واحدة على المشروع الأساسي:
 ```
-firebase deploy --only hosting --project orderly-yvzug
+firebase deploy --only hosting --project orderly-cafe-28129 --account ahmedhassanshika655@gmail.com
 ```

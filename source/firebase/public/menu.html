@@ -133,7 +133,7 @@ h2.sec{font-size:18px;margin:18px 4px 8px}
 // وبنقبل بس عناوين Firebase (عشان محدش يوجّه الصفحة لسيرفر تاني)
 const DB = (() => {
   const d = new URLSearchParams(location.search).get('d') || '';
-  return /^[a-z0-9-]+(\.[a-z0-9-]+)?\.(firebasedatabase\.app|firebaseio\.com)$/.test(d) ? `https://${d}` : 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)?\.(firebasedatabase\.app|firebaseio\.com)$/.test(d) ? `https://${d}` : 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';
 })();
 const seg = location.pathname.split('/').filter(Boolean); // ["m", cafeId, key]
 const CAFE = seg[1] || '', KEY = seg[2] || '';

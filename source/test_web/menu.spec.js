@@ -6,7 +6,7 @@ const path = require('path');
 const OUT = process.env.WEB_OUT;
 const fx = JSON.parse(fs.readFileSync(path.join(OUT, 'fixture.json'), 'utf8'));
 const MENU_HTML = fs.readFileSync(path.join(__dirname, '..', 'firebase', 'public', 'menu.html'), 'utf8');
-const DB = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+const DB = 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';
 const SITE = 'https://menu.test';
 
 const item = (name) => fx.menu.items.find((i) => i.n === name);

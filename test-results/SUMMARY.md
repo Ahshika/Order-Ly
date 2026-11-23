@@ -241,6 +241,19 @@ Evidence: `branches/local.txt`, `branches/firebase_live.txt`; screenshots in `so
 
 Evidence: `phase1/flutter-test.log`, `phase1/web-run.log`, `firebase-usage/before.json`, `firebase-usage/after.json`.
 
+## Round 7: phase 2 and the move to a new Firebase project (2026-11-23)
+
+| What | Result |
+|---|---|
+| Old project `orderly-yvzug` (account 667) | All test data deleted from the database (backup kept locally first). The 9 test sign-in accounts are still there: the CLI cannot delete them. The new rules and page from round 6 are deployed and checked. |
+| Phase 2 (a Firebase project per shop, settings inside the signed license) | Committed `b7c4bfb`. `flutter test` **89/89**, Playwright **66/66** |
+| New main project `orderly-cafe-28129` (account ahmedhassanshika655, Spark, no card) | Realtime Database in europe-west1, web app registered, rules and menu page deployed. Checked from outside: `pub`, `menu`, `logo` and `trackt` 200; `inbox`, `cafes` and `chains` 401; the live page points at the new database. |
+| Code moved to the new project | `firebase_config.dart`, `menu.html`, `.firebaserc` (+ `firebase login:use` 655 for that folder), and the test constants. `flutter test` **89/89**, Playwright **66/66** on 3 browsers, contract test OK |
+| Existing installs | An install that was on the old project can't sign in on the new one, so it makes a new account by itself (phase 2) and re-sends everything. |
+| **Open** | Email/Password sign-in on `orderly-cafe-28129` is not enabled yet (`OPERATION_NOT_ALLOWED`). Until it is, no cashier can connect to the new project. The real end-to-end test (`test_cloud`) has not been run on it. An empty Google Cloud project `orderly-cafes` (no Firebase, no billing) was also left from the first try. |
+
+Evidence: `move/flutter-test.log`, `move/web-run.log`, `web-move/`, `phase2/flutter-test.log`.
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

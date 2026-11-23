@@ -3,15 +3,15 @@
 ///
 /// كل محل ممكن يبقى له مشروع Firebase بتاعه (حدود الخطة المجانية لكل مشروع لوحده): إعداداته بتيجي
 /// جوه كود التفعيل ([FirebaseProject])، ولو مفيش، المحل بيشتغل على المشروع ده.
-/// صفحة منيو العملاء واحدة لكل المحلات (على المشروع ده)، وبتعرف داتابيز المحل من اللينك (?d=).
-const firebaseProjectId = 'orderly-yvzug';
-const firebaseApiKey = 'AIzaSyBXKteV9D9ityE9-1dpzclk9Qckd6JtHTo';
+/// صفحة منيو العملاء واحدة لكل المحلات (على المشروع ده، على أكونت ahmedhassanshika655)، وبتعرف داتابيز المحل من اللينك (?d=).
+const firebaseProjectId = 'orderly-cafe-28129';
+const firebaseApiKey = 'AIzaSyDjEWvb7vmw6R5U0-jSvoS0W2kEYctlDCE';
 
 /// Realtime Database: الطلبات بتوصل منها للكاشير لحظياً.
-const rtdbUrl = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+const rtdbUrl = 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';
 
 /// موقع منيو العملاء (اللي الـ QR بيفتحه) ودليل الاستخدام.
-const menuSiteUrl = 'https://orderly-yvzug.web.app';
+const menuSiteUrl = 'https://orderly-cafe-28129.web.app';
 
 /// عنوان Realtime Database صحيح على Firebase (https، ومن غير مسار). نفس الشرط موجود في صفحة المنيو.
 final _databaseHostRe = RegExp(r'^[a-z0-9-]+(\.[a-z0-9-]+)?\.(firebasedatabase\.app|firebaseio\.com)$');

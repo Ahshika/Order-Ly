@@ -1,0 +1,110 @@
+[
+  {
+    "test": "order",
+    "browser": "chromium-android",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "takeaway",
+    "browser": "chromium-android",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "wallet+proof",
+    "browser": "chromium-android",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": 8500,
+    "serverTotalCents": 8500,
+    "proofKB": 123,
+    "paymentStatus": "pending",
+    "proofStored": true
+  },
+  {
+    "test": "order",
+    "browser": "firefox-phone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "takeaway",
+    "browser": "firefox-phone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "wallet+proof",
+    "browser": "firefox-phone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": 8500,
+    "serverTotalCents": 8500,
+    "proofKB": 197,
+    "paymentStatus": "pending",
+    "proofStored": true
+  },
+  {
+    "test": "order",
+    "browser": "webkit-iphone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "takeaway",
+    "browser": "webkit-iphone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": null,
+    "serverTotalCents": 8500,
+    "proofKB": null,
+    "paymentStatus": null,
+    "proofStored": false
+  },
+  {
+    "test": "wallet+proof",
+    "browser": "webkit-iphone",
+    "status": "PASS",
+    "orderStatus": "pending",
+    "rejectReason": null,
+    "pageTotalCents": 8500,
+    "serverTotalCents": 8500,
+    "proofKB": 181,
+    "paymentStatus": "pending",
+    "proofStored": true
+  }
+]
