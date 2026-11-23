@@ -129,7 +129,12 @@ h2.sec{font-size:18px;margin:18px 4px 8px}
 <script>
 'use strict';
 // ---------------------------------------------------------------- إعدادات
-const DB = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+// الصفحة واحدة لكل المحلات. المحل اللي على مشروع Firebase خاص بيه، لينكه فيه ?d=<داتابيز المحل>،
+// وبنقبل بس عناوين Firebase (عشان محدش يوجّه الصفحة لسيرفر تاني)
+const DB = (() => {
+  const d = new URLSearchParams(location.search).get('d') || '';
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)?\.(firebasedatabase\.app|firebaseio\.com)$/.test(d) ? `https://${d}` : 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+})();
 const seg = location.pathname.split('/').filter(Boolean); // ["m", cafeId, key]
 const CAFE = seg[1] || '', KEY = seg[2] || '';
 const $ = (id) => document.getElementById(id);

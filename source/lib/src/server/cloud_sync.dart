@@ -40,7 +40,8 @@ class CloudSync {
   DateTime? _membershipCheckedAt;
 
   AppDb get db => server.db;
-  FirebaseEndpoints get _fb => server.firebase;
+  FirebaseEndpoints? _endpoints;
+  FirebaseEndpoints get _fb => _endpoints ?? server.firebase ?? FirebaseEndpoints.live;
 
   void start() {
     if (_fb.apiKey.isEmpty) return;
@@ -50,6 +51,7 @@ class CloudSync {
       if (!live) _pollInbox();
     });
     Timer(const Duration(seconds: 2), () async {
+      _endpoints = await server._resolveFirebase();
       await _run();
       _listen();
     });
@@ -62,6 +64,16 @@ class CloudSync {
     _reconnect?.cancel();
     _streamClient?.close();
     _http.close();
+  }
+
+  /// كود تفعيل جديد ممكن يكون فيه مشروع Firebase تاني: المزامنة بتنقل عليه.
+  Future<void> reloadProject() async {
+    final next = await server._resolveFirebase();
+    if (next.rtdb == _fb.rtdb && next.apiKey == _fb.apiKey) return;
+    _endpoints = next;
+    _idToken = null;
+    _streamClient?.close(); // الاستماع بيرجع يتصل لوحده على المشروع الجديد
+    await runNow();
   }
 
   Future<void> runNow() async {
@@ -124,7 +136,28 @@ class CloudSync {
 
   // ---------------------------------------------------------------- auth
 
+  /// الحساب والكافيه على Firebase بيتعملوا من الأول: المحل اتنقل لمشروع تاني، أو حسابه اتمسح من Firebase.
+  /// كود الكافيه بيتغير، فلينكات الـ QR بتتغير (الشاشة بتقول للمالك يطبعها تاني).
+  void _resetIdentity() {
+    // كان فيه كود كافيه قبل كده، يعني فيه QR مطبوع بقى قديم
+    if (db.setting('cloud_uid') != null) db.setSetting('cloud_qr_reprint', nowIso());
+    db.execute(
+      "DELETE FROM settings WHERE key IN ('cloud_email', 'cloud_password', 'cloud_refresh_token', 'cloud_uid', 'cloud_imgs', 'cloud_table_keys', 'cloud_track_clients')",
+    );
+    _idToken = null;
+    _uid = null;
+    _sent.clear();
+    _dirty.addAll(['shop', 'menu', 'tables', 'checks']);
+    // ربط الفروع كان على المشروع القديم
+    if ((db.setting('chain_role') ?? '').isNotEmpty) server._setChain(null);
+  }
+
   Future<String> _token() async {
+    // نسخ قبل كده كانت على المشروع الأساسي بس (مفيش cloud_db)
+    if ((db.setting('cloud_db') ?? rtdbUrl) != _fb.rtdb) {
+      _resetIdentity();
+      db.setSetting('cloud_db', _fb.rtdb);
+    }
     if (_idToken != null && DateTime.now().isBefore(_idTokenExpiry)) return _idToken!;
     final refresh = db.setting('cloud_refresh_token');
     if (refresh != null && refresh.isNotEmpty) {
@@ -154,7 +187,14 @@ class CloudSync {
           body: jsonEncode({'email': email, 'password': password, 'returnSecureToken': true}),
         )
         .timeout(const Duration(seconds: 20));
-    if (res.statusCode != 200) throw Exception('Firebase auth ${res.statusCode}: ${res.body}');
+    if (res.statusCode != 200) {
+      // الحساب مش موجود على Firebase (اتمسح من الكونسول): حساب جديد، وكل حاجة تتبعت تاني
+      if (endpoint == 'signInWithPassword' && RegExp('EMAIL_NOT_FOUND|INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|USER_DISABLED').hasMatch(res.body)) {
+        _resetIdentity();
+        return _token();
+      }
+      throw Exception('Firebase auth ${res.statusCode}: ${res.body}');
+    }
     final j = jsonDecode(res.body) as Map<String, dynamic>;
     return _saveAuth(j['idToken'] as String, j['refreshToken'] as String, j['localId'] as String, j['expiresIn']);
   }

@@ -131,6 +131,42 @@ void main() {
     expect(fb.get('trackc/$uid/client-bbbbbbbbbb'), isNotNull);
   });
 
+  test('account deleted from Firebase: a new one is made by itself, everything re-sent, owner told to reprint QR', () async {
+    final before = (await api.get('/api/tables/qr'))['tables'] as List;
+    expect((before.first as Map)['url'], contains('/m/$uid/'));
+    fb.deleteUser(uid);
+    fb.root.clear(); // ومعاه بياناته
+    server.db.setSetting('cloud_last_error', '');
+    // التوكن الحالي لسه صالح ساعة: بنخلّي السيرفر يجدده زي ما هيحصل بعد ساعة
+    server.expireCloudTokenForTests();
+    await server.syncNow();
+    final newUid = server.db.setting('cloud_uid')!;
+    expect(newUid, isNot(uid));
+    expect(fb.get('cafes/$newUid/pub'), isNotNull);
+    expect(fb.get('cafes/$newUid/menu'), isNotNull);
+    expect(fb.get('img/$newUid'), isNotNull);
+    final qr = await api.get('/api/tables/qr');
+    expect(((qr['tables'] as List).first as Map)['url'], contains('/m/$newUid/'));
+    expect(qr['reprintSince'], isNotNull);
+  });
+
+  test('shop moved to another Firebase project: new account there, branch link dropped', () async {
+    server.db.setSetting('chain_role', 'member');
+    server.db.setSetting('chain_id', 'ABCDEFGHJKLM');
+    // كأن المحل كان على مشروع تاني قبل كده
+    server.db.setSetting('cloud_db', 'https://old-shop-default-rtdb.europe-west1.firebasedatabase.app');
+    await server.syncNow();
+    expect(server.db.setting('cloud_uid'), isNot(uid));
+    expect(server.db.setting('cloud_db'), fb.endpoints.rtdb);
+    expect(server.db.setting('chain_role'), isEmpty);
+  });
+
+  test('QR links carry the shop database when it is not the main project', () async {
+    final qr = await api.get('/api/tables/qr');
+    // الوهمي مش المشروع الأساسي، فاللينك فيه ?d=
+    expect(((qr['tables'] as List).first as Map)['url'], endsWith('?d=127.0.0.1'));
+  });
+
   test('takeaway customer: no table bill in the tracking', () async {
     await order('t1', 'client-cccccccccc', server.takeawayKey);
     final doc = fb.get('trackc/$uid/client-cccccccccc') as Map;

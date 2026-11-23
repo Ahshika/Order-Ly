@@ -371,3 +371,31 @@ test('real transfer screenshot (text on a plain background) uploads under 300 KB
   ti.annotations.push({ type: 'proof', description: `screenshot → uploaded ${(proof.body.d.length / 1024).toFixed(0)} KB` });
   expect(proof.body.d.length).toBeLessThanOrEqual(300_000);
 });
+
+// ---------------------------------------------------------------- محل على مشروع Firebase خاص بيه (المرحلة 2)
+
+test('shop on its own Firebase project: the page talks to the database in ?d=, and refuses anything that is not Firebase', async ({ page }, ti) => {
+  const SHOP = 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app';
+  const hits = { shop: 0, main: 0, evil: 0 };
+  await page.route(`${SITE}/**`, (r) => r.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: MENU_HTML }));
+  const serve = (who) => async (r) => {
+    hits[who]++;
+    const p = new URL(r.request().url()).pathname.replace(/^\//, '').replace(/\.json$/, '').split('/');
+    const data = p[2] === 'pub' ? fx.pub : p[2] === 'menu' ? fx.menu : p[2] === 'mv' ? fx.menu.v : p[2] === 'seen' ? Date.now() : p[2] === 'tables' ? fx.tables[p[3]] ?? null : null;
+    if ((r.request().headers()['accept'] || '').includes('text/event-stream')) return r.fulfill({ status: 200, contentType: 'text/event-stream', body: `event: put\ndata: ${JSON.stringify({ path: '/', data })}\n\n` });
+    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
+  };
+  await page.route(`${SHOP}/**`, serve('shop'));
+  await page.route(`${DB}/**`, serve('main'));
+  await page.route('https://evil.example.com/**', serve('evil'));
+
+  await page.goto(`${SITE}/m/${fx.cafe}/${fx.tableKey}?d=cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app`);
+  await expect(page.locator('#cafeName')).toHaveText(fx.pub.name);
+  expect(hits.shop).toBeGreaterThan(0);
+  expect(hits.main).toBe(0);
+
+  await page.goto(`${SITE}/m/${fx.cafe}/${fx.tableKey}?d=evil.example.com`);
+  await expect(page.locator('#cafeName')).toHaveText(fx.pub.name);
+  expect(hits.evil).toBe(0);
+  expect(hits.main).toBeGreaterThan(0);
+});

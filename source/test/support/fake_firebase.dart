@@ -23,7 +23,14 @@ class FakeFirebase {
   final requests = <FakeRequest>[];
   final _streams = <(String, HttpResponse, FakeRequest)>[];
   final _users = <String, String>{}; // email → uid
+  final _deleted = <String>{};
   var _nextUid = 0;
+
+  /// زي مسح الحساب من Firebase Console.
+  void deleteUser(String uid) {
+    _users.removeWhere((_, v) => v == uid);
+    _deleted.add(uid);
+  }
 
   String get base => 'http://127.0.0.1:${_server.port}';
   FirebaseEndpoints get endpoints => FirebaseEndpoints(apiKey: 'fake', rtdb: base, auth: base, token: base);
@@ -188,6 +195,9 @@ class FakeFirebase {
       } else {
         out = {'idToken': 'tok-$uid', 'refreshToken': 'ref-$uid', 'localId': uid, 'expiresIn': '3600'};
       }
+    } else if (path.endsWith('/token') && _deleted.contains('${j['refresh_token']}'.replaceFirst('ref-', ''))) {
+      res.statusCode = 400;
+      out = {'error': {'message': 'USER_NOT_FOUND'}};
     } else if (path.endsWith('/token')) {
       final uid = '${j['refresh_token']}'.replaceFirst('ref-', '');
       out = {'id_token': 'tok-$uid', 'refresh_token': 'ref-$uid', 'user_id': uid, 'expires_in': '3600'};

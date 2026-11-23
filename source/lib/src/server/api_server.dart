@@ -85,14 +85,29 @@ class AuthUser {
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
 class OrderlyServer {
-  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase = FirebaseEndpoints.live});
+  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase});
 
   final String dataDir;
   final int requestedPort;
 
   /// المزامنة مع منيو العملاء على Firebase (بتتقفل في الاختبارات).
   final bool cloudSync;
-  final FirebaseEndpoints firebase;
+
+  /// للاختبارات (Firebase وهمي). null = المشروع اللي في كود التفعيل، أو الأساسي.
+  final FirebaseEndpoints? firebase;
+
+  /// مشروع Firebase اللي المحل ده بيستخدمه: من كود التفعيل لو فيه، وإلا الأساسي.
+  Future<FirebaseEndpoints> _resolveFirebase() async {
+    if (firebase != null) return firebase!;
+    final code = db.setting('license_code');
+    if (code == null || code.isEmpty) return FirebaseEndpoints.live;
+    try {
+      final fb = (await verifyLicense(code, deviceCode: _deviceCode)).firebase;
+      return fb == null ? FirebaseEndpoints.live : FirebaseEndpoints.forProject(fb);
+    } on LicenseException {
+      return FirebaseEndpoints.live;
+    }
+  }
   CloudSync? _cloud;
   Timer? _jobsTimer;
   Timer? _firstJobTimer;
@@ -186,6 +201,9 @@ class OrderlyServer {
 
   /// بيمسح كل بيانات الكافيه من Firebase (للاختبارات بس).
   Future<void> cleanupCloudForTests() async => _cloud?.deleteEverything();
+
+  /// كأن توكن Firebase خلص (بيعيش ساعة) عشان المزامنة الجاية تجدده (للاختبارات).
+  void expireCloudTokenForTests() => _cloud?._idToken = null;
 
   /// آخر خطأ في المزامنة (فاضي لو كله تمام).
   String? get cloudError => db.setting('cloud_last_error');

@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 // ignore: implementation_imports
+import 'package:orderly/src/core/firebase_config.dart';
+// ignore: implementation_imports
 import 'package:orderly/src/core/license.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,6 +71,10 @@ class _MakerHomeState extends State<MakerHome> {
   final _phone = TextEditingController();
   final _device = TextEditingController();
   final _months = TextEditingController(text: '12');
+  // مشروع Firebase خاص بالمحل (اختياري): كل فروع المحل لازم ياخدوا نفس الإعدادات
+  final _fbProject = TextEditingController();
+  final _fbKey = TextEditingController();
+  final _fbDb = TextEditingController();
   String _plan = 'yearly';
   int _devices = 3;
   int _branches = 1;
@@ -147,6 +153,16 @@ class _MakerHomeState extends State<MakerHome> {
       setState(() => _error = 'اكتب اسم الكافيه');
       return;
     }
+    FirebaseProject? firebase;
+    final fbFields = [_fbProject, _fbKey, _fbDb].map((c) => c.text.trim()).toList();
+    if (fbFields.any((f) => f.isNotEmpty)) {
+      try {
+        firebase = FirebaseProject(projectId: fbFields[0], apiKey: fbFields[1], databaseUrl: fbFields[2]);
+      } on FormatException catch (e) {
+        setState(() => _error = e.message);
+        return;
+      }
+    }
     final now = DateTime.now();
     final months = switch (_plan) {
       'monthly' => 1,
@@ -164,6 +180,7 @@ class _MakerHomeState extends State<MakerHome> {
       devices: _devices,
       branches: _branches,
       issued: now,
+      firebase: firebase,
     );
     final code = await signLicense(data, _seed!);
     // نتأكد إن الكود هيشتغل في برنامج الكافيهات (بالمفتاح العام اللي جواه)
@@ -182,6 +199,7 @@ class _MakerHomeState extends State<MakerHome> {
       'issued': now.toIso8601String(),
       'devices': _devices,
       'branches': _branches,
+      'firebase': firebase?.projectId,
       'code': code,
     }));
     _saveHistory();
@@ -264,6 +282,23 @@ class _MakerHomeState extends State<MakerHome> {
                     Text('$_branches', style: text.titleMedium),
                     IconButton(onPressed: () => setState(() => _branches = (_branches + 1).clamp(1, 50)), icon: const Icon(Icons.add)),
                   ]),
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    title: const Text('مشروع Firebase خاص بالمحل (اختياري)'),
+                    subtitle: const Text('فاضي = المشروع الأساسي. كل فروع المحل لازم ياخدوا نفس الإعدادات'),
+                    children: [
+                      TextField(controller: _fbProject, textDirection: TextDirection.ltr, decoration: const InputDecoration(labelText: 'Project ID', hintText: 'cafe-elnour')),
+                      const SizedBox(height: 8),
+                      TextField(controller: _fbKey, textDirection: TextDirection.ltr, decoration: const InputDecoration(labelText: 'Web API Key', hintText: 'AIza...')),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _fbDb,
+                        textDirection: TextDirection.ltr,
+                        decoration: const InputDecoration(labelText: 'Realtime Database URL', hintText: 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app'),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   if (_error != null) Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(_error!, style: const TextStyle(color: Colors.red))),
                   FilledButton.icon(onPressed: _generate, icon: const Icon(Icons.auto_awesome_rounded), label: const Text('اعمل الكود')),

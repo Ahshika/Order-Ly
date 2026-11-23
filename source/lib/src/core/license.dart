@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 
+import 'firebase_config.dart';
+
 const licensePublicKey = 'sPK9VJMVGhCKtXXlgwrRn4jtjknE1adqMmoQQaLHNL0=';
 const trialDays = 14;
 
@@ -22,6 +24,7 @@ class LicenseData {
     required this.devices,
     required this.branches,
     required this.issued,
+    this.firebase,
   });
 
   factory LicenseData.fromJson(Map<String, dynamic> j) => LicenseData(
@@ -33,6 +36,7 @@ class LicenseData {
         devices: j['devs'] as int? ?? 3,
         branches: j['br'] as int? ?? 1,
         issued: DateTime.parse(j['iat'] as String),
+        firebase: j['fb'] is Map ? FirebaseProject.fromJson((j['fb'] as Map).cast<String, dynamic>()) : null,
       );
 
   final String id;
@@ -52,6 +56,9 @@ class LicenseData {
   final int branches;
   final DateTime issued;
 
+  /// مشروع Firebase الخاص بالمحل (كل فروعه لازم ياخدوا نفس المشروع). null = المشروع الأساسي.
+  final FirebaseProject? firebase;
+
   Map<String, Object?> toJson() => {
         'v': 1,
         'id': id,
@@ -62,6 +69,7 @@ class LicenseData {
         'devs': devices,
         'br': branches,
         'iat': issued.toUtc().toIso8601String(),
+        if (firebase != null) 'fb': firebase!.toJson(),
       };
 
   bool get lifetime => expires == null;
@@ -109,7 +117,12 @@ Future<LicenseData> verifyLicense(String code, {required String deviceCode, Stri
     signature: Signature(sig, publicKey: SimplePublicKey(base64.decode(publicKey), type: KeyPairType.ed25519)),
   );
   if (!ok) throw LicenseException('كود التفعيل ده مش صحيح (التوقيع مش مطابق)');
-  final data = LicenseData.fromJson(jsonDecode(utf8.decode(payload)) as Map<String, dynamic>);
+  final LicenseData data;
+  try {
+    data = LicenseData.fromJson(jsonDecode(utf8.decode(payload)) as Map<String, dynamic>);
+  } on FormatException catch (e) {
+    throw LicenseException('كود التفعيل فيه إعدادات غلط: ${e.message}');
+  }
   if (data.device != deviceCode) throw LicenseException('الكود ده معمول لجهاز تاني (كود جهازك: $deviceCode)');
   return data;
 }
