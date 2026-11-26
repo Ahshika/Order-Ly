@@ -90,7 +90,7 @@ class _LicenseScreenState extends ConsumerState<LicenseScreen> {
       await ref.read(sessionProvider).value!.api!.post('/api/license', {'code': _code.text.trim()});
       ref.invalidate(licenseProvider);
       _code.clear();
-      if (mounted) showMessage(context, 'اتفعّل البرنامج ✅ شكراً!');
+      if (mounted) showMessage(context, 'اتفعّل البرنامج، شكراً!');
     } catch (e) {
       if (mounted) setState(() => _error = errorText(e));
     } finally {
@@ -112,7 +112,7 @@ class _LicenseScreenState extends ConsumerState<LicenseScreen> {
           final exp = parseDate(s['expiresAt']);
           final device = s['deviceCode'] as String;
           final (label, color) = switch (state) {
-            'active' => ('مفعّل ✅', const Color(0xFF16A34A)),
+            'active' => ('مفعّل', const Color(0xFF16A34A)),
             'trial' => ('تجربة مجانية', brandPrimary),
             'tampered' => ('تاريخ الجهاز مش مظبوط', Theme.of(context).colorScheme.error),
             _ => ('خلص', Theme.of(context).colorScheme.error),

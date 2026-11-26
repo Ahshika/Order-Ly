@@ -297,7 +297,7 @@ class _CloseDialogState extends ConsumerState<_CloseDialog> {
           Text('المتوقع: ${money(_result!['expectedCashCents'] as int)}'),
           Text('الفعلي: ${money(_result!['countedCashCents'] as int)}'),
           const SizedBox(height: 8),
-          Text(diff == 0 ? 'الدرج مظبوط ✔' : diff > 0 ? 'زيادة ${money(diff)}' : 'عجز ${money(-diff)}',
+          Text(diff == 0 ? 'الدرج مظبوط' : diff > 0 ? 'زيادة ${money(diff)}' : 'عجز ${money(-diff)}',
               style: Theme.of(context).textTheme.titleMedium?.bold.copyWith(color: diff < 0 ? Theme.of(context).colorScheme.error : const Color(0xFF16A34A))),
         ]),
         actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('تمام'))],
@@ -314,7 +314,7 @@ class _CloseDialogState extends ConsumerState<_CloseDialog> {
           MoneyField(controller: _counted, label: 'عدّيت كام في الدرج؟', autofocus: true, onChanged: (_) => setState(() {})),
           if (counted != null && _counted.text.isNotEmpty) ...[
             const SizedBox(height: 6),
-            Text(counted == widget.expected ? 'مظبوط ✔' : counted > widget.expected ? 'زيادة ${money(counted - widget.expected)}' : 'عجز ${money(widget.expected - counted)}'),
+            Text(counted == widget.expected ? 'مظبوط' : counted > widget.expected ? 'زيادة ${money(counted - widget.expected)}' : 'عجز ${money(widget.expected - counted)}'),
           ],
           const SizedBox(height: 10),
           MoneyField(controller: _kept, label: 'هتسيب كام فكة للوردية الجاية؟'),
@@ -367,7 +367,7 @@ class _HistoryScreen extends ConsumerWidget {
             for (final s in list)
               Card(
                 child: ListTile(
-                  title: Text('${formatDateTime(parseDate(s['openedAt'])!)} ← ${s['closedAt'] == null ? 'مفتوحة' : formatTime(parseDate(s['closedAt'])!)}'),
+                  title: Text('${formatDateTime(parseDate(s['openedAt'])!)} - ${s['closedAt'] == null ? 'مفتوحة' : formatTime(parseDate(s['closedAt'])!)}'),
                   subtitle: Text([
                     'المبيعات ${money(s['salesCents'] as int? ?? 0)}',
                     if (s['countedCashCents'] != null) 'الفرق ${money((s['countedCashCents'] as int) - (s['expectedCashCents'] as int))}',

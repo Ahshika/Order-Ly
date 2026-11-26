@@ -360,7 +360,8 @@ extension _ChainSync on CloudSync {
       _online(() async {
         await _token();
         await _patch({
-          if (approve) 'chains/$_cid/members/$uid': {'at': {'.sv': 'timestamp'}, 'name': name, 'branch': branch, 'main': mainName},
+          // mu: كود الرئيسي على Firebase (الفرع بيكتبه في cafes/{uid}/main عشان المالك يشوف تقاريره)
+          if (approve) 'chains/$_cid/members/$uid': {'at': {'.sv': 'timestamp'}, 'name': name, 'branch': branch, 'main': mainName, 'mu': _uid},
           'chains/$_cid/req/$uid': null,
         });
         _chainCache = null;
@@ -405,6 +406,7 @@ extension _ChainSync on CloudSync {
         final member = await _getJson('chains/$id/members/$_uid');
         _membershipCheckedAt = now;
         if (member is Map) {
+          if (member['mu'] is String) db.setSetting('chain_main_uid', member['mu'] as String);
           if (role == 'pending') {
             server._setChain('member', id: id, mainName: '${member['main'] ?? ''}');
             current = 'member';

@@ -39,6 +39,10 @@ class CloudSync {
   DateTime? _chainSyncedAt;
   DateTime? _membershipCheckedAt;
 
+  /// المالك (routes_owner.dart): آخر مرة قايمة الفروع اتكتبت، والإشعارات اللي طالعة من آخر تقارير.
+  DateTime? _ownerShopsAt;
+  List<(String, Map<String, Object?>)> _ownerEvents = const [];
+
   AppDb get db => server.db;
   FirebaseEndpoints? _endpoints;
   FirebaseEndpoints get _fb => _endpoints ?? server.firebase ?? FirebaseEndpoints.live;
@@ -117,6 +121,7 @@ class CloudSync {
     }
     // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
     if (!_stopped && _idToken != null) await _syncChain();
+    if (!_stopped && _idToken != null) await _syncOwner();
   }
 
   /// المنيو والترابيزات ومتابعة العملاء. لو الكتابة فشلت (النت قطع لحظة)، اللي اتعلّم "اتبعت" بيرجع يتبعت في الدورة الجاية.
@@ -153,6 +158,7 @@ class CloudSync {
       final reportDay = _addReports(reports, topics);
       await _patch(reports);
       db.setSetting('report_last_day', reportDay);
+      await _notifyOwner(_ownerEvents);
       db.setSetting('report_last_error', '');
     } catch (e) {
       _sent
@@ -506,14 +512,20 @@ class CloudSync {
         days.add(d);
       }
     }
+    // إشعارات المالك: كل يوم خلص (آخر يومين بس لو الكمبيوتر كان مقفول) وكل وردية اتقفلت
+    final events = <(String, Map<String, Object?>)>[];
     for (final d in days) {
-      _putReport(updates, 'rep/$_uid/${BusinessDay.keyOf(d)}/day', server._dayReport(d));
+      final report = server._dayReport(d);
+      _putReport(updates, 'rep/$_uid/${BusinessDay.keyOf(d)}/day', report);
+      if (d.isBefore(today) && !d.isBefore(day(-2))) events.add(('day:${BusinessDay.keyOf(d)}', dayPushMessage(report, _uid!)));
     }
     final since = DateTime.now().toUtc().subtract(const Duration(hours: 48)).toIso8601String();
     for (final s in db.select('SELECT * FROM register_sessions WHERE closed_at IS NOT NULL AND closed_at > ?', [since])) {
       final r = server._shiftReport(s);
+      events.add(('shift:${s['id']}', shiftPushMessage(r, _uid!)));
       _putReport(updates, 'rep/$_uid/${r['date']}/shifts/${s['id']}', r);
     }
+    _ownerEvents = events;
     return BusinessDay.keyOf(today);
   }
 
@@ -680,7 +692,7 @@ class CloudSync {
           // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
         }
       }
-      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep']) '$root/$_uid': null});
+      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own']) '$root/$_uid': null});
       await _http.post(
         Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},

@@ -181,7 +181,7 @@
               "annotations": [
                 {
                   "type": "load",
-                  "description": "login screen after 1213 ms"
+                  "description": "login screen after 1321 ms"
                 },
                 {
                   "type": "outside",
@@ -196,16 +196,16 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 4174,
+                  "duration": 4427,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-23T12:47:18.436Z",
+                  "startTime": "2026-11-26T11:40:41.564Z",
                   "annotations": [
                     {
                       "type": "load",
-                      "description": "login screen after 1213 ms"
+                      "description": "login screen after 1321 ms"
                     },
                     {
                       "type": "outside",
@@ -239,12 +239,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1500,
+                  "duration": 1499,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-23T12:47:22.721Z",
+                  "startTime": "2026-11-26T11:40:46.109Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -267,7 +267,7 @@
               "annotations": [
                 {
                   "type": "load",
-                  "description": "login screen after 1525 ms"
+                  "description": "login screen after 1381 ms"
                 },
                 {
                   "type": "outside",
@@ -282,16 +282,16 @@
                   "workerIndex": 1,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 4186,
+                  "duration": 3516,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-23T12:47:24.686Z",
+                  "startTime": "2026-11-26T11:40:48.174Z",
                   "annotations": [
                     {
                       "type": "load",
-                      "description": "login screen after 1525 ms"
+                      "description": "login screen after 1381 ms"
                     },
                     {
                       "type": "outside",
@@ -325,12 +325,12 @@
                   "workerIndex": 1,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 837,
+                  "duration": 1485,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-23T12:47:29.004Z",
+                  "startTime": "2026-11-26T11:40:51.851Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -348,8 +348,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-23T12:47:18.012Z",
-    "duration": 11935.400000000001,
+    "startTime": "2026-11-26T11:40:41.182Z",
+    "duration": 12255.88,
     "expected": 4,
     "skipped": 0,
     "unexpected": 0,

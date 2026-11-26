@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23T14:49:36.591239",
+  "generatedAt": "2026-11-26T13:43:21.908994",
   "results": [
     {
       "scenario": "race.add_order_vs_close",
@@ -55,7 +55,7 @@
       "scenario": "flood.300_orders_same_check",
       "status": "PASS",
       "errors": 0,
-      "ms": 5798,
+      "ms": 6087,
       "subtotal": 3000000,
       "expected": 3000000,
       "uniqueOrderNumbers": true
@@ -85,15 +85,15 @@
     {
       "scenario": "flood.websockets_400",
       "status": "PASS",
-      "messagesReceived": 111821,
-      "writeMsFor100Orders": 27493,
-      "infoLatencyMs": 189,
-      "rssMB": 273
+      "messagesReceived": 118904,
+      "writeMsFor100Orders": 29670,
+      "infoLatencyMs": 202,
+      "rssMB": 276
     },
     {
       "scenario": "dos.slowloris_1000",
       "status": "PASS",
-      "infoLatencyMs": 3
+      "infoLatencyMs": 2
     },
     {
       "scenario": "inventory.void_pending_qr_order",
@@ -167,15 +167,15 @@
       "scenario": "dos.huge_unauth_body",
       "status": "PASS",
       "httpStatus": 413,
-      "rssGrowthMB": 9,
-      "peakRssMB": 369
+      "rssGrowthMB": 29,
+      "peakRssMB": 373
     },
     {
       "scenario": "dos.image_bomb",
       "status": "PASS",
       "fileKB": 117,
       "decodedMegapixels": 100,
-      "ms": 7,
+      "ms": 9,
       "peakRssGrowthMB": 95,
       "refused": true
     },
@@ -199,13 +199,13 @@
       "scenario": "resilience.corrupt_db",
       "status": "INFO",
       "started": false,
-      "error": "ApiError(500): قاعدة البيانات بايظة ومفيش نسخة احتياطية سليمة نرجع لها. الملف البايظ اتحفظ في C:\\Users\\ahmed\\AppData\\Local\\Temp\\orderly_stress4b31fb99\\corrupt-2026-11-23T14-49-33. كلم الدعم الفني ومتمسحش الفولدر ده"
+      "error": "ApiError(500): قاعدة البيانات بايظة ومفيش نسخة احتياطية سليمة نرجع لها. الملف البايظ اتحفظ في C:\\Users\\ahmed\\AppData\\Local\\Temp\\orderly_stress1e2430b0\\corrupt-2026-11-26T13-43-19. كلم الدعم الفني ومتمسحش الفولدر ده"
     },
     {
       "scenario": "resilience.stop_under_load",
       "status": "PASS",
-      "completedBeforeStop": 18,
-      "ordersStored": 200,
+      "completedBeforeStop": 8,
+      "ordersStored": 161,
       "halfOrders": 0,
       "dbIntegrity": "ok"
     }

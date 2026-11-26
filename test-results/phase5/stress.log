@@ -1,0 +1,49 @@
+00:00 +0: loading D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart
+00:00 +0: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:01 +1: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:02 +2: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:03 +3: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:04 +4: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:05 +5: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:06 +6: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+00:06 +7: D:/Project/Programes/Order Ly/source/test_stress/endpoint_cost_test.dart: endpoint cost under a busy cafe
+{
+  "GET /api/floor": 2.7164533333333334,
+  "GET /api/kds": 4.35046,
+  "GET /api/live": 1.8392866666666667,
+  "GET /api/checks": 2.9589133333333333,
+  "GET /api/info (no auth)": 1.8633266666666666,
+  "POST order": 5.648546666666667
+}
+00:07 +8: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+00:13 +9: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+00:14 +10: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+00:14 +11: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+00:14 +12: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+00:59 +13: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:01 +14: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:01 +15: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:02 +16: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:02 +17: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:03 +18: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:03 +19: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:07 +20: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:07 +21: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:19 +22: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:20 +23: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:20 +24: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:21 +25: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:23 +26: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:25 +27: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:25 +28: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:26 +29: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:26 +30: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+01:29 +31: D:/Project/Programes/Order Ly/source/test_stress/order_cost_ab_test.dart: order cost with and without the new indexes
+{
+  "with new indexes #0": "12.877",
+  "without #0": "13.240",
+  "with new indexes #1": "14.492",
+  "without #1": "14.821"
+}
+04:15 +32: All tests passed!
+exit=0

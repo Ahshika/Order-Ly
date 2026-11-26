@@ -8,14 +8,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'src/app.dart';
+import 'src/owner/owner_app.dart';
 import 'src/core/app_config.dart';
 import 'src/core/app_info.dart';
 import 'src/core/diagnostics.dart';
 import 'src/core/notifications.dart';
 import 'src/core/session.dart';
 
+/// نسخة المالك (flutter build web --dart-define=ORDERLY_OWNER=true): أبلكيشن التقارير والإشعارات، مش برنامج الكافيه.
+const ownerBuild = bool.fromEnvironment('ORDERLY_OWNER');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (ownerBuild) {
+    if (kIsWeb && Uri.base.queryParameters['a11y'] == '1') SemanticsBinding.instance.ensureSemantics();
+    return runApp(const ProviderScope(child: OwnerApp()));
+  }
   final config = await AppConfig.load();
   await _startDiagnostics();
   await NotificationCenter.init();

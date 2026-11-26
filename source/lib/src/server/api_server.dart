@@ -28,6 +28,7 @@ import '../core/license.dart';
 import 'db.dart';
 import 'discovery.dart';
 import 'passwords.dart';
+import 'web_push.dart';
 
 part 'backup_service.dart';
 part 'cloud_sync.dart';
@@ -37,6 +38,7 @@ part 'routes_day_reports.dart';
 part 'routes_inventory.dart';
 part 'routes_license.dart';
 part 'routes_menu.dart';
+part 'routes_owner.dart';
 part 'routes_payments.dart';
 part 'routes_reports.dart';
 part 'routes_shop.dart';
@@ -87,8 +89,16 @@ class AuthUser {
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
 class OrderlyServer {
-  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase, String? webDir})
-      : webDir = webDir ?? _WebApp._findWebDir();
+  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase, String? webDir, PushSender? pushSender})
+      : webDir = webDir ?? _WebApp._findWebDir(),
+        pushSender = pushSender ?? _realPushSender;
+
+  /// إشعارات المالك (routes_owner.dart). الاختبارات بتحط واحد وهمي.
+  final PushSender pushSender;
+
+  static final _pushClient = http.Client();
+  static Future<PushResult> _realPushSender(PushSubscriptionData sub, Map<String, Object?> message, P256Keys vapid) =>
+      sendPush(_pushClient, sub, message, vapid: vapid, subject: menuSiteUrl);
 
   final String dataDir;
   final int requestedPort;
@@ -267,6 +277,7 @@ class OrderlyServer {
     _registerDayReportRoutes(r);
     _registerLicenseRoutes(r);
     _registerBranchRoutes(r);
+    _registerOwnerRoutes(r);
 
     r.get('/api/ws', _webSocket);
     // أي مسار تاني: نسخة الويب للموظفين (الأيفون)، و/api/... اللي مش موجود 404

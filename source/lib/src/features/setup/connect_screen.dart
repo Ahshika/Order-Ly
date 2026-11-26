@@ -114,7 +114,7 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 padding: const EdgeInsets.all(18),
                 child: Text(
                   'ملقيناش سيرفر في الشبكة. اتأكد من الواي فاي، أو اكتب عنوان السيرفر تحت '
-                  '(هتلاقيه في برنامج الكمبيوتر: الإعدادات ← الاتصال).',
+                  '(هتلاقيه في برنامج الكمبيوتر: الإعدادات › الاتصال).',
                   style: text.bodyMedium,
                 ),
               ),

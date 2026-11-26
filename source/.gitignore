@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# أبلكيشن المالك بعد البناء (tool/build_owner_web.ps1): بيترفع على Firebase Hosting، مش جزء من الكود
+/firebase/public/owner/

@@ -18,7 +18,16 @@
 
   <link rel="icon" type="image/png" href="favicon.png"/>
   <title>Order Ly</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" id="manifest" href="manifest.json">
+  <script>
+    // نفس الصفحة لنسختين: الموظفين (من كمبيوتر الكاشير) والمالك (على Firebase تحت /owner/).
+    // manifest-owner.json مالوش start_url: الأيفون بيحفظ اللينك اللي المالك فتحه (فيه كود الربط) للأيقونة.
+    if (location.pathname.indexOf('/owner') === 0) {
+      document.getElementById('manifest').href = 'manifest-owner.json';
+      document.title = 'Order Ly المالك';
+    }
+  </script>
+  <script src="owner_push.js"></script>
   <style>
     html, body { margin: 0; background: #F6F5F2; }
     @media (prefers-color-scheme: dark) { html, body { background: #121212; } #loading { color: #ddd; } }

@@ -10,7 +10,7 @@ import '../../core/shop.dart';
 
 pw.ThemeData? _theme;
 
-Future<pw.ThemeData> _loadTheme() async {
+Future<pw.ThemeData> loadPdfTheme() async {
   if (_theme != null) return _theme!;
   final regular = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Regular.ttf'));
   final bold = pw.Font.ttf(await rootBundle.load('assets/fonts/Cairo-Bold.ttf'));
@@ -33,7 +33,7 @@ String _time(DateTime d) => formatTime(d.toLocal());
 
 /// تيكت البار / المطبخ: خط كبير وواضح، من غير أسعار.
 Future<Uint8List> buildKitchenTicket(Map<String, dynamic> p, {String paper = '80mm', bool isVoid = false}) async {
-  final theme = await _loadTheme();
+  final theme = await loadPdfTheme();
   final small = paper == '58mm';
   final s = small ? 0.85 : 1.0;
   final doc = pw.Document(theme: theme);
@@ -102,7 +102,7 @@ Future<Uint8List> buildKitchenTicket(Map<String, dynamic> p, {String paper = '80
 
 /// الحساب (قبل الدفع) أو الفاتورة (بعد القفل).
 Future<Uint8List> buildCheckPdf(CheckDetail d, ShopProfile shop, {String? paper}) async {
-  final theme = await _loadTheme();
+  final theme = await loadPdfTheme();
   final size = paper ?? shop.receiptPaper;
   final small = size == '58mm';
   final s = small ? 0.85 : 1.0;
@@ -187,7 +187,7 @@ const _accent = PdfColor.fromInt(0xFFD97706);
 /// كروت الـ QR للترابيزات باسم الكافيه ولوجوه. [perPage] = 4 (كارت يتحط على الترابيزة) أو 1 (كارت كبير للكاونتر أو الحيطة).
 /// الكروت مترصوصة بصفوف ثابتة المقاس (من غير GridView) عشان تطلع كلها جوه الورقة في الاتجاه العربي.
 Future<Uint8List> buildQrCardsPdf(List<({String title, String subtitle, String url})> cards, ShopProfile shop, {int perPage = 4}) async {
-  final theme = await _loadTheme();
+  final theme = await loadPdfTheme();
   final doc = pw.Document(theme: theme, title: 'QR ${shop.name}', author: shop.name);
   const margin = 18.0;
   final page = PdfPageFormat.a4.copyWith(marginLeft: margin, marginRight: margin, marginTop: margin, marginBottom: margin);

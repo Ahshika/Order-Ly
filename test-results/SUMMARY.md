@@ -334,6 +334,45 @@ Evidence: `phase3/flutter-test.log`, `phase3/stress.log`, `phase3/cloud-live.log
 
 Evidence: `phase4/`, `staff-web/` (report, screenshots of the floor on both engines), `staff-web-run.log`, `web-build.log`.
 
+## Round 10: phase 5, the owner app with reports, PDF and notifications (2026-11-26)
+
+**What changed:**
+
+- **Owner app:** a Flutter web build in owner mode at `https://orderly-cafe-28129.web.app/owner/`, the same app for iPhone and Android. Join from the QR link, branches, days, the day report, PDF per day, and a notifications switch.
+- **Linking on the cashier PC:** in the main branch's settings, "المالك من بره" makes a one-time code (8 characters, 15 minutes) shown as a QR. The owner signs up on the shop's own Firebase project and claims with the code, and the PC approves the claim when the code matches, then cancels the code.
+- **The main branch publishes:**
+  - `own/$main/shops`: itself plus the linked branches;
+  - VAPID keys;
+  - and every cafe writes `cafes/$uid/main` (branches get the main's id when approved).
+- **Notifications (Web Push from the cafe PC, no server, no paid plan):**
+  - RFC 8291 aes128gcm + RFC 8292 VAPID (`lib/src/server/web_push.dart`).
+  - One notification per shift close, and one per finished day (the last 2 days at most after downtime). Each is sent once and remembered across restarts.
+  - Subscriptions the push service reports as gone (404/410) are removed.
+  - Only known push services are contacted.
+- **New dependency, with your approval:** `pointycastle` 4.0.0 (MIT, Bouncy Castle), pulling in `convert` 3.1.2 (Dart team). The `cryptography` package turned out not to support P-256 in pure Dart, so the study was wrong about that.
+- **Rules (deployed):** the owner reads a branch's reports only when the main has confirmed that branch AND the branch points at that main. The code can't be read, reused, or claimed for someone else. The private key and the phone list are readable only by confirmed branches.
+- **Web pages:**
+  - custom `flutter_bootstrap.js`, without Flutter's deprecated service worker;
+  - `push-sw.js`;
+  - `owner_push.js`;
+  - `manifest-owner.json` with no start_url, so the iPhone saves the invite link;
+  - `index.html` switches the manifest under `/owner/`.
+- **Offline fonts:** Cairo has no "←", "✔" or "✅", so the offline staff web app showed boxes. In screen text and the PDF, "←" is now "›" (mirrored in RTL), and "✔"/"✅" were dropped (the colour and the word stay).
+
+| Test | Result |
+|---|---|
+| `test/web_push_test.dart` | **4/4**: byte-exact RFC 8291 section 5 message and appendix A ciphertext; random messages decrypt like a phone; the ES256 JWT verifies; only known push hosts |
+| `test/owner_link_test.dart` (fake Firebase) | **4/4**: right code approved, wrong code not, code single-use; shops, main pointer, stable VAPID key; one push per shift close to every phone, no repeat, gone phone removed; remove owner; cashier gets 403 |
+| `test_cloud/owner_cloud_test.dart` (**real Firebase, deployed rules**) | **1/1** (after a test bug was fixed: an empty PUT instead of DELETE). Wrong code, reading the code, claiming for someone else, reusing the code, the owner writing reports, a stranger reading reports, a fake branch reading the private key or phones, an owner after removal: **all refused**. The owner reads shops, the public key and the reports. Afterwards there was **no data and 0 accounts**. A leftover `cafes/<stranger>` from the interrupted first run was deleted, and the test now always cleans it up. |
+| `test_web/owner` (Playwright, owner app from `firebase/public/owner`, fake Firebase) | **6/6** on WebKit/iPhone 14 and Chromium/Pixel 7: QR link, new account, linked by code, branches, days, the day report with the right numbers, PDF; a wrong code gives a clear message; a non-Firebase database in the link is refused. The notification card says "add to home screen" on iPhone Safari and offers the button on Android. |
+| `test_web/staff` | **4/4** (after the bootstrap/index changes) |
+| `flutter test test/` | **115/115**; `test_stress` **32/32** |
+| Deploy | Rules deployed; Hosting deployed. Live: `/owner/` 200, `push-sw.js` 200, the manifest 200, the customer menu still 200 |
+
+**Not tested:** a real notification arriving on a real iPhone or Android, which needs a real phone subscribed to Apple/Google; the encryption is verified against the RFC, but end-to-end delivery is not. Also the PDF share sheet on a real phone.
+
+Evidence: `phase5/`, `owner-web/` (report, screenshots), `owner-build.log`.
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.
