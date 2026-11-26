@@ -224,6 +224,9 @@ class OrderlyServer {
     await Future<void>.delayed(const Duration(milliseconds: 1500));
   }
 
+  /// كأن آخر ملخص لايف اتبعت من أكتر من دقيقة (للاختبارات).
+  void forgetLiveForTests() => _cloud?._sent.remove('live-at');
+
   /// كأن توكن Firebase خلص (بيعيش ساعة) عشان المزامنة الجاية تجدده (للاختبارات).
   void expireCloudTokenForTests() => _cloud?._idToken = null;
 

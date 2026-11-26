@@ -109,6 +109,10 @@ void main() {
     expect(st, 200);
     expect((days as Map).isNotEmpty, isTrue);
     expect(await stranger.status('GET', 'rep/$main'), 401);
+    // الفرع وهو شغال: المالك يقراه، والغريب لأ، والمالك مايكتبش فيه
+    expect((await owner.send('GET', 'live/$main')).$2, isA<Map>());
+    expect(await stranger.status('GET', 'live/$main'), 401);
+    expect(await owner.status('PUT', 'live/$main', {'j': '{}', 'at': {'.sv': 'timestamp'}}), 401);
     // ومايكتبش في التقارير
     expect(await owner.status('PUT', 'rep/$main/2026-01-01/day', {'j': '{}', 'at': {'.sv': 'timestamp'}}), 401);
 

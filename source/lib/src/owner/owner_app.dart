@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/file_save.dart';
+import '../core/format.dart';
 import '../core/theme.dart';
 import '../widgets/common.dart' show EmptyState, ErrorBanner, showMessage;
 import 'day_report_pdf.dart';
@@ -61,6 +62,13 @@ final _shopsProvider = FutureProvider.autoDispose<List<(String, String, String)>
   final raw = await cloud.get('own/${cloud.link.main}/shops');
   if (raw is! Map) return const [];
   return [for (final e in raw.entries) ('${e.key}', '${(e.value as Map)['name'] ?? ''}', '${(e.value as Map)['branch'] ?? ''}')]..sort((a, b) => a.$3.compareTo(b.$3));
+});
+
+/// الفرع دلوقتي (live/{uid}): الملخص ووقت آخر تحديث، أو null لو لسه مابعتش.
+final _liveProvider = FutureProvider.autoDispose.family<(Map<String, dynamic>, DateTime)?, String>((ref, shop) async {
+  final raw = await _cloud(ref).get('live/$shop');
+  if (raw is! Map || raw['j'] is! String) return null;
+  return (jsonDecode(raw['j'] as String) as Map<String, dynamic>, DateTime.fromMillisecondsSinceEpoch(raw['at'] as int? ?? 0));
 });
 
 /// أيام الفرع اللي ليها تقارير (أحدث يوم الأول).
@@ -247,6 +255,22 @@ class OwnerHomeScreen extends ConsumerStatefulWidget {
 
 class _OwnerHomeScreenState extends ConsumerState<OwnerHomeScreen> {
   bool _opened = false;
+  Timer? _refresh;
+
+  @override
+  void initState() {
+    super.initState();
+    // الفروع وهي شغالة بتتحدث كل 30 ثانية طول ما الأبلكيشن قدام المالك (مش في الخلفية)
+    _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) ref.invalidate(_liveProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _refresh?.cancel();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -289,16 +313,7 @@ class _OwnerHomeScreenState extends ConsumerState<OwnerHomeScreen> {
             data: (list) => list.isEmpty
                 ? [const EmptyState(icon: Icons.storefront_rounded, text: 'لسه مفيش فروع')]
                 : [
-                    for (final (uid, name, branch) in list)
-                      Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.storefront_rounded),
-                          title: Text(branch.isEmpty ? name : branch),
-                          subtitle: branch.isEmpty ? null : Text(name),
-                          trailing: const Icon(Icons.chevron_left_rounded),
-                          onTap: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => _DaysScreen(shop: uid, title: branch.isEmpty ? name : branch))),
-                        ),
-                      ),
+                    for (final (uid, name, branch) in list) _LiveCard(shop: uid, title: branch.isEmpty ? name : branch),
                   ],
           ),
         ]),
@@ -365,6 +380,70 @@ class _PushCardState extends ConsumerState<_PushCard> {
           if (support == PushSupport.supported && !_done)
             FilledButton(onPressed: _busy ? null : _enable, child: _busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('شغّلها')),
         ]),
+      ),
+    );
+  }
+}
+
+/// كارت الفرع: النهارده لحد دلوقتي، والمفتوح، والدرج، واللي مستني. الضغط بيفتح التقارير بالأيام.
+class _LiveCard extends ConsumerWidget {
+  const _LiveCard({required this.shop, required this.title});
+  final String shop;
+  final String title;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final live = ref.watch(_liveProvider(shop));
+    final text = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+    final data = live.value;
+    final s = data?.$1;
+    // الفرع بيبعت نبضة كل 5 دقايق: لو عدّى 10 من غير جديد يبقى الكمبيوتر مقفول أو مفيش نت
+    final online = data != null && DateTime.now().difference(data.$2) < const Duration(minutes: 10);
+    Map<String, dynamic> m(String k) => (s?[k] as Map?)?.cast<String, dynamic>() ?? const {};
+    final today = m('today'), open = m('open'), reg = s?['reg'] as Map?;
+    final waiting = [
+      if ((s?['qr'] ?? 0) != 0) '${s!['qr']} طلب QR',
+      if ((s?['pays'] ?? 0) != 0) '${s!['pays']} تحويل',
+      if ((s?['calls'] ?? 0) != 0) '${s!['calls']} نداء',
+    ];
+    return Card(
+      // زرار لقارئ الشاشة (VoiceOver): "فرع ... • النهارده ..."
+      child: Semantics(
+        button: true,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => _DaysScreen(shop: shop, title: title))),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Row(children: [
+                const Icon(Icons.storefront_rounded),
+                const SizedBox(width: 8),
+                Expanded(child: Text(title, style: text.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                if (data != null)
+                  Chip(
+                    visualDensity: VisualDensity.compact,
+                    label: Text(online ? 'شغال' : 'مش متصل من ${formatTime(data.$2)}'),
+                    backgroundColor: online ? scheme.primaryContainer : scheme.errorContainer,
+                  ),
+                const Icon(Icons.chevron_left_rounded),
+              ]),
+              const SizedBox(height: 8),
+              if (live.hasError && data == null) Text(ownerError(live.error!), style: TextStyle(color: scheme.error)),
+              if (live.isLoading && data == null) const LinearProgressIndicator(),
+              if (!live.isLoading && !live.hasError && data == null) Text('لسه مفيش بيانات من الفرع ده', style: text.bodySmall),
+              if (s != null) ...[
+                Text('النهارده: ${money(today['t'] as int? ?? 0)} • ${today['n'] ?? 0} حساب', style: text.titleSmall),
+                const SizedBox(height: 4),
+                Text('مفتوح دلوقتي: ${open['n'] ?? 0} حساب (${money(open['t'] as int? ?? 0)}) • ${open['busy'] ?? 0} من ${open['tables'] ?? 0} ترابيزة'),
+                Text(reg == null ? 'الدرج مقفول' : 'الدرج مفتوح مع ${reg['by'] ?? ''} • المتوقع فيه ${money(reg['cash'] as int? ?? 0)}'),
+                if (waiting.isNotEmpty) Text('مستني: ${waiting.join(' • ')}', style: TextStyle(color: scheme.tertiary, fontWeight: FontWeight.bold)),
+                if ((s['voids'] ?? 0) != 0) Text('اتلغى النهارده: ${money(s['voids'] as int)}', style: text.bodySmall),
+              ],
+            ]),
+          ),
+        ),
       ),
     );
   }

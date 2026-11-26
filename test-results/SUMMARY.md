@@ -373,6 +373,24 @@ Evidence: `phase4/`, `staff-web/` (report, screenshots of the floor on both engi
 
 Evidence: `phase5/`, `owner-web/` (report, screenshots), `owner-build.log`.
 
+## Round 11: phase 6, the owner sees each branch live (2026-11-26)
+
+**What changed:**
+
+- Every cafe (main, branch, or a cafe with no branches) sends its summary to `live/{uid}`, at most once a minute when it changed, plus a heartbeat every 5 minutes. This is the same summary the main branch already received: today by business day, open checks, busy tables, the register (who opened it, expected cash), QR orders, transfers and calls waiting, voids.
+- **Rules:** same read condition as the reports (main confirmed the branch AND the branch points at that main). Only the cafe writes, with size and time validated.
+- **Owner app home:** one card per branch with today, open checks, the drawer and what is waiting, plus "شغال" or "مش متصل من …" when there has been no heartbeat for 10 minutes. It refreshes every 30 s only while the app is in front of the owner. The card is a button for screen readers (VoiceOver).
+
+| Test | Result |
+|---|---|
+| `test/owner_link_test.dart` | **5/5** (new: the summary is sent, throttled to once a minute, and shows the opened register on the next minute) |
+| `test_cloud/owner_cloud_test.dart` (real Firebase, deployed rules) | **1/1**: the owner reads `live`; a stranger and the owner writing are refused; nothing left behind |
+| `test_web/owner` | **6/6** on WebKit/iPhone and Chromium/Android: a running branch card (today 4,567 EGP, 3 open, drawer with Sara, 2 QR + 1 transfer waiting) and an offline branch card ("مش متصل من …", drawer closed). The screenshots also confirm that "›" renders correctly in RTL. |
+| `flutter test test/` | **116/116** |
+| Deploy | Rules and Hosting deployed; `/owner/` 200 |
+
+**Firebase cost:** uploads are free. The owner downloads about 2 KB per branch every 30 s, and only while the app is open (about 0.4 MB for 30 minutes with 3 branches).
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

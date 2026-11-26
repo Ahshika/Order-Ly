@@ -116,6 +116,23 @@ void main() {
     expect(fb.get('own/$uid/push'), isNull);
   });
 
+  test('live summary: sent for the owner, at most once a minute, with the open register', () async {
+    final live = fb.get('live/$uid') as Map;
+    final s = jsonDecode(live['j'] as String) as Map;
+    expect(s['branch'], 'فرع المعادي');
+    expect(s['reg'], isNull);
+    final writesBefore = fb.requests.where((r) => r.method == 'PATCH' && r.path.isEmpty).length;
+    // الدرج اتفتح: الملخص الجاي بيقول كده، بس مش قبل دقيقة من آخر مرة
+    await api.post('/api/register/open', {'openingCashCents': 5000});
+    await server.cloudTickForTests();
+    expect((jsonDecode((fb.get('live/$uid') as Map)['j'] as String) as Map)['reg'], isNull, reason: 'throttled to once a minute');
+    expect(fb.requests.where((r) => r.method == 'PATCH' && r.path.isEmpty).length, greaterThanOrEqualTo(writesBefore));
+    server.forgetLiveForTests();
+    await server.cloudTickForTests();
+    final reg = (jsonDecode((fb.get('live/$uid') as Map)['j'] as String) as Map)['reg'] as Map;
+    expect(reg['cash'], 5000);
+  });
+
   test('removing an owner deletes their access and phones; only the owner role can link', () async {
     fb.write('own/$uid/ok/ownerA', {'name': 'أحمد', 'email': 'a@b.c', 'at': 1});
     fb.write('own/$uid/push/ownerA/dev1', {'s': '{}', 'at': 1});

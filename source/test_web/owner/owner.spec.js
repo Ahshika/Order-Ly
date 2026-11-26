@@ -35,6 +35,9 @@ async function fakeFirebase(page) {
     [`own/${MAIN}/shops`]: { [MAIN]: { name: 'كافيه النور', branch: 'الفرع الرئيسي' }, [SHOP2]: { name: 'كافيه النور', branch: 'فرع المعادي' } },
     [`own/${MAIN}/vapid/pub`]: 'BP4z9KsN6nGRTbVYI_c7VJSPQTBtkgcy27mlmlMoZIIgDll6e3vCYLocInmYWAmS6TlzAC8wEqKK6PBru3jl7A8',
     [`rep/${SHOP2}`]: { '2026-11-22': true, '2026-11-21': true },
+    // فرع المعادي شغال دلوقتي، والرئيسي آخر تحديث منه من ساعتين
+    [`live/${SHOP2}`]: { at: Date.now(), j: JSON.stringify({ branch: 'فرع المعادي', today: { n: 12, t: 456700 }, open: { n: 3, t: 89000, busy: 3, tables: 10 }, reg: { by: 'سارة', cash: 120000 }, qr: 2, pays: 1, calls: 0, voids: 0 }) },
+    [`live/${MAIN}`]: { at: Date.now() - 2 * 3600 * 1000, j: JSON.stringify({ branch: 'الفرع الرئيسي', today: { n: 0, t: 0 }, open: { n: 0, t: 0, busy: 0, tables: 8 }, reg: null, qr: 0, pays: 0, calls: 0, voids: 0 }) },
     [`rep/${SHOP2}/2026-11-22`]: { day: { j: JSON.stringify(report), at: 1 }, shifts: { s1: { j: JSON.stringify({ id: 's1' }), at: 1 } } },
   };
   const writes = [];
@@ -102,13 +105,22 @@ test('QR link → new account → linked by code → branches → day report →
 
   // اتربط: الفروع ظهرت، وطلب الربط اتبعت بالكود الصح
   await expect.poll(() => semanticsText(page), { timeout: 60_000 }).toContain('فرع المعادي');
+  // الفروع وهي شغالة
+  await expect.poll(() => semanticsText(page)).toContain('4,567');
+  const home = await semanticsText(page);
+  expect(home).toContain('مفتوح دلوقتي: 3 حساب');
+  expect(home).toContain('الدرج مفتوح مع سارة');
+  expect(home).toContain('2 طلب QR');
+  expect(home).toContain('مش متصل من');
+  expect(home).toContain('الدرج مقفول');
+  await page.screenshot({ path: path.join(OUT, `owner-home-${ti.project.name}.png`) });
   const claim = fb.writes.find((w) => w.path === `own/${MAIN}/claim/ownerUid`);
   expect(claim.body.c).toBe(CODE);
   expect(claim.body.name).toBe('أحمد');
   ti.annotations.push({ type: 'push-card', description: (await semanticsText(page)).match(/(إشعار مع كل قفل وردية|على الأيفون: ضيف الصفحة|المتصفح ده مابيدعمش)/)?.[0] || 'none' });
 
   // الفرع ← الأيام ← تقرير اليوم
-  await page.getByRole('button', { name: /فرع المعادي/ }).click();
+  await page.getByRole('button', { name: /فرع المعادي/ }).first().click();
   await expect.poll(() => semanticsText(page)).toContain('2026-11-22');
   await page.getByRole('button', { name: /2026-11-22/ }).click();
   await expect.poll(() => semanticsText(page), { timeout: 30_000 }).toContain('المبيعات');

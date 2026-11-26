@@ -116,6 +116,7 @@ class CloudSync {
     try {
       await _pushCafe(topics);
       await _pushReports(topics);
+      await _pushLive();
     } finally {
       _busy = false;
     }
@@ -692,7 +693,7 @@ class CloudSync {
           // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
         }
       }
-      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own']) '$root/$_uid': null});
+      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own', 'live']) '$root/$_uid': null});
       await _http.post(
         Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},

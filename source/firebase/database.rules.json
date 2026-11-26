@@ -13,6 +13,7 @@
   //   الرئيسي بتاعه (cafes/$uid/main) لو الرئيسي أكّد إن الفرع ده تبعه (own/$main/shops/$uid).
   // - own/$main: ربط المالك بالفرع الرئيسي (أو الكافيه اللي مالوش فروع). الرئيسي بيعمل كود لمرة واحدة (code) بيخلص بعد شوية،
   //   والمالك بيطلب بيه (claim)، والرئيسي بيوافق (ok). shops = الفروع اللي المالك يشوفها (الرئيسي بس اللي يحددها).
+  // - live/$uid: ملخص الفرع دلوقتي (نفس شروط القراية بتاعة rep).
   //   vapid: مفاتيح إشعارات المالك (العام للمالك، والخاص للفروع اللي تبعه بس)، وpush: اشتراكات موبايلات المالك.
   "rules": {
     ".read": false,
@@ -107,6 +108,17 @@
           },
           "$other": { ".validate": false }
         }
+      }
+    },
+
+    "live": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (root.child('cafes').child($uid).child('main').isString() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('shops').child($uid).exists() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('ok').child(auth.uid).exists()))",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['j', 'at'])",
+        "j": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+        "at": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
       }
     },
 

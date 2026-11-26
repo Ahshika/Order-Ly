@@ -177,6 +177,26 @@ extension _OwnerSync on CloudSync {
     if (updates.isNotEmpty) await _patch(updates);
   }
 
+  // ---------------------------------------------------------------- الفرع وهو شغال
+
+  /// ملخص الفرع دلوقتي (live/{uid}) للمالك: مبيعات النهارده، والحسابات المفتوحة، والترابيزات، والدرج، والطلبات المستنية.
+  /// مرة في الدقيقة بالكتير لو اتغير، ونبضة كل 5 دقايق (المالك بيعرف منها إن الفرع شغال).
+  Future<void> _pushLive() async {
+    if (_uid == null || _idToken == null || _stopped) return;
+    final now = DateTime.now();
+    final last = DateTime.tryParse(_sent['live-at'] ?? '');
+    if (last != null && now.difference(last) < const Duration(seconds: 55)) return;
+    try {
+      final j = jsonEncode(await server._branchSummary());
+      if (_sent['live-j'] == j && last != null && now.difference(last) < const Duration(minutes: 5)) return;
+      await _patch({'live/$_uid': {'j': j, 'at': {'.sv': 'timestamp'}}});
+      _sent['live-j'] = j;
+      _sent['live-at'] = now.toIso8601String();
+    } catch (e) {
+      db.setSetting('owner_last_error', 'الملخص اللايف: ${_errorText(e)}');
+    }
+  }
+
   // ---------------------------------------------------------------- الإشعارات
 
   Set<String> _pushDone() => ((jsonDecode(db.setting('push_done') ?? '[]') as List).cast<String>()).toSet();
