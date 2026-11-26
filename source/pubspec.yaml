@@ -1,7 +1,7 @@
 name: orderly
 description: "Order Ly - نظام كاشير وطلب بالـ QR للكافيهات"
 publish_to: 'none'
-version: 1.1.1+10
+version: 1.2.0+11
 
 environment:
   sdk: ^3.13.4
