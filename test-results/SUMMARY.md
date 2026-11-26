@@ -391,6 +391,24 @@ Evidence: `phase5/`, `owner-web/` (report, screenshots), `owner-build.log`.
 
 **Firebase cost:** uploads are free. The owner downloads about 2 KB per branch every 30 s, and only while the app is open (about 0.4 MB for 30 minutes with 3 branches).
 
+## Round 12: phase 7, remote control with a fixed list (2026-11-27)
+
+**What changed:** commands over Firebase, not a tunnel into the whole API:
+- **The list:** `menu.get`, `item.price`, `item.available`, `checks.open`, `audit.recent`.
+- **Owner writes `cmd/{cafe}/{id}`.** The rules allow only a linked owner, only those 5 ops, `by` must be the writer, the time is the server's, and a command can't be overwritten.
+- **The cashier PC listens** (one live connection, only while "التحكم من بعيد" is on, which it is not by default, per branch). It runs the command, writes `cmdr/{cafe}/{id}` (readable only by the sender) and deletes the command.
+- **Refused:** commands older than 2 minutes, and more than 30 a minute.
+- **Every change goes in the activity log** as "من أبلكيشن المالك".
+- Owner app: in each branch, the "تحكم من بعيد" menu (menu and prices with a sold-out switch, open checks, activity log). The cashier screen has the on/off switch on every branch.
+
+| Test | Result |
+|---|---|
+| `test/remote_test.dart` (fake Firebase) | **3/3**: off by default (no reply); all 5 commands; price and availability change in the database; logged "من أبلكيشن المالك"; bad price, unknown item, op outside the list, stale command refused; turned off = no listening; the 31st+ command in a minute refused |
+| `test_cloud/owner_cloud_test.dart` (real Firebase) | First run: the checks passed but **the cleanup failed**. The rules didn't let a cafe delete its whole `cmd/{uid}`, and the cleanup is one atomic write, so it was refused entirely: the same class of bug as round 8. Fixed: the cafe may delete its whole `cmd/{uid}`. The leftovers (the temp cafe's data and account) were deleted using that cafe's own saved credentials. Then **1/1**: the owner sends only listed ops in his own name; stranger, fake `by`, reading the queue, reading someone else's reply, and faking a reply are all refused; the PC really answered over the deployed rules; a removed owner can't send. **Empty database and 0 accounts afterwards.** |
+| `test_web/owner` | **8/8** on WebKit/iPhone and Chromium/Android (new: the remote menu, prices, and the sold-out switch sends `item.available` with the right id, signed by the owner) |
+| `flutter test test/` | **119/119**; `test_stress` **32/32** |
+| Deploy | Rules and Hosting deployed |
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

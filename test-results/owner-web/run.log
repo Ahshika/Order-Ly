@@ -1,11 +1,13 @@
 
-Running 6 tests using 1 worker
+Running 8 tests using 1 worker
 
-  ok 1 [webkit-iphone] › owner\owner.spec.js:92:1 › QR link → new account → linked by code → branches → day report → PDF (11.1s)
-  ok 2 [webkit-iphone] › owner\owner.spec.js:140:1 › wrong or old code: clear message, nothing saved (5.2s)
-  ok 3 [webkit-iphone] › owner\owner.spec.js:153:1 › a link that is not a Firebase database is refused (shows the "no link" screen) (1.3s)
-  ok 4 [chromium-android] › owner\owner.spec.js:92:1 › QR link → new account → linked by code → branches → day report → PDF (13.7s)
-  ok 5 [chromium-android] › owner\owner.spec.js:140:1 › wrong or old code: clear message, nothing saved (4.3s)
-  ok 6 [chromium-android] › owner\owner.spec.js:153:1 › a link that is not a Firebase database is refused (shows the "no link" screen) (1.4s)
+  ok 1 [webkit-iphone] › owner\owner.spec.js:104:1 › QR link → new account → linked by code → branches → day report → PDF (11.0s)
+  ok 2 [webkit-iphone] › owner\owner.spec.js:152:1 › wrong or old code: clear message, nothing saved (5.2s)
+  ok 3 [webkit-iphone] › owner\owner.spec.js:165:1 › a link that is not a Firebase database is refused (shows the "no link" screen) (1.5s)
+  ok 4 [webkit-iphone] › owner\owner.spec.js:173:1 › remote control: menu and prices, sold out switch, open checks (4.8s)
+  ok 5 [chromium-android] › owner\owner.spec.js:104:1 › QR link → new account → linked by code → branches → day report → PDF (13.6s)
+  ok 6 [chromium-android] › owner\owner.spec.js:152:1 › wrong or old code: clear message, nothing saved (4.5s)
+  ok 7 [chromium-android] › owner\owner.spec.js:165:1 › a link that is not a Firebase database is refused (shows the "no link" screen) (1.5s)
+  ok 8 [chromium-android] › owner\owner.spec.js:173:1 › remote control: menu and prices, sold out switch, open checks (5.6s)
 
-  6 passed (38.2s)
+  8 passed (49.1s)

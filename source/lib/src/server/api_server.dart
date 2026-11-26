@@ -40,6 +40,7 @@ part 'routes_license.dart';
 part 'routes_menu.dart';
 part 'routes_owner.dart';
 part 'routes_payments.dart';
+part 'routes_remote.dart';
 part 'routes_reports.dart';
 part 'routes_shop.dart';
 part 'routes_tables.dart';
@@ -281,6 +282,7 @@ class OrderlyServer {
     _registerLicenseRoutes(r);
     _registerBranchRoutes(r);
     _registerOwnerRoutes(r);
+    _registerRemoteRoutes(r);
 
     r.get('/api/ws', _webSocket);
     // أي مسار تاني: نسخة الويب للموظفين (الأيفون)، و/api/... اللي مش موجود 404

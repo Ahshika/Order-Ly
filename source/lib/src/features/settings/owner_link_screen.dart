@@ -48,8 +48,22 @@ class _OwnerLinkScreenState extends ConsumerState<OwnerLinkScreen> {
         value: ref.watch(_ownerProvider),
         onRetry: () => ref.invalidate(_ownerProvider),
         builder: (s) {
+          // التحكم من بعيد: كل كمبيوتر بيقرر لنفسه (هو اللي بينفّذ أوامر الفرع بتاعه)
+          final remote = Card(
+            child: SwitchListTile(
+              secondary: const Icon(Icons.settings_remote_rounded),
+              title: const Text('التحكم من بعيد'),
+              subtitle: const Text('المالك يغيّر الأسعار، ويقفل أو يفتح صنف، ويشوف الحسابات المفتوحة والسجل من موبايله. '
+                  'كل حاجة بتتسجل في سجل العمليات "من أبلكيشن المالك".'),
+              value: s['remote'] == true,
+              onChanged: _busy ? null : (v) => _call(() => api.post('/api/owner/remote', {'on': v})),
+            ),
+          );
           if (s['hub'] != true) {
-            return const EmptyState(icon: Icons.account_tree_rounded, text: 'ربط المالك بيتعمل من الفرع الرئيسي، والمالك هيشوف تقارير الفرع ده من هناك.');
+            return ListView(padding: const EdgeInsets.all(16), children: [
+              const EmptyState(icon: Icons.account_tree_rounded, text: 'ربط المالك بيتعمل من الفرع الرئيسي، والمالك هيشوف تقارير الفرع ده من هناك.'),
+              remote,
+            ]);
           }
           if (s['ready'] != true) {
             return const EmptyState(icon: Icons.cloud_off_rounded, text: 'الكمبيوتر ده لسه مااتوصلش بالنت. استنى دقيقة وارجع تاني.');
@@ -102,6 +116,8 @@ class _OwnerLinkScreenState extends ConsumerState<OwnerLinkScreen> {
                       ]),
                     ),
                   ),
+                const SizedBox(height: 12),
+                remote,
                 const SizedBox(height: 20),
                 Text('الملّاك المربوطين', style: text.titleMedium),
                 const SizedBox(height: 6),

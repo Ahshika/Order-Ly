@@ -194,12 +194,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 11062,
+                  "duration": 11014,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:26:33.140Z",
+                  "startTime": "2026-11-26T22:23:08.174Z",
                   "annotations": [
                     {
                       "type": "push-card",
@@ -214,7 +214,7 @@
           ],
           "id": "4014f32489f3bc4430e7-1973a315b0f896dd8800",
           "file": "owner.spec.js",
-          "line": 92,
+          "line": 104,
           "column": 1
         },
         {
@@ -233,12 +233,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 5153,
+                  "duration": 5229,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:26:44.309Z",
+                  "startTime": "2026-11-26T22:23:19.319Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -248,7 +248,7 @@
           ],
           "id": "4014f32489f3bc4430e7-313826336020e602f9b6",
           "file": "owner.spec.js",
-          "line": 140,
+          "line": 152,
           "column": 1
         },
         {
@@ -267,12 +267,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1276,
+                  "duration": 1487,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:26:49.480Z",
+                  "startTime": "2026-11-26T22:23:24.562Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -282,7 +282,41 @@
           ],
           "id": "4014f32489f3bc4430e7-faa13d358282dcdb5ac1",
           "file": "owner.spec.js",
-          "line": 153,
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "remote control: menu and prices, sold out switch, open checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4822,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:26.062Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-fe13062ec72f413e18de",
+          "file": "owner.spec.js",
+          "line": 173,
           "column": 1
         },
         {
@@ -306,12 +340,12 @@
                   "workerIndex": 1,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 13725,
+                  "duration": 13567,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:26:51.264Z",
+                  "startTime": "2026-11-26T22:23:31.396Z",
                   "annotations": [
                     {
                       "type": "push-card",
@@ -326,7 +360,7 @@
           ],
           "id": "4014f32489f3bc4430e7-d7062c51f0b862c8337a",
           "file": "owner.spec.js",
-          "line": 92,
+          "line": 104,
           "column": 1
         },
         {
@@ -345,12 +379,12 @@
                   "workerIndex": 1,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 4299,
+                  "duration": 4485,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:27:05.124Z",
+                  "startTime": "2026-11-26T22:23:45.091Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -360,7 +394,7 @@
           ],
           "id": "4014f32489f3bc4430e7-a5dd739fed1c8ee79fe1",
           "file": "owner.spec.js",
-          "line": 140,
+          "line": 152,
           "column": 1
         },
         {
@@ -379,12 +413,12 @@
                   "workerIndex": 1,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1408,
+                  "duration": 1480,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-26T12:27:09.434Z",
+                  "startTime": "2026-11-26T22:23:49.591Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -394,7 +428,41 @@
           ],
           "id": "4014f32489f3bc4430e7-bed970a162a139984ac0",
           "file": "owner.spec.js",
-          "line": 153,
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "remote control: menu and prices, sold out switch, open checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5635,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:51.084Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-d607b0180aef68f218f3",
+          "file": "owner.spec.js",
+          "line": 173,
           "column": 1
         }
       ]
@@ -402,9 +470,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-26T12:26:32.713Z",
-    "duration": 38233.238,
-    "expected": 6,
+    "startTime": "2026-11-26T22:23:07.718Z",
+    "duration": 49115.294,
+    "expected": 8,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

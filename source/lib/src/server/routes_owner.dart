@@ -44,7 +44,7 @@ extension _OwnerRoutes on OrderlyServer {
   Future<Object?> _ownerStatus() async {
     final cloud = _cloud;
     final uid = db.setting('cloud_uid');
-    final base = <String, Object?>{'hub': _isOwnerHub, 'ready': cloud != null && uid != null};
+    final base = <String, Object?>{'hub': _isOwnerHub, 'ready': cloud != null && uid != null, 'remote': _remoteOn};
     if (cloud == null || uid == null || !_isOwnerHub) return base;
     final code = _activeOwnerCode();
     List<Map<String, Object?>> owners = const [];

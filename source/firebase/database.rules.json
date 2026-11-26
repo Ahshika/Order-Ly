@@ -14,6 +14,8 @@
   // - own/$main: ربط المالك بالفرع الرئيسي (أو الكافيه اللي مالوش فروع). الرئيسي بيعمل كود لمرة واحدة (code) بيخلص بعد شوية،
   //   والمالك بيطلب بيه (claim)، والرئيسي بيوافق (ok). shops = الفروع اللي المالك يشوفها (الرئيسي بس اللي يحددها).
   // - live/$uid: ملخص الفرع دلوقتي (نفس شروط القراية بتاعة rep).
+  // - cmd/$uid/$id: أوامر المالك من بره (قايمة ثابتة بس، op). المالك المربوط بالفرع ده بس يكتب أمر جديد، والكافيه بيقرا ويمسح.
+  //   cmdr/$uid/$id: رد الكافيه، وصاحب الأمر (by) بس اللي يقراه.
   //   vapid: مفاتيح إشعارات المالك (العام للمالك، والخاص للفروع اللي تبعه بس)، وpush: اشتراكات موبايلات المالك.
   "rules": {
     ".read": false,
@@ -119,6 +121,37 @@
         "j": { ".validate": "newData.isString() && newData.val().length <= 20000" },
         "at": { ".validate": "newData.val() === now" },
         "$other": { ".validate": false }
+      }
+    },
+
+    "cmd": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !newData.exists()",
+        "$id": {
+          ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.exists() && root.child('cafes').child($uid).child('main').isString() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('shops').child($uid).exists() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('ok').child(auth.uid).exists()))",
+          ".validate": "$id.length <= 40 && newData.hasChildren(['op', 'a', 'at', 'by'])",
+          "op": { ".validate": "newData.isString() && newData.val().matches(/^(menu[.]get|item[.]price|item[.]available|checks[.]open|audit[.]recent)$/)" },
+          "a": { ".validate": "newData.isString() && newData.val().length <= 4000" },
+          "at": { ".validate": "newData.val() === now" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "cmdr": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".read": "auth != null && data.child('by').val() === auth.uid",
+          ".validate": "newData.hasChildren(['ok', 'r', 'by', 'at'])",
+          "ok": { ".validate": "newData.isBoolean()" },
+          "r": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+          "by": { ".validate": "newData.isString()" },
+          "at": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
       }
     },
 

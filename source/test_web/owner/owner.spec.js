@@ -54,6 +54,18 @@ async function fakeFirebase(page) {
       writes.push({ path: p, body: JSON.parse(req.postData()) });
       // الفرع الرئيسي بيوافق على طلب الربط بالكود الصح
       if (p === `own/${MAIN}/claim/ownerUid` && JSON.parse(req.postData()).c === CODE) db[`own/${MAIN}/ok/ownerUid`] = { name: 'المالك' };
+      // كمبيوتر الفرع بيرد على أوامر التحكم من بعيد
+      const cmd = p.match(/^cmd\/([^/]+)\/([^/]+)$/);
+      if (cmd) {
+        const body = JSON.parse(req.postData());
+        const replies = {
+          'menu.get': { items: [{ id: 'i1', n: 'لاتيه', c: 'مشروبات', p: 6000, av: true }, { id: 'i2', n: 'شاي', c: 'مشروبات', p: 2000, av: false }] },
+          'item.available': { ok: true },
+          'item.price': { ok: true },
+          'checks.open': { checks: [{ n: 7, type: 'dine_in', t: 15000, paid: 0, at: '2026-11-26T18:00:00Z', table: '4', w: 'سارة' }] },
+        };
+        db[`cmdr/${cmd[1]}/${cmd[2]}`] = { ok: true, r: JSON.stringify(replies[body.op] ?? {}), by: body.by };
+      }
       return r.fulfill({ status: 204, body: '' });
     }
     return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(db[p] ?? null) });
@@ -156,4 +168,25 @@ test('a link that is not a Firebase database is refused (shows the "no link" scr
   // الشاشة دي كلام بس (مفيش زراير ولا خانات)
   await expect.poll(() => semanticsText(page), { timeout: 90_000 }).toContain('الفرع الرئيسي');
   expect(await semanticsText(page)).not.toContain('ربط المالك');
+});
+
+test('remote control: menu and prices, sold out switch, open checks', async ({ page }) => {
+  await serveApp(page);
+  const fb = await fakeFirebase(page);
+  await page.addInitScript(([k, v]) => localStorage.setItem('flutter.owner_link', JSON.stringify(JSON.stringify(v))),
+    ['x', { k: KEY, d: DB, m: MAIN, u: 'ownerUid', e: 'o@x', r: 'ref' }]);
+  await page.goto(`${SITE}/owner/?a11y=1`);
+  await expect.poll(() => semanticsText(page), { timeout: 90_000 }).toContain('فرع المعادي');
+  await page.getByRole('button', { name: /فرع المعادي/ }).first().click();
+  // زرار في الشريط فوق: نفس طريقة زرار الـ PDF
+  await page.getByRole('button', { name: 'تحكم من بعيد' }).dispatchEvent('click');
+  await expect.poll(() => semanticsText(page)).toContain('المنيو والأسعار');
+  await page.getByRole('menuitem', { name: /المنيو والأسعار/ }).or(page.getByRole('button', { name: /المنيو والأسعار/ })).first().dispatchEvent('click');
+  await expect.poll(() => semanticsText(page), { timeout: 30_000 }).toContain('لاتيه');
+  expect(await semanticsText(page)).toContain('60');
+  await page.getByRole('switch').first().dispatchEvent('click');
+  await expect.poll(() => fb.writes.some((w) => w.path.startsWith(`cmd/${SHOP2}/`) && w.body.op === 'item.available')).toBe(true);
+  const w = fb.writes.find((x) => x.body.op === 'item.available');
+  expect(JSON.parse(w.body.a)).toEqual({ id: 'i1', av: false });
+  expect(w.body.by).toBe('ownerUid');
 });

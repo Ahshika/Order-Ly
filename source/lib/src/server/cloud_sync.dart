@@ -43,6 +43,12 @@ class CloudSync {
   DateTime? _ownerShopsAt;
   List<(String, Map<String, Object?>)> _ownerEvents = const [];
 
+  /// التحكم من بعيد (routes_remote.dart): الاستماع، والأوامر اللي اتنفذت، ووقت الأوامر الأخيرة، والردود.
+  bool _cmdListening = false;
+  final Set<String> _cmdSeen = {};
+  final List<DateTime> _cmdTimes = [];
+  final Map<String, DateTime> _cmdReplies = {};
+
   AppDb get db => server.db;
   FirebaseEndpoints? _endpoints;
   FirebaseEndpoints get _fb => _endpoints ?? server.firebase ?? FirebaseEndpoints.live;
@@ -58,6 +64,7 @@ class CloudSync {
       _endpoints = await server._resolveFirebase();
       await _run();
       _listen();
+      _startCommandListener();
     });
   }
 
@@ -693,7 +700,7 @@ class CloudSync {
           // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
         }
       }
-      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own', 'live']) '$root/$_uid': null});
+      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own', 'live', 'cmd', 'cmdr']) '$root/$_uid': null});
       await _http.post(
         Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},

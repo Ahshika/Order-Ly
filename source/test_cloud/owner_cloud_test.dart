@@ -129,9 +129,30 @@ void main() {
     expect(await stranger.status('GET', 'own/$main/push'), 401);
     expect(await stranger.status('DELETE', 'cafes/${stranger.uid}/main'), 200);
 
+    // التحكم من بعيد: المالك بيكتب أوامر القايمة بس وباسمه هو، والغريب لأ، والرد لصاحب الأمر بس
+    await api.post('/api/owner/remote', {'on': true});
+    await Future<void>.delayed(const Duration(seconds: 3));
+    Map<String, Object?> cmd(String op, String by) => {'op': op, 'a': '{}', 'at': {'.sv': 'timestamp'}, 'by': by};
+    expect(await owner.status('PUT', 'cmd/$main/x1', cmd('menu.get', owner.uid)), 200);
+    expect(await owner.status('PUT', 'cmd/$main/x2', cmd('users.delete', owner.uid)), 401);
+    expect(await owner.status('PUT', 'cmd/$main/x3', cmd('menu.get', stranger.uid)), 401);
+    expect(await stranger.status('PUT', 'cmd/$main/x4', cmd('menu.get', stranger.uid)), 401);
+    expect(await owner.status('GET', 'cmd/$main'), 401);
+    Object? reply;
+    for (var i = 0; i < 40 && reply is! Map; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      final (st, body) = await owner.send('GET', 'cmdr/$main/x1');
+      if (st == 200) reply = body;
+    }
+    expect((reply as Map)['ok'], isTrue);
+    expect('${reply['r']}', contains('items'));
+    expect(await stranger.status('GET', 'cmdr/$main/x1'), 401);
+    expect(await owner.status('PUT', 'cmdr/$main/x1', {'ok': true, 'r': '"fake"', 'by': owner.uid, 'at': {'.sv': 'timestamp'}}), 401);
+
     // الرئيسي شال المالك: مابقاش يقرا
     await api.post('/api/owner/remove', {'uid': owner.uid});
     expect(await owner.status('GET', 'rep/$main'), 401);
     expect(await owner.status('GET', 'own/$main/shops'), 401);
+    expect(await owner.status('PUT', 'cmd/$main/x5', cmd('menu.get', owner.uid)), 401);
   }, timeout: const Timeout(Duration(minutes: 3)));
 }

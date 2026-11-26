@@ -15,6 +15,7 @@ import 'day_report_pdf.dart';
 import 'day_report_view.dart';
 import 'owner_cloud.dart';
 import 'owner_push.dart';
+import 'owner_remote.dart';
 
 /// أبلكيشن المالك (نسخة ويب على Firebase Hosting تحت /owner، للأيفون وأندرويد): تقارير كل الفروع يوم بيوم،
 /// وPDF لكل يوم، وإشعارات مع كل قفل وردية وكل يوم بيخلص. البيانات من Firebase بس (مش محتاج يبقى في الكافيه).
@@ -458,7 +459,7 @@ class _DaysScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final days = ref.watch(_daysProvider(shop));
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(title), actions: [RemoteMenuButton(shop: shop, title: title)]),
       body: days.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Padding(padding: const EdgeInsets.all(24), child: ErrorBanner(ownerError(e)))),
