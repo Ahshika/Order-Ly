@@ -62,7 +62,7 @@ Each branch is its own server with its own database. The main branch makes a lin
 cd source
 flutter test                       # server + logic tests (temporary folders)
 flutter test test_stress           # worst-case suite: races, floods, fuzzing, attacks, broken backups (temporary folders)
-flutter test test_cloud            # live Firebase end-to-end tests: QR ordering and branch linking (clean up after themselves)
+flutter test test_cloud --dart-define-from-file=config/firebase.json   # live Firebase end-to-end tests: QR ordering and branch linking (clean up after themselves)
 flutter test test_visual --update-goldens   # render UI screenshots
 powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe>   # 5-minute load test
 powershell -ExecutionPolicy Bypass -File test_load\run.ps1 -K6 <k6.exe> -Script spike.js   # sudden spike + junk requests

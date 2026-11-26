@@ -11,7 +11,7 @@ const DB = 'cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app';
 const MAIN = 'mainUid123';
 const SHOP2 = 'branchUid456';
 const CODE = 'ABCD2345';
-const KEY = 'AIzaSyTESTKEY1234567890abcd';
+const KEY = 'test-api-key';
 
 const report = {
   v: 1, date: '2026-11-22', final: true, shop: 'كافيه النور', branch: 'فرع المعادي', hours: { open: '21:00', close: '03:00' },

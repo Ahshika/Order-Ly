@@ -5,7 +5,10 @@
 /// جوه كود التفعيل ([FirebaseProject])، ولو مفيش، المحل بيشتغل على المشروع ده.
 /// صفحة منيو العملاء واحدة لكل المحلات (على المشروع ده، على أكونت ahmedhassanshika655)، وبتعرف داتابيز المحل من اللينك (?d=).
 const firebaseProjectId = 'orderly-cafe-28129';
-const firebaseApiKey = 'AIzaSyDjEWvb7vmw6R5U0-jSvoS0W2kEYctlDCE';
+/// المفتاح مش مكتوب في الكود: بييجي وقت البناء من config/firebase.json (متجاهل في git):
+///   flutter build ... --dart-define-from-file=config/firebase.json
+/// انسخ config/firebase.example.json لـ config/firebase.json وحط المفتاح فيه.
+const firebaseApiKey = String.fromEnvironment('ORDERLY_FIREBASE_API_KEY');
 
 /// Realtime Database: الطلبات بتوصل منها للكاشير لحظياً.
 const rtdbUrl = 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';

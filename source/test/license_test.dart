@@ -33,7 +33,7 @@ void main() {
     });
 
     test('a shop Firebase project rides inside the signed code; bad settings are refused', () async {
-      final fb = FirebaseProject(projectId: 'cafe-elnour', apiKey: 'AIzaSyA1234567890abcdefghijklmnop', databaseUrl: 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app/');
+      final fb = FirebaseProject(projectId: 'cafe-elnour', apiKey: 'fake-test-api-key-0000000000', databaseUrl: 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app/');
       final d = data();
       final code = await signLicense(
           LicenseData(id: d.id, shop: d.shop, device: d.device, plan: d.plan, expires: null, devices: 5, branches: 2, issued: d.issued, firebase: fb), seed);
@@ -46,7 +46,7 @@ void main() {
       // من غير مشروع: زي الأكواد القديمة
       expect((await verifyLicense(await signLicense(d, seed), deviceCode: 'ABCDE-FGHJK', publicKey: pub)).firebase, isNull);
       for (final bad in ['http://x-default-rtdb.firebaseio.com', 'https://evil.example.com', 'https://x.firebaseio.com/path', 'https://a.b.c.firebasedatabase.app']) {
-        expect(() => FirebaseProject(projectId: 'cafe-elnour', apiKey: 'AIzaSyA1234567890abcdefghijklmnop', databaseUrl: bad), throwsFormatException, reason: bad);
+        expect(() => FirebaseProject(projectId: 'cafe-elnour', apiKey: 'fake-test-api-key-0000000000', databaseUrl: bad), throwsFormatException, reason: bad);
       }
     });
 
