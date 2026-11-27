@@ -1,0 +1,376 @@
+﻿== Order Ly 1.2.0 ==
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_local_notifications 22.3.3 (23.0.4 available)
+  flutter_local_notifications_linux 8.0.2 (9.0.0 available)
+  flutter_local_notifications_platform_interface 12.2.0 (13.0.0 available)
+  flutter_local_notifications_web 1.0.0 (2.0.0 available)
+  flutter_local_notifications_windows 3.1.1 (4.0.1 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+16 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.2.1 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Building Windows application...                                    92.1s
+√ Built build\windows\x64\runner\Release\orderly.exe
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_local_notifications 22.3.3 (23.0.4 available)
+  flutter_local_notifications_linux 8.0.2 (9.0.0 available)
+  flutter_local_notifications_platform_interface 12.2.0 (13.0.0 available)
+  flutter_local_notifications_web 1.0.0 (2.0.0 available)
+  flutter_local_notifications_windows 3.1.1 (4.0.1 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+16 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.2.1 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Compiling lib\main.dart for the Web...                          
+powershell : Wasm dry run succeeded. Consider building and testing your application with the `--wasm` flag. See docs 
+for more info: https://docs.flutter.dev/platform-integration/web/wasm
+At line:1 char:355
++ ... Ly\source"; powershell -ExecutionPolicy Bypass -File tool\build_relea ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Wasm dry run su...ration/web/wasm:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Use --no-wasm-dry-run to disable these warnings.
+Expected to find fonts for (MaterialIcons, packages/cupertino_icons/CupertinoIcons), but found (MaterialIcons). This usually means you are referring to font families in an IconData class but not including them in the assets section of your pubspec.yaml, are missing the package that would include them, or are missing "uses-material-design: true".
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 37816 bytes (97.7% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Compiling lib\main.dart for the Web...                             92.5s
+√ Built build\web
+Inno Setup 6 Command-Line Compiler
+Copyright (C) 1997-2026 Jordan Russell. All rights reserved.
+Portions Copyright (C) 2000-2026 Martijn Laan. All rights reserved.
+Portions Copyright (C) 2001-2004 Alex Yackimoff. All rights reserved.
+https://www.innosetup.com
+
+Compiler engine version: Inno Setup 6.7.3
+Non-commercial use only
+
+Preprocessing
+   Reading file: C:\Users\ahmed\AppData\Local\Programs\Inno Setup 6\ISPPBuiltins.iss
+Parsing [Setup] section, line 16
+Parsing [Setup] section, line 17
+Parsing [Setup] section, line 18
+Parsing [Setup] section, line 19
+Parsing [Setup] section, line 20
+Parsing [Setup] section, line 21
+Parsing [Setup] section, line 22
+Parsing [Setup] section, line 23
+Parsing [Setup] section, line 24
+Parsing [Setup] section, line 25
+Parsing [Setup] section, line 26
+Parsing [Setup] section, line 27
+Parsing [Setup] section, line 28
+Parsing [Setup] section, line 29
+Parsing [Setup] section, line 30
+Parsing [Setup] section, line 31
+Parsing [Setup] section, line 32
+Parsing [Setup] section, line 33
+Parsing [Setup] section, line 34
+Parsing [Setup] section, line 35
+Parsing [Setup] section, line 36
+Reading file (WizardImageFile)
+Reading file (WizardSmallImageFile)
+Preparing Setup program executable
+   Verification successful
+   Updating icons (Setup.e32)
+   Updating version info (Setup.e32)
+Determining language code pages
+Parsing [Languages] section, line 39
+   Reading file: C:\Users\ahmed\AppData\Local\Programs\Inno Setup 6\Languages\Arabic.isl
+Parsing [Languages] section, line 40
+   Reading file: C:\Users\ahmed\AppData\Local\Programs\Inno Setup 6\Default.isl
+   Messages in script file
+Reading default messages from Default.isl
+Parsing [Languages] section, line 39
+   Reading file: C:\Users\ahmed\AppData\Local\Programs\Inno Setup 6\Languages\Arabic.isl
+Parsing [Languages] section, line 40
+   Reading file: C:\Users\ahmed\AppData\Local\Programs\Inno Setup 6\Default.isl
+Parsing [LangOptions], [Messages], and [CustomMessages] sections
+   Messages in script file
+Reading [Code] section
+Parsing [Tasks] section, line 51
+Parsing [Tasks] section, line 52
+Parsing [Icons] section, line 58
+Parsing [Icons] section, line 59
+Parsing [Icons] section, line 60
+Parsing [Run] section, line 65
+Parsing [Run] section, line 66
+Parsing [Run] section, line 67
+Parsing [UninstallRun] section, line 70
+Parsing [Files] section, line 55
+Creating setup files
+   Verification successful
+   Updating icons (Setup.exe)
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\audioplayers_windows_plugin.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\dartjni.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\file_selector_windows_plugin.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\flutter_local_notifications_windows.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\flutter_windows.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\msvcp140.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\native_assets.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\orderly.exe
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\pdfium.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\printing_plugin.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\share_plus_plugin.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\sqlite3.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\vcruntime140.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\vcruntime140_1.dll
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\app.so
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\icudtl.dat
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\AssetManifest.bin
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\FontManifest.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\NativeAssetsManifest.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\NOTICES.Z
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\fonts\Cairo-Bold.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\fonts\Cairo-Regular.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\fonts\Cairo-Variable.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\kitchen_new.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\order_new.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\order_ready.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\payment.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\problem.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\assets\sounds\table_call.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\fonts\MaterialIcons-Regular.otf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\packages\flutter_local_notifications_web\web\notifications_service_worker.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\shaders\ink_sparkle.frag
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\data\flutter_assets\shaders\stretch_effect.frag
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\.last_build_id
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\favicon.png
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\flutter.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\flutter_bootstrap.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\flutter_service_worker.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\index.html
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\main.dart.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\manifest-owner.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\manifest.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\owner_push.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\push-sw.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\version.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\AssetManifest.bin
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\AssetManifest.bin.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\FontManifest.json
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\NOTICES
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\fonts\Cairo-Bold.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\fonts\Cairo-Regular.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\fonts\Cairo-Variable.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\kitchen_new.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\order_new.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\order_ready.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\payment.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\problem.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\assets\sounds\table_call.wav
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\fonts\MaterialIcons-Regular.otf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\fonts\fallback\Roboto-Regular.ttf
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\packages\flutter_local_notifications_web\web\notifications_service_worker.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\shaders\ink_sparkle.frag
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\assets\shaders\stretch_effect.frag
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\canvaskit.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\canvaskit.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\canvaskit.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm_heavy.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm_heavy.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\skwasm_heavy.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\wimp.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\wimp.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\wimp.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\chromium\canvaskit.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\chromium\canvaskit.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\chromium\canvaskit.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\webparagraph\canvaskit.js
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\webparagraph\canvaskit.js.symbols
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\canvaskit\webparagraph\canvaskit.wasm
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\icons\Icon-180.png
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\icons\Icon-192.png
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\icons\Icon-512.png
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\icons\Icon-maskable-192.png
+   Compressing: D:\Project\Programes\Order Ly\source\installer\..\build\windows\x64\runner\Release\web\icons\Icon-maskable-512.png
+   Compressing Setup program executable
+   Updating version info (Setup.exe)
+   Updating manifest (Setup.exe)
+
+
+Successful compile (33.828 sec). Resulting Setup program filename is:
+D:\Project\Programes\Order Ly\builds\OrderLy-Setup-1.2.0.exe
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_local_notifications 22.3.3 (23.0.4 available)
+  flutter_local_notifications_linux 8.0.2 (9.0.0 available)
+  flutter_local_notifications_platform_interface 12.2.0 (13.0.0 available)
+  flutter_local_notifications_web 1.0.0 (2.0.0 available)
+  flutter_local_notifications_windows 3.1.1 (4.0.1 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+16 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.2.1 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleRelease'...                        
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 32388 bytes (98.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Running Gradle task 'assembleRelease'...                          268.2s
+√ Built build\app\outputs\flutter-apk\app-release.apk (94.7MB)
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_local_notifications 22.3.3 (23.0.4 available)
+  flutter_local_notifications_linux 8.0.2 (9.0.0 available)
+  flutter_local_notifications_platform_interface 12.2.0 (13.0.0 available)
+  flutter_local_notifications_web 1.0.0 (2.0.0 available)
+  flutter_local_notifications_windows 3.1.1 (4.0.1 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+16 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.2.1 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleRelease'...                        
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 32388 bytes (98.0% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Running Gradle task 'assembleRelease'...                           52.9s
+√ Built build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk (31.5MB)
+√ Built build\app\outputs\flutter-apk\app-arm64-v8a-release.apk (34.5MB)
+√ Built build\app\outputs\flutter-apk\app-x86_64-release.apk (37.0MB)
+== تم: D:\Project\Programes\Order Ly\builds ==
+exit=0

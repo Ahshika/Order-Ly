@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -20,7 +21,7 @@ import '../inventory/recipe_editor.dart';
 
 /// بيختار صورة من الجهاز (ملف على الكمبيوتر، أو المعرض/الكاميرا على الموبايل).
 Future<Uint8List?> pickImageBytes(BuildContext context) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => SafeArea(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _NotificationSettingsTilesState extends ConsumerState<NotificationSettings
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       FlutterForegroundTask.isIgnoringBatteryOptimizations.then((v) {
         if (mounted) setState(() => _batteryOk = v);
       });
@@ -55,7 +56,7 @@ class _NotificationSettingsTilesState extends ConsumerState<NotificationSettings
         value: config.alertSound,
         onChanged: on ? (v) => change(() => config.setAlertSound(v)) : null,
       ),
-      if (Platform.isAndroid) ...[
+      if (!kIsWeb && Platform.isAndroid) ...[
         SwitchListTile(
           secondary: const Icon(Icons.screen_lock_portrait_rounded),
           title: const Text('توصل والموبايل مقفول'),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,7 +8,8 @@ import 'package:share_plus/share_plus.dart';
 /// حفظ ملف: على الكمبيوتر بيسأل تحفظه فين، وعلى الموبايل بيفتح المشاركة (واتساب، Drive، ...).
 /// بيرجع مكان الملف لو اتحفظ على الكمبيوتر.
 Future<String?> saveOrShareFile(Uint8List bytes, String fileName, String mimeType) async {
-  if (Platform.isAndroid || Platform.isIOS) {
+  // الويب: قايمة المشاركة بتاعة الموبايل (على الأيفون فيها "حفظ في الملفات")
+  if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
     await SharePlus.instance.share(ShareParams(files: [XFile.fromData(bytes, name: fileName, mimeType: mimeType)], fileNameOverrides: [fileName]));
     return null;
   }

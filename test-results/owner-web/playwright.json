@@ -1,0 +1,480 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Project\\Programes\\Order Ly\\source\\test_web\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "owner/playwright.config.js"
+    ],
+    "configFile": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\owner\\playwright.config.js",
+    "rootDir": "D:/Project/Programes/Order Ly/source/test_web/owner",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/owner-web/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit-iphone",
+        "name": "webkit-iphone",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web/owner",
+        "testIgnore": [],
+        "testMatch": [
+          "owner.spec.js"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/owner-web/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-android",
+        "name": "chromium-android",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web/owner",
+        "testIgnore": [],
+        "testMatch": [
+          "owner.spec.js"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\owner-web\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "webkit-iphone",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\owner",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\owner",
+        "testIgnore": [],
+        "testMatch": "owner.spec.js",
+        "timeout": 120000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "acceptDownloads": true,
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+          "viewport": {
+            "width": 390,
+            "height": 664
+          },
+          "screen": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "webkit"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "webkit-iphone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\owner-web\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium-android",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\owner",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\owner",
+        "testIgnore": [],
+        "testMatch": "owner.spec.js",
+        "timeout": 120000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "acceptDownloads": true,
+          "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Mobile Safari/537.36",
+          "viewport": {
+            "width": 412,
+            "height": 839
+          },
+          "screen": {
+            "width": 412,
+            "height": 915
+          },
+          "deviceScaleFactor": 2.625,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium-android"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "D:\\Project\\Programes\\Order Ly\\test-results\\owner-web\\report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "D:\\Project\\Programes\\Order Ly\\test-results\\owner-web\\playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "owner.spec.js",
+      "file": "owner.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "QR link → new account → linked by code → branches → day report → PDF",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "push-card",
+                  "description": "على الأيفون: ضيف الصفحة"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11014,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:08.174Z",
+                  "annotations": [
+                    {
+                      "type": "push-card",
+                      "description": "على الأيفون: ضيف الصفحة"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-1973a315b0f896dd8800",
+          "file": "owner.spec.js",
+          "line": 104,
+          "column": 1
+        },
+        {
+          "title": "wrong or old code: clear message, nothing saved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5229,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:19.319Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-313826336020e602f9b6",
+          "file": "owner.spec.js",
+          "line": 152,
+          "column": 1
+        },
+        {
+          "title": "a link that is not a Firebase database is refused (shows the \"no link\" screen)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1487,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:24.562Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-faa13d358282dcdb5ac1",
+          "file": "owner.spec.js",
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "remote control: menu and prices, sold out switch, open checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4822,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:26.062Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-fe13062ec72f413e18de",
+          "file": "owner.spec.js",
+          "line": 173,
+          "column": 1
+        },
+        {
+          "title": "QR link → new account → linked by code → branches → day report → PDF",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "push-card",
+                  "description": "إشعار مع كل قفل وردية"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13567,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:31.396Z",
+                  "annotations": [
+                    {
+                      "type": "push-card",
+                      "description": "إشعار مع كل قفل وردية"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-d7062c51f0b862c8337a",
+          "file": "owner.spec.js",
+          "line": 104,
+          "column": 1
+        },
+        {
+          "title": "wrong or old code: clear message, nothing saved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4485,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:45.091Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-a5dd739fed1c8ee79fe1",
+          "file": "owner.spec.js",
+          "line": 152,
+          "column": 1
+        },
+        {
+          "title": "a link that is not a Firebase database is refused (shows the \"no link\" screen)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1480,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:49.591Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-bed970a162a139984ac0",
+          "file": "owner.spec.js",
+          "line": 165,
+          "column": 1
+        },
+        {
+          "title": "remote control: menu and prices, sold out switch, open checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5635,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T22:23:51.084Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4014f32489f3bc4430e7-d607b0180aef68f218f3",
+          "file": "owner.spec.js",
+          "line": 173,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-26T22:23:07.718Z",
+    "duration": 49115.294,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

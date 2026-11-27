@@ -1,0 +1,167 @@
+Resolving dependencies...
+Downloading packages...
+  archive 4.3.0 (4.7.1 available)
+  cli_util 0.4.2 (0.6.1 available)
+  code_assets 1.2.1 (2.2.0 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  crypto 3.0.7 (3.0.8 available)
+  file_selector_ios 0.5.3+6 (0.5.3+7 available)
+  file_selector_macos 0.9.5+1 (0.9.5+2 available)
+  flutter_local_notifications 22.3.3 (23.0.3 available)
+  flutter_local_notifications_linux 8.0.2 (9.0.0 available)
+  flutter_local_notifications_platform_interface 12.2.0 (13.0.0 available)
+  flutter_local_notifications_web 1.0.0 (2.0.0 available)
+  flutter_local_notifications_windows 3.1.1 (4.0.1 available)
+  flutter_riverpod 3.4.3 (3.5.0 available)
+  image 4.10.1 (4.13.1 available)
+  image_picker 1.2.3 (1.2.4 available)
+  image_picker_android 0.8.13+23 (0.8.13+25 available)
+  image_picker_ios 0.8.13+8 (0.8.13+16 available)
+  image_picker_platform_interface 2.11.1 (2.11.2 available)
+  jni 1.0.3 (1.2.1 available)
+  jni_flutter 1.0.3 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  native_toolchain_c 0.19.2 (0.19.6 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
+  posix 6.5.2 (6.5.4 available)
+  qr 3.0.2 (4.0.1 available)
+  riverpod 3.4.3 (3.5.0 available)
+  share_plus 13.3.0 (13.3.1 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  shelf 1.4.2 (1.4.3 available)
+  shelf_router 1.1.4 (1.1.5 available)
+  sqlite3 3.6.0 (3.9.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+  vector_math 2.4.0 (2.4.4 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+  xml 7.0.1 (7.1.0 available)
+Got dependencies!
+42 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading D:/Project/Programes/Order Ly/source/test/branches_test.dart
+00:00 +0: D:/Project/Programes/Order Ly/source/test/branches_test.dart: link codes: dashes, spaces and small letters are fine; wrong length or letters are not
+00:00 +1: D:/Project/Programes/Order Ly/source/test/cafe_test.dart: setup seeds stations, an area and cash/card payment methods
+00:00 +2: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +3: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +4: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +5: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +6: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +7: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +8: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +9: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +10: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +11: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:01 +12: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +13: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +14: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +15: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +16: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +17: D:/Project/Programes/Order Ly/source/test/cloud_sync_test.dart: every write is silent (Firebase does not send the data back) and sync reports no error
+00:02 +18: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:02 +19: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:02 +20: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +21: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +22: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +23: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +24: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +25: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +26: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +27: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +28: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:03 +29: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +30: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +31: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +32: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +33: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +34: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:04 +35: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +36: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +37: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +38: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +39: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +40: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:05 +41: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:06 +42: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:06 +43: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:06 +44: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:06 +45: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +46: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +47: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +48: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +49: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +50: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +51: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +52: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +53: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +54: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +55: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +56: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:07 +57: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +58: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +59: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +60: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +61: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +62: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +63: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +64: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +65: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +66: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +67: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +68: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +69: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:08 +70: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:09 +71: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:09 +72: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+00:09 +73: D:/Project/Programes/Order Ly/source/test/cloud_usage_test.dart: Firebase download for a working cafe: setup, 20 QR orders, the customer page
+{
+  "label": "run",
+  "at": "2026-11-23T13:35:40.738698",
+  "cashier": {
+    "setupBytes": 8,
+    "setupRequests": 5,
+    "ordersBytes": 4,
+    "ordersRequests": 26,
+    "bytesPerOrder": 0,
+    "echoBytes": 0
+  },
+  "nodes": {
+    "pub": 355,
+    "pubHasLogo": false,
+    "logo": 61910,
+    "menu": 2051,
+    "images": 12,
+    "avgImage": 4888,
+    "avgTrackc": 449,
+    "avgTrackt": 300
+  },
+  "customer": {
+    "newVisitBytes": 216751,
+    "returningVisitBytes": 6150,
+    "avgVisitBytes": 111450
+  },
+  "trackcDocs": 20
+}
+00:09 +74: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:10 +75: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:10 +76: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:10 +77: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:10 +78: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:10 +79: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:11 +80: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:11 +81: D:/Project/Programes/Order Ly/source/test/diagnostics_test.dart: the watchdog records a UI freeze and when it recovered
+00:11 +82: D:/Project/Programes/Order Ly/source/test/hardening_test.dart: permissions only the printer that took a job can report it printed
+00:11 +83: D:/Project/Programes/Order Ly/source/test/hardening_test.dart: permissions only the printer that took a job can report it printed
+00:11 +84: D:/Project/Programes/Order Ly/source/test/hardening_test.dart: permissions only the printer that took a job can report it printed
+00:11 +85: D:/Project/Programes/Order Ly/source/test/cafe_test.dart: backup (written in the background) restores the data and photos
+00:12 +86: D:/Project/Programes/Order Ly/source/test/cafe_test.dart: backup (written in the background) restores the data and photos
+00:12 +87: D:/Project/Programes/Order Ly/source/test/hardening_test.dart: QR flood per table rotating phone ids cannot flood one table
+00:12 +88: D:/Project/Programes/Order Ly/source/test/hardening_test.dart: QR flood per table auto-accept table: at most 15 QR orders in 10 minutes
+00:13 +89: All tests passed!
+exit=0

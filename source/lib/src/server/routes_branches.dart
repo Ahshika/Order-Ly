@@ -74,9 +74,13 @@ extension _BranchRoutes on OrderlyServer {
 
   /// ملخص شغل الفرع ده اللي بيتبعت للفرع الرئيسي. الأسماء مختصرة عشان المساحة على Firebase.
   Future<Map<String, Object?>> _branchSummary() async {
+    // كله بيوم الشغل: "النهارده" في كافيه بيقفل 3 الفجر هي السهرة كلها
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final bd = _bday;
+    final day = bd.dateOf(now);
+    DateTime dayStart(int offset) => bd.startOf(DateTime(day.year, day.month, day.day + offset));
+    final today = dayStart(0);
+    final tomorrow = dayStart(1);
     String iso(DateTime d) => d.toUtc().toIso8601String();
 
     Map<String, Object?> sales(DateTime from, DateTime to) {
@@ -99,11 +103,13 @@ extension _BranchRoutes on OrderlyServer {
       'name': names.shop,
       'branch': names.branch,
       'app': appVersion,
+      // تاريخ يوم الشغل (الشاشة بتكتب أسامي الأيام منه)
+      'bd': BusinessDay.keyOf(day),
       'today': sales(today, tomorrow),
-      'yesterday': sales(DateTime(now.year, now.month, now.day - 1), today),
-      'month': sales(DateTime(now.year, now.month), tomorrow),
+      'yesterday': sales(dayStart(-1), today),
+      'month': sales(bd.startOf(DateTime(day.year, day.month)), tomorrow),
       // مبيعات آخر 7 أيام (الأقدم الأول، والنهارده آخر واحد)
-      'days': [for (var i = 6; i >= 0; i--) sales(DateTime(now.year, now.month, now.day - i), DateTime(now.year, now.month, now.day - i + 1))['t']],
+      'days': [for (var i = 6; i >= 0; i--) sales(dayStart(-i), dayStart(-i + 1))['t']],
       'open': {
         'n': open['n'],
         't': open['t'],
@@ -354,7 +360,8 @@ extension _ChainSync on CloudSync {
       _online(() async {
         await _token();
         await _patch({
-          if (approve) 'chains/$_cid/members/$uid': {'at': {'.sv': 'timestamp'}, 'name': name, 'branch': branch, 'main': mainName},
+          // mu: كود الرئيسي على Firebase (الفرع بيكتبه في cafes/{uid}/main عشان المالك يشوف تقاريره)
+          if (approve) 'chains/$_cid/members/$uid': {'at': {'.sv': 'timestamp'}, 'name': name, 'branch': branch, 'main': mainName, 'mu': _uid},
           'chains/$_cid/req/$uid': null,
         });
         _chainCache = null;
@@ -399,6 +406,7 @@ extension _ChainSync on CloudSync {
         final member = await _getJson('chains/$id/members/$_uid');
         _membershipCheckedAt = now;
         if (member is Map) {
+          if (member['mu'] is String) db.setSetting('chain_main_uid', member['mu'] as String);
           if (role == 'pending') {
             server._setChain('member', id: id, mainName: '${member['main'] ?? ''}');
             current = 'member';

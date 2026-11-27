@@ -1,6 +1,6 @@
 {
   // Order Ly: كل كافيه ليه حساب Firebase خاص بيه (بيتعمل أوتوماتيك من كمبيوتر الكاشير)، و$uid = الحساب ده.
-  // - cafes/$uid: بيانات الكافيه والمنيو وأكواد الترابيزات. أي حد يقرا (مفيش list للأكواد)، والكافيه بس يكتب.
+  // - cafes/$uid: بيانات الكافيه والمنيو واللوجو وأكواد الترابيزات. أي حد يقرا (مفيش list للأكواد)، والكافيه بس يكتب.
   // - img/$uid/$id: صور الأصناف.
   // - inbox/$uid/$id: رسائل العملاء (طلب، نداء، دفع، تقييم). العميل يضيف بس لو معاه كود ترابيزة صحيح،
   //   والكافيه بس اللي يقرا ويمسح.
@@ -9,6 +9,14 @@
   // - chains/$cid: ربط الفروع. $cid = كود الربط اللي عمله الفرع الرئيسي (owner). الرئيسي بس يقرا ويكتب الكل.
   //   أي فرع معاه الكود يبعت طلب ربط في req/$uid بتاعه بس، والرئيسي يوافق (members/$uid).
   //   الفرع المربوط بس يكتب ملخصه في b/$uid، ويقدر يفصل نفسه، ويقرا حالة طلبه وربطه هو بس.
+  // - rep/$uid/$يوم: تقرير كل يوم شغل وكل وردية (JSON نص في j). الكافيه بس يكتب. يقراه هو، والمالك المربوط بالفرع
+  //   الرئيسي بتاعه (cafes/$uid/main) لو الرئيسي أكّد إن الفرع ده تبعه (own/$main/shops/$uid).
+  // - own/$main: ربط المالك بالفرع الرئيسي (أو الكافيه اللي مالوش فروع). الرئيسي بيعمل كود لمرة واحدة (code) بيخلص بعد شوية،
+  //   والمالك بيطلب بيه (claim)، والرئيسي بيوافق (ok). shops = الفروع اللي المالك يشوفها (الرئيسي بس اللي يحددها).
+  // - live/$uid: ملخص الفرع دلوقتي (نفس شروط القراية بتاعة rep).
+  // - cmd/$uid/$id: أوامر المالك من بره (قايمة ثابتة بس، op). المالك المربوط بالفرع ده بس يكتب أمر جديد، والكافيه بيقرا ويمسح.
+  //   cmdr/$uid/$id: رد الكافيه، وصاحب الأمر (by) بس اللي يقراه.
+  //   vapid: مفاتيح إشعارات المالك (العام للمالك، والخاص للفروع اللي تبعه بس)، وpush: اشتراكات موبايلات المالك.
   "rules": {
     ".read": false,
     ".write": false,
@@ -17,6 +25,7 @@
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",
         "pub": { ".read": true },
+        "logo": { ".read": true },
         "menu": { ".read": true },
         "mv": { ".read": true },
         "seen": { ".read": true },
@@ -79,6 +88,122 @@
       }
     },
 
+    "rep": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (root.child('cafes').child($uid).child('main').isString() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('shops').child($uid).exists() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('ok').child(auth.uid).exists()))",
+        ".write": "auth != null && auth.uid === $uid",
+        "$day": {
+          ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+          "day": {
+            ".validate": "newData.hasChildren(['j', 'at'])",
+            "j": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+            "at": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          },
+          "shifts": {
+            "$sid": {
+              ".validate": "$sid.length <= 40 && newData.hasChildren(['j', 'at'])",
+              "j": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+              "at": { ".validate": "newData.val() === now" },
+              "$other": { ".validate": false }
+            }
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "live": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (root.child('cafes').child($uid).child('main').isString() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('shops').child($uid).exists() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('ok').child(auth.uid).exists()))",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['j', 'at'])",
+        "j": { ".validate": "newData.isString() && newData.val().length <= 20000" },
+        "at": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "cmd": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !newData.exists()",
+        "$id": {
+          ".write": "auth != null && ((auth.uid === $uid && !newData.exists()) || (!data.exists() && newData.exists() && root.child('cafes').child($uid).child('main').isString() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('shops').child($uid).exists() && root.child('own').child(root.child('cafes').child($uid).child('main').val() + '').child('ok').child(auth.uid).exists()))",
+          ".validate": "$id.length <= 40 && newData.hasChildren(['op', 'a', 'at', 'by'])",
+          "op": { ".validate": "newData.isString() && newData.val().matches(/^(menu[.]get|item[.]price|item[.]available|checks[.]open|audit[.]recent)$/)" },
+          "a": { ".validate": "newData.isString() && newData.val().length <= 4000" },
+          "at": { ".validate": "newData.val() === now" },
+          "by": { ".validate": "newData.val() === auth.uid" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "cmdr": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "$id": {
+          ".read": "auth != null && data.child('by').val() === auth.uid",
+          ".validate": "newData.hasChildren(['ok', 'r', 'by', 'at'])",
+          "ok": { ".validate": "newData.isBoolean()" },
+          "r": { ".validate": "newData.isString() && newData.val().length <= 200000" },
+          "by": { ".validate": "newData.isString()" },
+          "at": { ".validate": "newData.val() === now" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+
+    "own": {
+      "$main": {
+        ".read": "auth != null && auth.uid === $main",
+        ".write": "auth != null && auth.uid === $main",
+        "code": {
+          ".validate": "newData.hasChildren(['c', 'exp'])",
+          "c": { ".validate": "newData.isString() && newData.val().matches(/^[A-HJ-NP-Z2-9]{8}$/)" },
+          "exp": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        },
+        "claim": {
+          "$owner": {
+            ".write": "auth != null && auth.uid === $owner && newData.exists() && !data.exists() && root.child('own').child($main).child('code').child('exp').val() > now && newData.child('c').val() === root.child('own').child($main).child('code').child('c').val() && !root.child('own').child($main).child('ok').child($owner).exists()",
+            ".validate": "newData.hasChildren(['c', 'name', 'email', 'at'])",
+            "c": { ".validate": "newData.isString()" },
+            "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+            "email": { ".validate": "newData.isString() && newData.val().length <= 120" },
+            "at": { ".validate": "newData.val() === now" },
+            "$other": { ".validate": false }
+          }
+        },
+        "ok": {
+          "$owner": {
+            ".read": "auth != null && auth.uid === $owner",
+            ".write": "auth != null && auth.uid === $owner && !newData.exists()"
+          }
+        },
+        "shops": {
+          ".read": "auth != null && root.child('own').child($main).child('ok').child(auth.uid).exists()"
+        },
+        "vapid": {
+          "pub": { ".read": "auth != null && root.child('own').child($main).child('ok').child(auth.uid).exists()" },
+          "priv": { ".read": "auth != null && root.child('own').child($main).child('shops').child(auth.uid).exists()" }
+        },
+        "push": {
+          ".read": "auth != null && root.child('own').child($main).child('shops').child(auth.uid).exists()",
+          "$owner": {
+            ".write": "auth != null && auth.uid === $owner && root.child('own').child($main).child('ok').child($owner).exists()",
+            "$dev": {
+              ".validate": "$dev.length <= 40 && newData.hasChildren(['s', 'at'])",
+              "s": { ".validate": "newData.isString() && newData.val().length <= 3000" },
+              "at": { ".validate": "newData.val() === now" },
+              "$other": { ".validate": false }
+            }
+          }
+        }
+      }
+    },
+
     "chains": {
       "$cid": {
         ".read": "auth != null && data.child('owner').val() === auth.uid",
@@ -106,6 +231,7 @@
             "name": { ".validate": "newData.isString() && newData.val().length <= 80" },
             "branch": { ".validate": "newData.isString() && newData.val().length <= 80" },
             "main": { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "mu": { ".validate": "newData.isString() && newData.val().length <= 128" },
             "$other": { ".validate": false }
           }
         },

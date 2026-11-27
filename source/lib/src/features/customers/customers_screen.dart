@@ -34,7 +34,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         if (!loyalty)
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Card(child: ListTile(leading: Icon(Icons.loyalty_outlined), title: Text('نقط الولاء مقفولة'), subtitle: Text('فعّلها من الإعدادات ← بيانات الكافيه عشان العملاء ياخدوا نقط على كل زيارة'))),
+            child: Card(child: ListTile(leading: Icon(Icons.loyalty_outlined), title: Text('نقط الولاء مقفولة'), subtitle: Text('فعّلها من الإعدادات › بيانات الكافيه عشان العملاء ياخدوا نقط على كل زيارة'))),
           ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),

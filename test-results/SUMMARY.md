@@ -199,6 +199,216 @@ Evidence: `branches/local.txt`, `branches/firebase_live.txt`; screenshots in `so
 
 **Not tested:** two real PCs in two places (the live test runs both servers on this laptop against the real Firebase); a branch with a wrong clock (the "online" check uses Firebase server time, but the "today" sales use the branch PC's clock); many branches at once (the rules have no count limit, and the main branch enforces the subscription number when it approves).
 
+## Round 6: less Firebase usage (phase 1, 2026-11-23, not committed)
+
+**What changed:**
+
+- **Logo in its own node.** It moved out of `cafes/{uid}/pub` into `cafes/{uid}/logo`. `pub` now carries only its version (`lv`). The menu page downloads the logo once and keeps it on the phone.
+- **Silent writes.** Every cashier write uses `print=silent`, so Firebase replies with an empty 204 instead of sending the data back.
+- **Connection kept open.** The cashier's HTTPS connection stays open for 2 minutes, so it no longer pays a new TLS handshake on every sync.
+- **Smaller item photos.** They are now 240 px instead of 360 px. If an older version had uploaded them bigger, they are uploaded again once.
+- **Old tracking deleted.** A customer whose last order is more than 3 hours old gets their tracking (`trackc`) deleted. Before, it stayed forever.
+- **One live connection per phone.** Tracking v2 carries the table bill (`tb`), so a phone listens on a single stream. `trackt` is still written, for phones that have not ordered yet and for older pages.
+- **Connections close when hidden.** The menu page closes its live connections when the screen is locked or hidden, and reopens them when the customer comes back.
+- **Smaller transfer screenshots.** Max 1000 px and about 300 KB, instead of 1280 px and 700 KB.
+- **Rules.** `cafes/$uid/logo` is now public read.
+
+**How it was measured:** a new fake Firebase (`source/test/support/fake_firebase.dart`) counts every byte sent back to the caller. That is what Firebase bills as download.
+
+| Measured (`test/cloud_usage_test.dart`: 12 item photos, a logo, 20 QR orders) | Before | After |
+|---|---|---|
+| `pub` (read every minute by every open menu page) | 62,253 B (logo inside) | **355 B** |
+| Data Firebase sent back to the cashier for 20 orders | 78,463 B | **4 B** |
+| Data sent back during the first menu upload | 139,809 B | **8 B** |
+| Average item photo | 7,139 B | 4,888 B (this test's photos are simple; real photos are bigger and shrink by about the same ratio) |
+| New customer, 10 minutes on screen, 30 photos | 903,024 B | **216,751 B** |
+| Returning customer (photos and menu already on the phone) | 686,803 B | **6,150 B** |
+
+**Results:**
+
+| Test | Result |
+|---|---|
+| `flutter test test/` | **85/85** (79 old + 6 new), exit 0 |
+| New `test/cloud_sync_test.dart` | **5/5**: every write is silent and nothing comes back; the logo node and `lv` (and both are removed when the logo is deleted); photos at 240 px and re-sent after an upgrade; tracking v2 has the table bill, and tracking older than 3 h is deleted while active customers stay; takeaway has no table bill |
+| New `test/cloud_usage_test.dart` | 1/1 (writes the numbers above) |
+| Analyzer | only the 3 old info notes |
+| Playwright menu tests (14 old + 7 new, × Chromium/Pixel 7, WebKit/iPhone 14, Firefox) | **63/63**, 0 flaky, and the real-server contract test passed too. First run was BLOCKED (`node_modules` missing); restored with `npm ci` (you approved; `@playwright/test` 1.64.0 from the lockfile, no browser download). Before that `npx` had pulled a `playwright` package into the npm cache by itself; it was not used. |
+| Measured in the browser | 10 minutes on screen: `pub` downloaded 12 times = **5,964 B** in total, logo **once** (60,013 B), nothing again after a reload. A transfer screenshot (1170×2532 receipt) uploads at **110–126 KB**. A 46 MB random-noise photo (worst case) uploads at 164–263 KB (before: up to 700 KB). While the screen is off: **0 requests** for 7 seconds, and the live connection and `pub` come back when the customer returns. |
+| `test_cloud/` (real Firebase) | NOT RUN: it writes to the real project |
+| Deploy | NOT DONE: the rules and `menu.html` are not deployed yet |
+
+**Order of release:** the new `menu.html` and rules must be deployed **before** any cashier PC gets the new app. The new page still reads the logo from `pub` (older cashiers) and still listens on `trackt` when tracking has no `v: 2`. An old page with a new cashier would show no logo.
+
+Evidence: `phase1/flutter-test.log`, `phase1/web-run.log`, `firebase-usage/before.json`, `firebase-usage/after.json`.
+
+## Round 7: phase 2 and the move to a new Firebase project (2026-11-23)
+
+| What | Result |
+|---|---|
+| Old project `orderly-yvzug` (account 667) | All test data deleted from the database (backup kept locally first). The 9 test sign-in accounts are still there: the CLI cannot delete them. The new rules and page from round 6 are deployed and checked. |
+| Phase 2 (a Firebase project per shop, settings inside the signed license) | Committed `b7c4bfb`. `flutter test` **89/89**, Playwright **66/66** |
+| New main project `orderly-cafe-28129` (account ahmedhassanshika655, Spark, no card) | Realtime Database in europe-west1, web app registered, rules and menu page deployed. Checked from outside: `pub`, `menu`, `logo` and `trackt` 200; `inbox`, `cafes` and `chains` 401; the live page points at the new database. |
+| Code moved to the new project | `firebase_config.dart`, `menu.html`, `.firebaserc` (+ `firebase login:use` 655 for that folder), and the test constants. `flutter test` **89/89**, Playwright **66/66** on 3 browsers, contract test OK |
+| Existing installs | An install that was on the old project can't sign in on the new one, so it makes a new account by itself (phase 2) and re-sends everything. |
+| Email/Password on the new project | Enabled by you. A probe account was created and deleted at once. |
+| Live end-to-end on the new project (`test_cloud/cloud_test.dart`, `test_cloud/branches_cloud_test.dart`) | **2/2**, against the deployed rules: phone → Firebase → cashier, status back to the phone, and the branch link with every rule refusal. Afterwards the database is empty (`null`) and **0** sign-in accounts are left. |
+| Still open | An empty Google Cloud project `orderly-cafes` (no Firebase, no billing) is left from the first try. The old project `orderly-yvzug` (account 667) is untouched, with its 9 empty test sign-in accounts. |
+
+Evidence: `move/flutter-test.log`, `move/web-run.log`, `move/cloud-live.log`, `web-move/`, `phase2/flutter-test.log`.
+
+## Round 8: phase 3, the business day and a report for every shift and day (2026-11-23)
+
+**What changed:**
+
+- **Working hours** (`dayOpen`, `dayClose`) are set in "بيانات الكافيه". "24 ساعة" means one end-of-day time. The day ends at a single cutoff in the middle of the hours the cafe is closed (`lib/src/core/business_day.dart`). The default 00:00–00:00 keeps the old midnight day.
+- **Everything uses the business day:**
+  - order numbers (`_today`)
+  - the reports screen (a date without a time = the start of that business day)
+  - the cashier's "today"
+  - the branch summary (`bd` + the day labels)
+- **New endpoints** (owner only):
+  - `/api/reports/day?date=`: sales, payment methods, check types, sources, hours, expenses by category, voids (who and why), discounts, top 20 items, feedback, the shifts with counted vs expected cash, open checks and low stock.
+  - `/api/reports/shift/<id>`: one shift.
+- **Reports go to Firebase** under `rep/{cafe}/{day}/day` and `.../shifts/{id}`:
+  - today's report on every register change;
+  - yesterday's whenever it changes (this is the final report once the day ends, plus any later correction);
+  - days missed while the PC was off (up to 31).
+- **Rules:** `rep/$uid` is readable and writable only by the cafe itself, with day-key and size validation. Owner access from outside comes in phase 5.
+- **Robustness:**
+  - Reports go in their own write, so a refused report never blocks the menu or order tracking.
+  - **Bug fixed (it predates this phase):** a write that failed (internet dropping for a moment) left the data marked as sent, so a customer's order status could stay stale until it changed again. Now it is sent again on the next normal cycle.
+
+| Test | Result |
+|---|---|
+| `flutter test test/` | **103/103**. New: `business_day_test` (7), `day_reports_test` (5), plus 2 in `cloud_sync_test`: refused reports don't stop the menu; a failed write is re-sent (checked to **fail without the fix**) |
+| Worst-case suite `test_stress` | **32/32** |
+| Live Firebase on `orderly-cafe-28129` | First run **failed**. The rules put write access on each day, so the cafe could not delete its whole `rep/{uid}`, and its cleanup (one atomic write) was refused entirely. Fixed (write access on `rep/$uid`, validation on each day) and redeployed. Then **2/2**, and the database is empty afterwards. |
+| Screen tests `test_visual` | 10/13. `check_desktop`, `kds_desktop` and `register_desktop` differ by 0.01–0.05% of pixels. **The same 3 fail on the commit before this phase** (checked in a separate worktree), and the pixel count changes from run to run: those screens show the current time. Not caused by phase 3. The QR card PDFs were regenerated with the new site address. |
+| Playwright | Not re-run: `menu.html` did not change in this phase (66/66 in round 7) |
+
+**Still open:**
+
+- 4 empty sign-in accounts on `orderly-cafe-28129`, left by the failed live run. Delete them in Authentication → Users.
+- The rules on the new project are deployed. The customer page did not change.
+
+Evidence: `phase3/flutter-test.log`, `phase3/stress.log`, `phase3/cloud-live.log`, `phase3/visual.log`.
+
+## Round 9: phase 4, staff web app for iPhone (2026-11-23)
+
+**What changed:**
+
+- **The same Flutter app now builds for the web** (`flutter build web --release --no-web-resources-cdn`). Everything is bundled, including CanvasKit, so nothing loads from the internet.
+- **The cashier PC serves it** on its own port (`lib/src/server/web_app.dart`):
+  - no path traversal;
+  - correct types (`application/wasm`);
+  - ETag/304, `no-cache`, nosniff;
+  - pages without an extension fall back to `index.html`;
+  - unknown `/api/...` paths are still JSON 404;
+  - a clear Arabic message when the web folder is missing.
+- **App code is web-safe without changing Android/Windows:**
+  - Every `Platform.*` call has a `kIsWeb` guard in front of it.
+  - The embedded server is a conditional import (`server_launcher.dart`): sqlite3/ffi can't compile for the web.
+  - `serverPort` moved to `app_info.dart`.
+  - On the web, the session's server is the page's own origin.
+  - The browser WebSocket is used on the web.
+  - On the web, the app does not try to be a print station.
+  - The logs screen and the barcode camera say they are not available on the web.
+- **iPhone home-screen:** Arabic page, the app icon, `apple-mobile-web-app-capable`, manifest. `?a11y=1` turns on semantics, for VoiceOver users and for the tests.
+- **Server settings** show a QR code and the steps for staff with an iPhone.
+- `tool/build_release.ps1` puts the web build in `web/` next to the exe, so the installer ships it.
+
+| Test | Result |
+|---|---|
+| `test/web_app_test.dart` | **4/4**: page, types, 304, deep links; **no file outside the web folder** (`..`, `%2e%2e`, `%2f`, `%5c`, drive letters, and a raw socket request); API unchanged; missing web folder |
+| `test_web/staff` (Playwright, real server, **internet blocked**) | **4/4** on WebKit/iPhone 14 and Chromium/Pixel 7: the login screen in about 1.2 s / 1.5 s, the waiter logs in, and the floor shows the 4 tables from the server. **0 requests left the cafe PC.** No page errors. The server recorded the logins as "متصفح (ويب)". The home-screen tags, manifest and icon are served. |
+| `flutter test test/` | **107/107** |
+| `test_stress` | **32/32** |
+| `test_visual` | 10/13: the same 3 time-dependent screenshots as round 8 |
+| Builds | `flutter build windows --release` OK; `flutter build apk --release` OK (91.2 MB); `flutter build web` OK (45 MB on disk; a phone downloads only one renderer: about 5.5 MB JS + 7 MB wasm, once, over the cafe Wi-Fi) |
+
+**Not tested:**
+
+- **A real iPhone.** WebKit on Windows is close but not the same, especially Arabic typing with the iOS keyboard and older iPhones. Please test on a real phone.
+- The installed Windows app finding `web/` next to the exe (the folder lookup is covered with an explicit folder in the tests).
+- Font fallback for a character outside Cairo (for example an emoji) would try Google Fonts and, with no internet, show a box.
+
+Evidence: `phase4/`, `staff-web/` (report, screenshots of the floor on both engines), `staff-web-run.log`, `web-build.log`.
+
+## Round 10: phase 5, the owner app with reports, PDF and notifications (2026-11-26)
+
+**What changed:**
+
+- **Owner app:** a Flutter web build in owner mode at `https://orderly-cafe-28129.web.app/owner/`, the same app for iPhone and Android. Join from the QR link, branches, days, the day report, PDF per day, and a notifications switch.
+- **Linking on the cashier PC:** in the main branch's settings, "المالك من بره" makes a one-time code (8 characters, 15 minutes) shown as a QR. The owner signs up on the shop's own Firebase project and claims with the code, and the PC approves the claim when the code matches, then cancels the code.
+- **The main branch publishes:**
+  - `own/$main/shops`: itself plus the linked branches;
+  - VAPID keys;
+  - and every cafe writes `cafes/$uid/main` (branches get the main's id when approved).
+- **Notifications (Web Push from the cafe PC, no server, no paid plan):**
+  - RFC 8291 aes128gcm + RFC 8292 VAPID (`lib/src/server/web_push.dart`).
+  - One notification per shift close, and one per finished day (the last 2 days at most after downtime). Each is sent once and remembered across restarts.
+  - Subscriptions the push service reports as gone (404/410) are removed.
+  - Only known push services are contacted.
+- **New dependency, with your approval:** `pointycastle` 4.0.0 (MIT, Bouncy Castle), pulling in `convert` 3.1.2 (Dart team). The `cryptography` package turned out not to support P-256 in pure Dart, so the study was wrong about that.
+- **Rules (deployed):** the owner reads a branch's reports only when the main has confirmed that branch AND the branch points at that main. The code can't be read, reused, or claimed for someone else. The private key and the phone list are readable only by confirmed branches.
+- **Web pages:**
+  - custom `flutter_bootstrap.js`, without Flutter's deprecated service worker;
+  - `push-sw.js`;
+  - `owner_push.js`;
+  - `manifest-owner.json` with no start_url, so the iPhone saves the invite link;
+  - `index.html` switches the manifest under `/owner/`.
+- **Offline fonts:** Cairo has no "←", "✔" or "✅", so the offline staff web app showed boxes. In screen text and the PDF, "←" is now "›" (mirrored in RTL), and "✔"/"✅" were dropped (the colour and the word stay).
+
+| Test | Result |
+|---|---|
+| `test/web_push_test.dart` | **4/4**: byte-exact RFC 8291 section 5 message and appendix A ciphertext; random messages decrypt like a phone; the ES256 JWT verifies; only known push hosts |
+| `test/owner_link_test.dart` (fake Firebase) | **4/4**: right code approved, wrong code not, code single-use; shops, main pointer, stable VAPID key; one push per shift close to every phone, no repeat, gone phone removed; remove owner; cashier gets 403 |
+| `test_cloud/owner_cloud_test.dart` (**real Firebase, deployed rules**) | **1/1** (after a test bug was fixed: an empty PUT instead of DELETE). Wrong code, reading the code, claiming for someone else, reusing the code, the owner writing reports, a stranger reading reports, a fake branch reading the private key or phones, an owner after removal: **all refused**. The owner reads shops, the public key and the reports. Afterwards there was **no data and 0 accounts**. A leftover `cafes/<stranger>` from the interrupted first run was deleted, and the test now always cleans it up. |
+| `test_web/owner` (Playwright, owner app from `firebase/public/owner`, fake Firebase) | **6/6** on WebKit/iPhone 14 and Chromium/Pixel 7: QR link, new account, linked by code, branches, days, the day report with the right numbers, PDF; a wrong code gives a clear message; a non-Firebase database in the link is refused. The notification card says "add to home screen" on iPhone Safari and offers the button on Android. |
+| `test_web/staff` | **4/4** (after the bootstrap/index changes) |
+| `flutter test test/` | **115/115**; `test_stress` **32/32** |
+| Deploy | Rules deployed; Hosting deployed. Live: `/owner/` 200, `push-sw.js` 200, the manifest 200, the customer menu still 200 |
+
+**Not tested:** a real notification arriving on a real iPhone or Android, which needs a real phone subscribed to Apple/Google; the encryption is verified against the RFC, but end-to-end delivery is not. Also the PDF share sheet on a real phone.
+
+Evidence: `phase5/`, `owner-web/` (report, screenshots), `owner-build.log`.
+
+## Round 11: phase 6, the owner sees each branch live (2026-11-26)
+
+**What changed:**
+
+- Every cafe (main, branch, or a cafe with no branches) sends its summary to `live/{uid}`, at most once a minute when it changed, plus a heartbeat every 5 minutes. This is the same summary the main branch already received: today by business day, open checks, busy tables, the register (who opened it, expected cash), QR orders, transfers and calls waiting, voids.
+- **Rules:** same read condition as the reports (main confirmed the branch AND the branch points at that main). Only the cafe writes, with size and time validated.
+- **Owner app home:** one card per branch with today, open checks, the drawer and what is waiting, plus "شغال" or "مش متصل من …" when there has been no heartbeat for 10 minutes. It refreshes every 30 s only while the app is in front of the owner. The card is a button for screen readers (VoiceOver).
+
+| Test | Result |
+|---|---|
+| `test/owner_link_test.dart` | **5/5** (new: the summary is sent, throttled to once a minute, and shows the opened register on the next minute) |
+| `test_cloud/owner_cloud_test.dart` (real Firebase, deployed rules) | **1/1**: the owner reads `live`; a stranger and the owner writing are refused; nothing left behind |
+| `test_web/owner` | **6/6** on WebKit/iPhone and Chromium/Android: a running branch card (today 4,567 EGP, 3 open, drawer with Sara, 2 QR + 1 transfer waiting) and an offline branch card ("مش متصل من …", drawer closed). The screenshots also confirm that "›" renders correctly in RTL. |
+| `flutter test test/` | **116/116** |
+| Deploy | Rules and Hosting deployed; `/owner/` 200 |
+
+**Firebase cost:** uploads are free. The owner downloads about 2 KB per branch every 30 s, and only while the app is open (about 0.4 MB for 30 minutes with 3 branches).
+
+## Round 12: phase 7, remote control with a fixed list (2026-11-27)
+
+**What changed:** commands over Firebase, not a tunnel into the whole API:
+- **The list:** `menu.get`, `item.price`, `item.available`, `checks.open`, `audit.recent`.
+- **Owner writes `cmd/{cafe}/{id}`.** The rules allow only a linked owner, only those 5 ops, `by` must be the writer, the time is the server's, and a command can't be overwritten.
+- **The cashier PC listens** (one live connection, only while "التحكم من بعيد" is on, which it is not by default, per branch). It runs the command, writes `cmdr/{cafe}/{id}` (readable only by the sender) and deletes the command.
+- **Refused:** commands older than 2 minutes, and more than 30 a minute.
+- **Every change goes in the activity log** as "من أبلكيشن المالك".
+- Owner app: in each branch, the "تحكم من بعيد" menu (menu and prices with a sold-out switch, open checks, activity log). The cashier screen has the on/off switch on every branch.
+
+| Test | Result |
+|---|---|
+| `test/remote_test.dart` (fake Firebase) | **3/3**: off by default (no reply); all 5 commands; price and availability change in the database; logged "من أبلكيشن المالك"; bad price, unknown item, op outside the list, stale command refused; turned off = no listening; the 31st+ command in a minute refused |
+| `test_cloud/owner_cloud_test.dart` (real Firebase) | First run: the checks passed but **the cleanup failed**. The rules didn't let a cafe delete its whole `cmd/{uid}`, and the cleanup is one atomic write, so it was refused entirely: the same class of bug as round 8. Fixed: the cafe may delete its whole `cmd/{uid}`. The leftovers (the temp cafe's data and account) were deleted using that cafe's own saved credentials. Then **1/1**: the owner sends only listed ops in his own name; stranger, fake `by`, reading the queue, reading someone else's reply, and faking a reply are all refused; the PC really answered over the deployed rules; a removed owner can't send. **Empty database and 0 accounts afterwards.** |
+| `test_web/owner` | **8/8** on WebKit/iPhone and Chromium/Android (new: the remote menu, prices, and the sold-out switch sends `item.available` with the right id, signed by the owner) |
+| `flutter test test/` | **119/119**; `test_stress` **32/32** |
+| Deploy | Rules and Hosting deployed |
+
 ## Not tested
 
 Firefox (fixed in round 4 — now 42/42), real phones/tablets and Windows UI under stress (only the Android emulator was driven), real thermal printers, the live Firebase project (`test_cloud` writes to the real service, so it was not run), real power loss and full disk (only simulated by stopping the server / corrupting the file), date roll-over at midnight, other machines on a real Wi-Fi network. Semgrep's Dart coverage is limited; the customer menu page uses `esc()` consistently for `innerHTML` but was not exhaustively reviewed for XSS. Scanners cannot prove the absence of vulnerabilities.

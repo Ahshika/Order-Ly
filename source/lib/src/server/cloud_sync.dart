@@ -13,7 +13,9 @@ class CloudSync {
   CloudSync(this.server);
 
   final OrderlyServer server;
-  final _http = http.Client();
+
+  /// الاتصال بيفضل مفتوح دقيقتين (المزامنة كل دقيقة): كل اتصال جديد بيكلّف حوالي 3.5 كيلو تشفير على حساب Firebase.
+  final http.Client _http = IOClient(HttpClient()..idleTimeout = const Duration(minutes: 2));
   http.Client? _streamClient;
   Timer? _pushTimer;
   Timer? _pollTimer;
@@ -37,18 +39,32 @@ class CloudSync {
   DateTime? _chainSyncedAt;
   DateTime? _membershipCheckedAt;
 
+  /// المالك (routes_owner.dart): آخر مرة قايمة الفروع اتكتبت، والإشعارات اللي طالعة من آخر تقارير.
+  DateTime? _ownerShopsAt;
+  List<(String, Map<String, Object?>)> _ownerEvents = const [];
+
+  /// التحكم من بعيد (routes_remote.dart): الاستماع، والأوامر اللي اتنفذت، ووقت الأوامر الأخيرة، والردود.
+  bool _cmdListening = false;
+  final Set<String> _cmdSeen = {};
+  final List<DateTime> _cmdTimes = [];
+  final Map<String, DateTime> _cmdReplies = {};
+
   AppDb get db => server.db;
+  FirebaseEndpoints? _endpoints;
+  FirebaseEndpoints get _fb => _endpoints ?? server.firebase ?? FirebaseEndpoints.live;
 
   void start() {
-    if (firebaseApiKey.isEmpty) return;
+    if (_fb.apiKey.isEmpty) return;
     // كل دقيقة: العروض اللي بتبدأ وتخلص بالساعة، وإن الكافيه لسه شغال
     _pushTimer = Timer.periodic(const Duration(minutes: 1), (_) => kick('tick'));
     _pollTimer = Timer.periodic(const Duration(seconds: 20), (_) {
       if (!live) _pollInbox();
     });
     Timer(const Duration(seconds: 2), () async {
+      _endpoints = await server._resolveFirebase();
       await _run();
       _listen();
+      _startCommandListener();
     });
   }
 
@@ -59,6 +75,16 @@ class CloudSync {
     _reconnect?.cancel();
     _streamClient?.close();
     _http.close();
+  }
+
+  /// كود تفعيل جديد ممكن يكون فيه مشروع Firebase تاني: المزامنة بتنقل عليه.
+  Future<void> reloadProject() async {
+    final next = await server._resolveFirebase();
+    if (next.rtdb == _fb.rtdb && next.apiKey == _fb.apiKey) return;
+    _endpoints = next;
+    _idToken = null;
+    _streamClient?.close(); // الاستماع بيرجع يتصل لوحده على المشروع الجديد
+    await runNow();
   }
 
   Future<void> runNow() async {
@@ -95,6 +121,21 @@ class CloudSync {
     final topics = {..._dirty};
     _dirty.clear();
     try {
+      await _pushCafe(topics);
+      await _pushReports(topics);
+      await _pushLive();
+    } finally {
+      _busy = false;
+    }
+    // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
+    if (!_stopped && _idToken != null) await _syncChain();
+    if (!_stopped && _idToken != null) await _syncOwner();
+  }
+
+  /// المنيو والترابيزات ومتابعة العملاء. لو الكتابة فشلت (النت قطع لحظة)، اللي اتعلّم "اتبعت" بيرجع يتبعت في الدورة الجاية.
+  Future<void> _pushCafe(Set<String> topics) async {
+    final sentBefore = Map.of(_sent);
+    try {
       await _token();
       final updates = <String, Object?>{};
       if (topics.contains('shop')) _logoCache = null;
@@ -107,13 +148,33 @@ class CloudSync {
       db.setSetting('cloud_last_sync', nowIso());
       db.setSetting('cloud_last_error', '');
     } catch (e) {
+      _sent
+        ..clear()
+        ..addAll(sentBefore);
       _dirty.addAll(topics);
       db.setSetting('cloud_last_error', _errorText(e));
-    } finally {
-      _busy = false;
     }
-    // الفروع لوحدها: لو الفرع الرئيسي رفض الكتابة، منيو العملاء مايتأثرش
-    if (!_stopped && _idToken != null) await _syncChain();
+  }
+
+  /// تقارير المالك في كتابة لوحدها: Firebase بيرفض الكتابة كلها لو جزء منها اترفض،
+  /// فأي مشكلة في التقارير ماتوقفش منيو العملاء ومتابعة الطلبات.
+  Future<void> _pushReports(Set<String> topics) async {
+    if (_uid == null || _idToken == null || _stopped) return;
+    final sentBefore = Map.of(_sent);
+    try {
+      final reports = <String, Object?>{};
+      final reportDay = _addReports(reports, topics);
+      await _patch(reports);
+      db.setSetting('report_last_day', reportDay);
+      await _notifyOwner(_ownerEvents);
+      db.setSetting('report_last_error', '');
+    } catch (e) {
+      _sent
+        ..clear()
+        ..addAll(sentBefore);
+      if (topics.contains('register')) _dirty.add('register');
+      db.setSetting('report_last_error', _errorText(e));
+    }
   }
 
   String _errorText(Object e) =>
@@ -121,12 +182,33 @@ class CloudSync {
 
   // ---------------------------------------------------------------- auth
 
+  /// الحساب والكافيه على Firebase بيتعملوا من الأول: المحل اتنقل لمشروع تاني، أو حسابه اتمسح من Firebase.
+  /// كود الكافيه بيتغير، فلينكات الـ QR بتتغير (الشاشة بتقول للمالك يطبعها تاني).
+  void _resetIdentity() {
+    // كان فيه كود كافيه قبل كده، يعني فيه QR مطبوع بقى قديم
+    if (db.setting('cloud_uid') != null) db.setSetting('cloud_qr_reprint', nowIso());
+    db.execute(
+      "DELETE FROM settings WHERE key IN ('cloud_email', 'cloud_password', 'cloud_refresh_token', 'cloud_uid', 'cloud_imgs', 'cloud_table_keys', 'cloud_track_clients')",
+    );
+    _idToken = null;
+    _uid = null;
+    _sent.clear();
+    _dirty.addAll(['shop', 'menu', 'tables', 'checks']);
+    // ربط الفروع كان على المشروع القديم
+    if ((db.setting('chain_role') ?? '').isNotEmpty) server._setChain(null);
+  }
+
   Future<String> _token() async {
+    // نسخ قبل كده كانت على المشروع الأساسي بس (مفيش cloud_db)
+    if ((db.setting('cloud_db') ?? rtdbUrl) != _fb.rtdb) {
+      _resetIdentity();
+      db.setSetting('cloud_db', _fb.rtdb);
+    }
     if (_idToken != null && DateTime.now().isBefore(_idTokenExpiry)) return _idToken!;
     final refresh = db.setting('cloud_refresh_token');
     if (refresh != null && refresh.isNotEmpty) {
       final res = await _http.post(
-        Uri.parse('https://securetoken.googleapis.com/v1/token?key=$firebaseApiKey'),
+        Uri.parse('${_fb.token}/v1/token?key=${_fb.apiKey}'),
         body: {'grant_type': 'refresh_token', 'refresh_token': refresh},
       ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
@@ -146,12 +228,19 @@ class CloudSync {
     }
     final res = await _http
         .post(
-          Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:$endpoint?key=$firebaseApiKey'),
+          Uri.parse('${_fb.auth}/v1/accounts:$endpoint?key=${_fb.apiKey}'),
           headers: {'content-type': 'application/json'},
           body: jsonEncode({'email': email, 'password': password, 'returnSecureToken': true}),
         )
         .timeout(const Duration(seconds: 20));
-    if (res.statusCode != 200) throw Exception('Firebase auth ${res.statusCode}: ${res.body}');
+    if (res.statusCode != 200) {
+      // الحساب مش موجود على Firebase (اتمسح من الكونسول): حساب جديد، وكل حاجة تتبعت تاني
+      if (endpoint == 'signInWithPassword' && RegExp('EMAIL_NOT_FOUND|INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|USER_DISABLED').hasMatch(res.body)) {
+        _resetIdentity();
+        return _token();
+      }
+      throw Exception('Firebase auth ${res.statusCode}: ${res.body}');
+    }
     final j = jsonDecode(res.body) as Map<String, dynamic>;
     return _saveAuth(j['idToken'] as String, j['refreshToken'] as String, j['localId'] as String, j['expiresIn']);
   }
@@ -170,12 +259,22 @@ class CloudSync {
   }
 
   Uri _url(String path, [Map<String, String>? query]) =>
-      Uri.parse('$rtdbUrl/$path.json').replace(queryParameters: {'auth': _idToken!, ...?query});
+      Uri.parse('${_fb.rtdb}/$path.json').replace(queryParameters: {'auth': _idToken!, ...?query});
+
+  /// كتابة من غير ما Firebase يرجّع اللي اتكتب (print=silent): الرد 204 فاضي بدل نسخة كاملة بتتحسب تنزيل.
+  Uri _writeUrl(String path) => _url(path, const {'print': 'silent'});
+
+  static bool _ok(int status) => status == 200 || status == 204;
 
   Future<void> _patch(Map<String, Object?> updates) async {
     if (updates.isEmpty) return;
-    final res = await _http.patch(_url(''), body: jsonEncode(updates), headers: {'content-type': 'application/json'}).timeout(const Duration(seconds: 30));
-    if (res.statusCode != 200) throw RtdbError(res.statusCode, res.body);
+    final res = await _http.patch(_writeUrl(''), body: jsonEncode(updates), headers: {'content-type': 'application/json'}).timeout(const Duration(seconds: 30));
+    if (!_ok(res.statusCode)) throw RtdbError(res.statusCode, res.body);
+  }
+
+  Future<void> _delete(String path) async {
+    final res = await _http.delete(_writeUrl(path)).timeout(const Duration(seconds: 20));
+    if (!_ok(res.statusCode)) throw RtdbError(res.statusCode, res.body);
   }
 
   /// بيضيف المسار للتحديث لو اتغير عن آخر مرة اتبعت.
@@ -203,7 +302,8 @@ class CloudSync {
       'branch': shop['branchName'],
       'phone': shop['phone'],
       'address': shop['address'],
-      'logo': _smallLogo(),
+      // اللوجو لوحده في cafes/{uid}/logo (pub بيتقري كل دقيقة)، وهنا رقم نسخته بس عشان الصفحة تعرف إنه اتغير
+      'lv': _smallLogo() == null ? null : sha256Hex(_smallLogo()!).substring(0, 12),
       'welcome': s['qrWelcome'],
       'wifi': (s['wifiName'] as String? ?? '').isEmpty ? null : {'n': s['wifiName'], 'p': s['wifiPassword']},
       'langs': s['menuLanguages'],
@@ -227,6 +327,7 @@ class CloudSync {
       'off': off.isEmpty ? null : off,
     };
     _put(updates, 'cafes/$_uid/pub', pub);
+    _put(updates, 'cafes/$_uid/logo', _smallLogo());
     // نبضة كل 5 دقايق: الصفحة بتعرف منها إن كمبيوتر الكافيه شغال
     final last = DateTime.tryParse(_sent['seen-at'] ?? '');
     if (last == null || DateTime.now().difference(last).inMinutes >= 5) {
@@ -234,6 +335,9 @@ class CloudSync {
       updates['cafes/$_uid/seen'] = {'.sv': 'timestamp'};
     }
   }
+
+  /// أطول ضلع لصورة الصنف على النت: الكارت 92px والموبايلات 2x، يعني 184px كفاية، والصورة الكبيرة في شاشة الصنف مقبولة.
+  static const _thumbSide = 240;
 
   String? _logoCache;
   String? _smallLogo() => _logoCache == null || _logoCache!.isEmpty ? null : _logoCache;
@@ -286,14 +390,19 @@ class CloudSync {
       updates['cafes/$_uid/mv'] = version;
     }
 
-    // صور الأصناف: نسخة صغيرة لكل صورة، بتتبعت مرة واحدة بس
+    // صور الأصناف: نسخة صغيرة لكل صورة، بتتبعت مرة واحدة بس.
+    // لو مقاس النسخة اتغير (نسخة أقدم من البرنامج كانت بتبعت أكبر) بتتبعت كلها تاني مرة واحدة.
     final wanted = {for (final i in menu['items'] as List) if ((i as Map)['img'] != null) i['img'] as String};
+    if (db.setting('cloud_img_size') != '$_thumbSide') {
+      db.setSetting('cloud_imgs', '[]');
+      db.setSetting('cloud_img_size', '$_thumbSide');
+    }
     final sentImgs = ((jsonDecode(db.setting('cloud_imgs') ?? '[]') as List).cast<String>()).toSet();
     for (final id in wanted.difference(sentImgs).take(15)) {
       final f = File(p.join(server._filesDir.path, id));
       if (!f.existsSync()) continue;
       final bytes = f.readAsBytesSync();
-      final thumb = await shrinkInBackground(bytes, 360, 62);
+      final thumb = await shrinkInBackground(bytes, _thumbSide, 60);
       if (thumb == null) continue;
       updates['img/$_uid/$id'] = base64.encode(thumb);
       sentImgs.add(id);
@@ -349,6 +458,14 @@ class CloudSync {
       "SELECT DISTINCT client_id FROM orders WHERE client_id IS NOT NULL AND created_at > ?",
       [since],
     );
+    // العميل اللي آخر طلب ليه عدّى عليه 3 ساعات: متابعته بتتمسح من النت (كانت بتفضل للأبد)
+    final current = {for (final c in clients) c['client_id'] as String};
+    final previous = ((jsonDecode(db.setting('cloud_track_clients') ?? '[]') as List).cast<String>()).toSet();
+    for (final gone in previous.difference(current)) {
+      updates['trackc/$_uid/$gone'] = null;
+      _sent.remove('trackc/$_uid/$gone');
+    }
+    db.setSetting('cloud_track_clients', jsonEncode(current.toList()));
     for (final c in clients) {
       final clientId = c['client_id'] as String;
       final orders = db.select('SELECT * FROM orders WHERE client_id = ? AND created_at > ? ORDER BY created_at', [clientId, since]);
@@ -368,11 +485,63 @@ class CloudSync {
         };
       }
       final pays = db.select("SELECT p.cloud_id, p.status, p.reject_reason, p.amount_cents FROM payments p WHERE p.cloud_id IS NOT NULL AND p.created_at > ? AND p.payer = ?", [since, clientId]);
+      // حساب ترابيزة العميل جوه متابعته هو: الصفحة بتفتح اتصال واحد بس بدل اتنين (الكتابة ببلاش، والتنزيل واحد)
+      final table = db.selectOne(
+        "SELECT c.*, t.qr_key FROM orders o JOIN checks c ON c.id = o.check_id JOIN tables t ON t.id = c.table_id "
+        "WHERE o.client_id = ? AND o.created_at > ? AND c.type = 'dine_in' ORDER BY o.created_at DESC LIMIT 1",
+        [clientId, since],
+      );
       _put(updates, 'trackc/$_uid/$clientId', {
+        // v2: فيه tb، والصفحة مش محتاجة تسمع على trackt
+        'v': 2,
+        'tb': table == null ? null : {'k': table['qr_key'], ..._billDoc(table)},
         'orders': doc.isEmpty ? null : doc,
         'pays': pays.isEmpty ? null : {for (final p in pays) p['cloud_id'] as String: {'s': p['status'], 'r': p['reject_reason'], 'a': p['amount_cents']}},
       });
     }
+  }
+
+  // ---------------------------------------------------------------- push: تقارير المالك
+
+  /// تقرير كل يوم شغل (rep/{cafe}/{يوم}/day) وكل وردية اتقفلت (rep/{cafe}/{يوم}/shifts/{id}).
+  /// - النهارده: مع كل حركة درج (فتح، مصروف، قفل)، فالمالك بيشوف اليوم لحد آخر تسليم.
+  /// - امبارح: كل دورة، بس بيتبعت لو اتغير (التقرير النهائي أول ما اليوم يخلص، وأي تصحيح بعدها).
+  /// - لو الكمبيوتر كان مقفول كام يوم، الأيام اللي فاتت بتتبعت (لحد شهر).
+  /// بيرجع تاريخ النهارده عشان يتحفظ بعد ما الكتابة تنجح.
+  String _addReports(Map<String, Object?> updates, Set<String> topics) {
+    final bd = server._bday;
+    final today = bd.dateOf(DateTime.now());
+    DateTime day(int offset) => DateTime(today.year, today.month, today.day + offset);
+    final days = <DateTime>{day(-1)};
+    if (topics.contains('register')) days.add(today);
+    final last = BusinessDay.parseKey(db.setting('report_last_day'));
+    if (last != null) {
+      for (var d = DateTime(last.year, last.month, last.day); d.isBefore(day(-1)) && days.length < 32; d = DateTime(d.year, d.month, d.day + 1)) {
+        days.add(d);
+      }
+    }
+    // إشعارات المالك: كل يوم خلص (آخر يومين بس لو الكمبيوتر كان مقفول) وكل وردية اتقفلت
+    final events = <(String, Map<String, Object?>)>[];
+    for (final d in days) {
+      final report = server._dayReport(d);
+      _putReport(updates, 'rep/$_uid/${BusinessDay.keyOf(d)}/day', report);
+      if (d.isBefore(today) && !d.isBefore(day(-2))) events.add(('day:${BusinessDay.keyOf(d)}', dayPushMessage(report, _uid!)));
+    }
+    final since = DateTime.now().toUtc().subtract(const Duration(hours: 48)).toIso8601String();
+    for (final s in db.select('SELECT * FROM register_sessions WHERE closed_at IS NOT NULL AND closed_at > ?', [since])) {
+      final r = server._shiftReport(s);
+      events.add(('shift:${s['id']}', shiftPushMessage(r, _uid!)));
+      _putReport(updates, 'rep/$_uid/${r['date']}/shifts/${s['id']}', r);
+    }
+    _ownerEvents = events;
+    return BusinessDay.keyOf(today);
+  }
+
+  void _putReport(Map<String, Object?> updates, String path, Map<String, Object?> report) {
+    final j = jsonEncode(report);
+    if (_sent[path] == j) return;
+    _sent[path] = j;
+    updates[path] = {'j': j, 'at': {'.sv': 'timestamp'}};
   }
 
   Map<String, Object?> _billDoc(Map<String, Object?> c) {
@@ -491,9 +660,9 @@ class CloudSync {
         } catch (e) {
           stderr.writeln('cloud message $cloudId: $e');
         }
-        if (msg['p'] == true) await _http.delete(_url('proof/$_uid/$cloudId')).timeout(const Duration(seconds: 20));
+        if (msg['p'] == true) await _delete('proof/$_uid/$cloudId');
       }
-      await _http.delete(_url('inbox/$_uid/$cloudId')).timeout(const Duration(seconds: 20));
+      await _delete('inbox/$_uid/$cloudId');
       kick('orders');
     } catch (e) {
       db.setSetting('cloud_last_error', _errorText(e));
@@ -531,9 +700,9 @@ class CloudSync {
           // مفيش نت: الاختبار نفسه هيفشل في المسح اللي بعده
         }
       }
-      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc']) '$root/$_uid': null});
+      await _patch({for (final root in ['cafes', 'img', 'inbox', 'proof', 'trackt', 'trackc', 'rep', 'own', 'live', 'cmd', 'cmdr']) '$root/$_uid': null});
       await _http.post(
-        Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=$firebaseApiKey'),
+        Uri.parse('${_fb.auth}/v1/accounts:delete?key=${_fb.apiKey}'),
         headers: {'content-type': 'application/json'},
         body: jsonEncode({'idToken': _idToken}),
       );

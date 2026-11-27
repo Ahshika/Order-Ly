@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../server/server_host.dart';
+import 'server_launcher.dart';
 import 'api_client.dart';
 import 'app_config.dart';
 import 'models.dart';
@@ -47,20 +48,21 @@ class SessionController extends AsyncNotifier<Session> {
 
   @override
   Future<Session> build() async {
-    final mode = _config.mode;
+    // نسخة الويب (أيفون الموظفين): الصفحة جاية من سيرفر الكافيه نفسه، فهو العنوان، ومفيش اختيار وضع
+    final mode = kIsWeb ? AppMode.client : _config.mode;
     if (mode == null) return const Session(SessionStatus.chooseMode);
 
     final String baseUrl;
     if (mode == AppMode.server) {
       try {
         final dir = await getApplicationSupportDirectory();
-        final port = await ServerHost.start(dir.path);
+        final port = await startEmbeddedServer(dir.path);
         baseUrl = 'http://127.0.0.1:$port';
       } catch (e) {
         return Session(SessionStatus.serverFailed, error: e.toString());
       }
     } else {
-      final url = _config.serverUrl;
+      final url = kIsWeb ? Uri.base.origin : _config.serverUrl;
       if (url == null) return const Session(SessionStatus.needsServer);
       baseUrl = url;
     }

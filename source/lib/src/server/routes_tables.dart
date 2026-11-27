@@ -195,10 +195,16 @@ extension _TableRoutes on OrderlyServer {
           }).toList(),
       // QR للتيك أواي (عند الكاونتر): العميل يطلب ويستلم بنفسه
       'takeawayUrl': cafeId == null ? null : _menuLink(cafeId, _takeawayKey),
+      // كود الكافيه على النت اتغير (نقل مشروع أو الحساب اتمسح): الـ QR المطبوع قبل الوقت ده مابقاش شغال
+      'reprintSince': (db.setting('cloud_qr_reprint') ?? '').isEmpty ? null : db.setting('cloud_qr_reprint'),
     };
   }
 
-  String _menuLink(String cafeId, String key) => '$menuSiteUrl/m/$cafeId/$key';
+  /// المحل على مشروع Firebase خاص بيه: الصفحة (واحدة لكل المحلات) بتعرف داتابيزه من ?d=.
+  String _menuLink(String cafeId, String key) {
+    final d = _cloud?._fb.menuDatabaseParam;
+    return '$menuSiteUrl/m/$cafeId/$key${d == null ? '' : '?d=$d'}';
+  }
 
   /// الكود السري لـ QR التيك أواي (واحد للكافيه كله).
   String get _takeawayKey {

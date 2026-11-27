@@ -129,7 +129,12 @@ h2.sec{font-size:18px;margin:18px 4px 8px}
 <script>
 'use strict';
 // ---------------------------------------------------------------- إعدادات
-const DB = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+// الصفحة واحدة لكل المحلات. المحل اللي على مشروع Firebase خاص بيه، لينكه فيه ?d=<داتابيز المحل>،
+// وبنقبل بس عناوين Firebase (عشان محدش يوجّه الصفحة لسيرفر تاني)
+const DB = (() => {
+  const d = new URLSearchParams(location.search).get('d') || '';
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)?\.(firebasedatabase\.app|firebaseio\.com)$/.test(d) ? `https://${d}` : 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';
+})();
 const seg = location.pathname.split('/').filter(Boolean); // ["m", cafeId, key]
 const CAFE = seg[1] || '', KEY = seg[2] || '';
 const $ = (id) => document.getElementById(id);
@@ -159,9 +164,11 @@ function toast(msg, ms = 2600) { const d = document.createElement('div'); d.clas
 async function get(path) { const r = await fetch(`${DB}/${path}.json`, { cache: 'no-store' }); if (!r.ok) throw new Error('get ' + r.status); return r.json(); }
 async function put(path, body) { const r = await fetch(`${DB}/${path}.json`, { method: 'PUT', body: JSON.stringify(body) }); if (!r.ok) throw new Error('put ' + r.status); return r.json(); }
 
-// بيسمع على مسار لحظياً (EventSource)، ولو مش شغال بيقرا كل شوية
+// بيسمع على مسار لحظياً (EventSource)، ولو مش شغال بيقرا كل شوية.
+// لما الشاشة تتقفل أو العميل يروح تطبيق تاني الاتصال بيتقفل (مايتحسبش على حد الـ 100 اتصال ولا التنزيل)،
+// ولما يرجع بيتفتح تاني وFirebase بيبعت الحالة كلها من الأول.
 function watch(path, cb) {
-  let state = null, es = null, timer = null, fails = 0;
+  let state = null, es = null, timer = null, polling = false, fails = 0, stopped = false;
   const setAt = (obj, parts, val) => {
     if (!parts.length) return val;
     const o = obj && typeof obj === 'object' ? { ...obj } : {};
@@ -170,8 +177,16 @@ function watch(path, cb) {
     if (v == null) delete o[h]; else o[h] = v;
     return Object.keys(o).length ? o : null;
   };
-  const poll = async () => { try { state = await get(path); cb(state); } catch (_) {} timer = setTimeout(poll, document.hidden ? 20000 : 6000); };
+  const poll = async () => {
+    timer = null;
+    if (stopped || document.hidden || polling) return;
+    polling = true;
+    try { state = await get(path); cb(state); } catch (_) {}
+    polling = false;
+    if (!stopped && !document.hidden && !timer) timer = setTimeout(poll, 6000);
+  };
   const start = () => {
+    if (stopped || document.hidden || es || timer || polling) return;
     if (!window.EventSource || fails > 2) return poll();
     es = new EventSource(`${DB}/${path}.json`);
     const on = (e, patch) => {
@@ -184,10 +199,14 @@ function watch(path, cb) {
     };
     es.addEventListener('put', (e) => on(e, false));
     es.addEventListener('patch', (e) => on(e, true));
-    es.onerror = () => { fails++; es.close(); setTimeout(start, 3000); };
+    es.onerror = () => { fails++; es.close(); es = null; setTimeout(start, 3000); };
   };
+  const pause = () => { if (es) { es.close(); es = null; } clearTimeout(timer); timer = null; };
+  // الموبايل بيقفل الاتصال وهو في الخلفية، فده مش "فشل": لما يرجع بنجرّب الاتصال اللحظي تاني
+  const onVis = () => { if (document.hidden) pause(); else { fails = 0; start(); } };
+  document.addEventListener('visibilitychange', onVis);
   start();
-  return () => { es && es.close(); clearTimeout(timer); };
+  return () => { stopped = true; pause(); document.removeEventListener('visibilitychange', onVis); };
 }
 
 // ---------------------------------------------------------------- الحالة
@@ -209,10 +228,54 @@ async function boot() {
   if (!menu) return fatal(t('bad'), '');
   if (pub.langs === 'ar') lang = 'ar'; else if (pub.langs === 'en') lang = 'en'; else if (store.get('lang', null) == null && !(navigator.language || 'ar').startsWith('ar') && !/^(ar|en)/.test(navigator.language || '')) lang = 'en';
   render();
-  watch(`trackc/${CAFE}/${CLIENT}`, (v) => { const before = track; track = v; onTrack(before); });
-  if (!isTk()) watch(`trackt/${CAFE}/${KEY}`, (v) => { bill = v; onBill(); });
-  // تحديث المتاح (الأصناف اللي خلصت) وحالة الكافيه كل شوية
-  setInterval(async () => { if (document.hidden) return; try { pub = await get(`cafes/${CAFE}/pub`); seen = await get(`cafes/${CAFE}/seen`); renderBanners(); renderMenu(); } catch (_) {} }, 60000);
+  loadLogo();
+  watch(`trackc/${CAFE}/${CLIENT}`, (v) => { const before = track; track = v; syncBill(); onTrack(before); });
+  syncBill();
+  // تحديث المتاح (الأصناف اللي خلصت) وحالة الكافيه كل دقيقة، وأول ما العميل يرجع للصفحة
+  setInterval(refreshPub, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshPub(); });
+}
+
+async function refreshPub() {
+  if (document.hidden) return;
+  try {
+    const lv = pub.lv;
+    pub = await get(`cafes/${CAFE}/pub`); seen = await get(`cafes/${CAFE}/seen`);
+    if (pub && pub.lv !== lv) loadLogo();
+    renderBanners(); renderMenu();
+  } catch (_) {}
+}
+
+// اللوجو: بيتنزل مرة واحدة ويتحفظ على الموبايل برقم نسخته (pub.lv). كاشير بنسخة قديمة بيبعته جوه pub نفسه.
+async function loadLogo() {
+  let d = pub.logo || null;
+  if (!d && pub.lv) {
+    const c = store.get('logo_' + CAFE, null);
+    if (c && c.v === pub.lv) d = c.d;
+    else { try { d = await get(`cafes/${CAFE}/logo`); if (d) store.set('logo_' + CAFE, { v: pub.lv, d }); } catch (_) {} }
+  }
+  if (d) { $('logo').src = 'data:image/png;base64,' + d; $('logo').classList.remove('hide'); }
+}
+
+// حساب الترابيزة: الكاشير الجديد بيبعته جوه متابعة العميل (trackc v2، اتصال واحد بس).
+// بنسمع على trackt لوحده بس لو: العميل لسه ما طلبش وفاتح "طلباتي"، أو الكاشير على نسخة قديمة.
+let billStop = null;
+function needBillWatch() {
+  if (isTk()) return false;
+  if (track && track.v === 2 && track.tb && track.tb.k === KEY) return false;
+  if (track && track.orders && track.v !== 2) return true;
+  return !!$('ordersSheet');
+}
+function syncBill() {
+  if (!table) return;
+  if (track && track.v === 2 && track.tb && track.tb.k === KEY) { bill = track.tb; onBill(); }
+  manageBillWatch();
+}
+function manageBillWatch() {
+  if (!table) return;
+  const need = needBillWatch();
+  if (need && !billStop) billStop = watch(`trackt/${CAFE}/${KEY}`, (v) => { bill = v; onBill(); });
+  else if (!need && billStop) { billStop(); billStop = null; }
 }
 
 function fatal(title, sub) {
@@ -229,7 +292,6 @@ function render() {
   $('hdr').classList.remove('hide');
   $('cafeName').textContent = pub.name;
   $('placeName').textContent = isTk() ? t('takeaway') : `${t('table')} ${table.n}${table.a ? ' • ' + table.a : ''}`;
-  if (pub.logo) { $('logo').src = 'data:image/png;base64,' + pub.logo; $('logo').classList.remove('hide'); }
   $('welcome').textContent = pub.welcome || ''; $('welcome').classList.toggle('hide', !pub.welcome);
   $('wifiBtn').classList.toggle('hide', !pub.wifi);
   $('langBtn').classList.toggle('hide', pub.langs !== 'ar_en');
@@ -420,17 +482,18 @@ function bindPayBox(layer, rerender) {
 }
 function restoreFieldsSafe() { try { restoreFields(); } catch (_) {} }
 
-// تصغير الصورة على الموبايل قبل الرفع (أسرع وأوفر للنت)
+// تصغير الصورة على الموبايل قبل الرفع (أسرع وأوفر للنت). صورة التحويل كلها كلام وأرقام:
+// 1000px كفاية تتقري، وحوالي 300 كيلو بدل 700 (الكاشير بينزّلها، والتنزيل بيتحسب على Firebase)
 function compress(file) {
   return new Promise((res, rej) => {
     const img = new Image(); const url = URL.createObjectURL(file);
     img.onload = () => {
-      const max = 1280; let w = img.width, h = img.height;
+      const max = 1000; let w = img.width, h = img.height;
       if (w > max || h > max) { const r = Math.min(max / w, max / h); w = Math.round(w * r); h = Math.round(h * r); }
       const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
       cv.getContext('2d').drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
-      let q = 0.72, out = cv.toDataURL('image/jpeg', q);
-      while (out.length > 700000 && q > 0.3) { q -= 0.12; out = cv.toDataURL('image/jpeg', q); }
+      let q = 0.7, out = cv.toDataURL('image/jpeg', q);
+      while (out.length > 300000 && q > 0.3) { q -= 0.1; out = cv.toDataURL('image/jpeg', q); }
       res(out);
     };
     img.onerror = rej; img.src = url;
@@ -517,6 +580,7 @@ function openOrders() {
   }
   h += `<button class="btn sec" id="closeOrders">${t('close')}</button>`;
   sheet(h, !!$('ordersSheet'));
+  manageBillWatch();
   $('closeOrders').onclick = closeSheet;
   if ($('payNowBtn')) $('payNowBtn').onclick = () => openPay();
   if ($('rateBtn')) $('rateBtn').onclick = () => openRate();
@@ -583,7 +647,7 @@ function sheet(html, keepScroll) {
   if (top) document.querySelector('#layer .sheet').scrollTop = top;
   $('sbg').onclick = (e) => { if (e.target.id === 'sbg') closeSheet(); };
 }
-function closeSheet() { $('layer').innerHTML = ''; }
+function closeSheet() { $('layer').innerHTML = ''; manageBillWatch(); }
 
 // ---------------------------------------------------------------- الأحداث
 document.addEventListener('click', (e) => {

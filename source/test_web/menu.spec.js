@@ -6,7 +6,7 @@ const path = require('path');
 const OUT = process.env.WEB_OUT;
 const fx = JSON.parse(fs.readFileSync(path.join(OUT, 'fixture.json'), 'utf8'));
 const MENU_HTML = fs.readFileSync(path.join(__dirname, '..', 'firebase', 'public', 'menu.html'), 'utf8');
-const DB = 'https://orderly-yvzug-default-rtdb.europe-west1.firebasedatabase.app';
+const DB = 'https://orderly-cafe-28129-default-rtdb.europe-west1.firebasedatabase.app';
 const SITE = 'https://menu.test';
 
 const item = (name) => fx.menu.items.find((i) => i.n === name);
@@ -16,6 +16,8 @@ const wallet = () => fx.pub.pay.find((p) => p.k === 'wallet');
 /** Firebase وهمي. [o] بيغيّر أي جزء من البيانات أو يكسر النت. */
 async function mock(page, testInfo, o = {}) {
   const sent = [];
+  /** كل طلب للداتابيز وحجم رده (التنزيل اللي Firebase بيحاسب عليه). */
+  const reqs = [];
   const pub = { ...fx.pub, ...(o.pub || {}) };
   const menu = o.menu || fx.menu;
   const tables = o.tables || fx.tables;
@@ -36,24 +38,31 @@ async function mock(page, testInfo, o = {}) {
       return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
     }
     const parts = p.split('/');
+    const stream = (req.headers()['accept'] || '').includes('text/event-stream');
     let data = null;
     if (parts[0] === 'cafes' && parts[1] === fx.cafe) {
       if (parts[2] === 'pub') data = pub;
       else if (parts[2] === 'menu') data = menu;
+      else if (parts[2] === 'logo') data = o.logo ?? null;
       else if (parts[2] === 'mv') data = menu.v;
       else if (parts[2] === 'seen') data = o.seen ?? Date.now();
       else if (parts[2] === 'tables') data = tables[parts[3]] ?? null;
     } else if (parts[0] === 'trackc') data = o.trackc ?? null;
     else if (parts[0] === 'trackt') data = o.trackt ?? null;
     // EventSource: نبعت الحالة كلها مرة واحدة زي Firebase
-    if ((req.headers()['accept'] || '').includes('text/event-stream')) {
-      return r.fulfill({ status: 200, contentType: 'text/event-stream', body: `event: put\ndata: ${JSON.stringify({ path: '/', data })}\n\n` });
+    if (stream) {
+      const body = `event: put\ndata: ${JSON.stringify({ path: '/', data })}\n\n`;
+      reqs.push({ path: p, stream, bytes: body.length });
+      return r.fulfill({ status: 200, contentType: 'text/event-stream', body });
     }
-    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
+    const body = JSON.stringify(data);
+    reqs.push({ path: p, stream, bytes: body.length });
+    return r.fulfill({ status: 200, contentType: 'application/json', body });
   });
   page.on('pageerror', (e) => testInfo.annotations.push({ type: 'pageerror', description: String(e) }));
   return {
     sent,
+    reqs,
     /** بيحفظ الرسايل اللي اتبعتت عشان السيرفر الحقيقي ياخدها بعد كده (menu_contract_test.dart). */
     save(testName) {
       const dir = path.join(OUT, 'captured');
@@ -153,6 +162,8 @@ test('wallet payment: needs a screenshot, a 12 MP photo is shrunk under the Fire
   const proof = fb.sent.find((s) => s.path.startsWith('proof/'));
   ti.annotations.push({ type: 'proof', description: `original PNG ${(b64.length * 0.75 / 1048576).toFixed(1)} MB → uploaded ${(proof.body.d.length / 1024).toFixed(0)} KB` });
   expect(proof.body.d.length).toBeLessThanOrEqual(1_200_000);
+  // صورة كلها ضوضاء (أسوأ حالة): بتنزل لأقل جودة. صورة تحويل حقيقية بتطلع أقل من 300 كيلو (اختبار تحت)
+  expect(proof.body.d.length).toBeLessThanOrEqual(450_000);
   expect(fb.sent.find((s) => s.path.startsWith('inbox/')).body.p).toBe(true);
   fb.save('wallet+proof');
 });
@@ -253,4 +264,138 @@ test('corrupted phone storage does not break the page', async ({ page }, ti) => 
   await mock(page, ti);
   await open(page);
   await expect(page.locator('.item').first()).toBeVisible();
+});
+
+// ---------------------------------------------------------------- استهلاك Firebase (المرحلة 1)
+
+const LOGO = 'iVBORw0KGgo' + 'A'.repeat(60_000); // لوجو حوالي 60 كيلو زي اللي بيتعمل من صورة حقيقية
+const streams = (fb) => fb.reqs.filter((r) => r.stream).map((r) => r.path.split('/')[0]);
+const setHidden = (page, hidden) => page.evaluate((h) => {
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => h });
+  document.dispatchEvent(new Event('visibilitychange'));
+}, hidden);
+
+test('logo: own node, downloaded once and kept on the phone (not every minute inside pub)', async ({ page }, ti) => {
+  await page.clock.install();
+  const fb = await mock(page, ti, { pub: { lv: 'logo-v1' }, logo: LOGO });
+  await open(page);
+  await expect(page.locator('#logo')).toBeVisible();
+  await page.clock.runFor(10 * 60_000); // 10 دقايق والصفحة قدام العميل
+  await page.reload();
+  await expect(page.locator('#logo')).toBeVisible();
+  const logoGets = fb.reqs.filter((r) => r.path.endsWith('/logo'));
+  const pubGets = fb.reqs.filter((r) => r.path.endsWith('/pub'));
+  ti.annotations.push({ type: 'usage', description: `pub × ${pubGets.length} = ${pubGets.reduce((s, r) => s + r.bytes, 0)} B, logo × ${logoGets.length} = ${logoGets.reduce((s, r) => s + r.bytes, 0)} B` });
+  expect(logoGets).toHaveLength(1);
+  expect(pubGets.length).toBeGreaterThanOrEqual(10);
+  expect(Math.max(...pubGets.map((r) => r.bytes))).toBeLessThan(5_000);
+});
+
+test('old cashier version: logo inside pub still shows, no extra request', async ({ page }, ti) => {
+  const fb = await mock(page, ti, { pub: { logo: 'iVBORw0KGgoAAAA' } });
+  await open(page);
+  await expect(page.locator('#logo')).toBeVisible();
+  expect(fb.reqs.filter((r) => r.path.endsWith('/logo'))).toHaveLength(0);
+});
+
+test('one live connection per phone: the table bill comes inside the customer tracking (v2)', async ({ page }, ti) => {
+  const fb = await mock(page, ti, {
+    trackc: { v: 2, orders: { a: { n: 3, s: 'accepted', at: '2026-01-01' } }, tb: { k: fx.tableKey, n: 12, items: [{ q: 1, n: 'لاتيه كبير', p: 6000 }], total: 6000, paid: 0 } },
+  });
+  await open(page);
+  await page.locator('#ordersFab').click();
+  await expect(page.locator('#ordersSheet')).toBeAttached();
+  await expect(page.locator('.sheet')).toContainText('لاتيه كبير');
+  await page.locator('#closeOrders').click();
+  await page.waitForTimeout(500);
+  expect([...new Set(streams(fb))]).toEqual(['trackc']);
+});
+
+test('old cashier version (tracking without v2): still listens on the table bill', async ({ page }, ti) => {
+  const fb = await mock(page, ti, {
+    trackc: { orders: { a: { n: 3, s: 'accepted', at: '2026-01-01' } } },
+    trackt: { n: 12, items: [{ q: 1, n: 'لاتيه قديم', p: 6000 }], total: 6000, paid: 0 },
+  });
+  await open(page);
+  await expect.poll(() => streams(fb).includes('trackt')).toBe(true);
+  await page.locator('#ordersFab').click();
+  await expect(page.locator('.sheet')).toContainText('لاتيه قديم');
+});
+
+test('customer who has not ordered: table bill is read only while "my orders" is open', async ({ page }, ti) => {
+  const fb = await mock(page, ti, { trackt: { n: 12, items: [{ q: 1, n: 'طلب الترابيزة', p: 6000 }], total: 6000, paid: 0 } });
+  await open(page);
+  await expect(page.locator('.item').first()).toBeVisible();
+  await page.waitForTimeout(500);
+  expect(streams(fb)).not.toContain('trackt');
+  await page.locator('#ordersFab').click();
+  await expect(page.locator('.sheet')).toContainText('طلب الترابيزة');
+});
+
+test('screen locked: no requests at all while hidden, live connection back when the customer returns', async ({ page }, ti) => {
+  const fb = await mock(page, ti);
+  await open(page);
+  await expect(page.locator('.item').first()).toBeVisible();
+  await page.waitForTimeout(500);
+  await setHidden(page, true);
+  const atHide = fb.reqs.length;
+  await page.waitForTimeout(7_000); // أكتر من إعادة الاتصال (3 ث) والقراية الاحتياطية (6 ث)
+  expect(fb.reqs.length, 'requests while the phone screen was off').toBe(atHide);
+  await setHidden(page, false);
+  await expect.poll(() => fb.reqs.slice(atHide).some((r) => r.stream)).toBe(true);
+  await expect.poll(() => fb.reqs.slice(atHide).some((r) => r.path.endsWith('/pub'))).toBe(true);
+});
+
+test('real transfer screenshot (text on a plain background) uploads under 300 KB', async ({ page }, ti) => {
+  const fb = await mock(page, ti);
+  await open(page);
+  await addLatte(page);
+  await page.locator('#cartbar').click();
+  await fillContact(page);
+  await page.locator(`[data-pm="${wallet().id}"]`).click();
+  // لقطة شاشة موبايل 1170×2532 فيها أرقام وكلام زي إيصال InstaPay
+  const b64 = await page.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 1170; c.height = 2532;
+    const g = c.getContext('2d'); g.fillStyle = '#f4f1fb'; g.fillRect(0, 0, 1170, 2532);
+    g.fillStyle = '#5b2a86'; g.fillRect(0, 0, 1170, 260);
+    g.fillStyle = '#222'; g.font = '48px sans-serif';
+    for (let i = 0; i < 30; i++) g.fillText(`Transfer ref 20261123-${1000 + i}   EGP ${(i * 37.5).toFixed(2)}`, 60, 360 + i * 70);
+    return c.toDataURL('image/png').split(',')[1];
+  });
+  await page.locator('#proofIn').setInputFiles({ name: 'instapay.png', mimeType: 'image/png', buffer: Buffer.from(b64, 'base64') });
+  await expect(page.locator('label.upl img')).toBeVisible({ timeout: 30_000 });
+  await fillContact(page);
+  await page.locator('#sendBtn').click();
+  await expect(page.locator('.toast', { hasText: 'الطلب اتبعت' })).toBeVisible();
+  const proof = fb.sent.find((s) => s.path.startsWith('proof/'));
+  ti.annotations.push({ type: 'proof', description: `screenshot → uploaded ${(proof.body.d.length / 1024).toFixed(0)} KB` });
+  expect(proof.body.d.length).toBeLessThanOrEqual(300_000);
+});
+
+// ---------------------------------------------------------------- محل على مشروع Firebase خاص بيه (المرحلة 2)
+
+test('shop on its own Firebase project: the page talks to the database in ?d=, and refuses anything that is not Firebase', async ({ page }, ti) => {
+  const SHOP = 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app';
+  const hits = { shop: 0, main: 0, evil: 0 };
+  await page.route(`${SITE}/**`, (r) => r.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: MENU_HTML }));
+  const serve = (who) => async (r) => {
+    hits[who]++;
+    const p = new URL(r.request().url()).pathname.replace(/^\//, '').replace(/\.json$/, '').split('/');
+    const data = p[2] === 'pub' ? fx.pub : p[2] === 'menu' ? fx.menu : p[2] === 'mv' ? fx.menu.v : p[2] === 'seen' ? Date.now() : p[2] === 'tables' ? fx.tables[p[3]] ?? null : null;
+    if ((r.request().headers()['accept'] || '').includes('text/event-stream')) return r.fulfill({ status: 200, contentType: 'text/event-stream', body: `event: put\ndata: ${JSON.stringify({ path: '/', data })}\n\n` });
+    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
+  };
+  await page.route(`${SHOP}/**`, serve('shop'));
+  await page.route(`${DB}/**`, serve('main'));
+  await page.route('https://evil.example.com/**', serve('evil'));
+
+  await page.goto(`${SITE}/m/${fx.cafe}/${fx.tableKey}?d=cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app`);
+  await expect(page.locator('#cafeName')).toHaveText(fx.pub.name);
+  expect(hits.shop).toBeGreaterThan(0);
+  expect(hits.main).toBe(0);
+
+  await page.goto(`${SITE}/m/${fx.cafe}/${fx.tableKey}?d=evil.example.com`);
+  await expect(page.locator('#cafeName')).toHaveText(fx.pub.name);
+  expect(hits.evil).toBe(0);
+  expect(hits.main).toBeGreaterThan(0);
 });

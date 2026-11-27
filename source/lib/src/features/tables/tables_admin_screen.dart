@@ -93,6 +93,12 @@ class TablesAdminScreen extends ConsumerWidget {
               padding: EdgeInsets.only(bottom: 12),
               child: ErrorBanner('لينكات الـ QR هتجهز أول ما كمبيوتر الكاشير يتوصل بالنت.'),
             ),
+          if (qr != null && qr['cafeId'] != null && qr['reprintSince'] is String && DateTime.now().difference(DateTime.parse(qr['reprintSince'] as String)).inDays < 30)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: ErrorBanner('كود الكافيه على النت اتغير يوم ${formatDate(DateTime.parse(qr['reprintSince'] as String).toLocal())}. '
+                  'أي QR اتطبع قبل اليوم ده مابقاش شغال: اطبع الكروت تاني.'),
+            ),
           Wrap(spacing: 8, runSpacing: 8, children: [
             FilledButton.icon(
               onPressed: () async {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/cafe_models.dart';
+import '../../core/business_day.dart';
 import '../../core/format.dart';
 import '../../core/providers.dart';
 import '../../core/realtime.dart';
@@ -404,7 +405,7 @@ class _BranchCard extends StatelessWidget {
               Expanded(child: _Figure('الشهر ده', s['month'] as Json?)),
             ]),
             const SizedBox(height: 10),
-            _WeekBars((s['days'] as List? ?? const []).whereType<int>().toList()),
+            _WeekBars((s['days'] as List? ?? const []).whereType<int>().toList(), today: BusinessDay.parseKey(s['bd'])),
             const SizedBox(height: 10),
             Wrap(spacing: 6, runSpacing: 6, children: [
               reg == null
@@ -455,8 +456,17 @@ class _Figure extends StatelessWidget {
 
 /// مبيعات آخر 7 أيام (النهارده على الطرف).
 class _WeekBars extends StatelessWidget {
-  const _WeekBars(this.days);
+  const _WeekBars(this.days, {this.today});
   final List<int> days;
+
+  /// يوم الشغل بتاع الفرع (فرع أقدم مابيبعتوش، فتاريخ الجهاز).
+  final DateTime? today;
+
+  String _label(int back, DateTime base) => switch (back) {
+        0 => 'النهارده',
+        1 => 'امبارح',
+        _ => formatDay(DateTime(base.year, base.month, base.day - back)),
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -464,9 +474,10 @@ class _WeekBars extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final top = days.fold(0, max);
     final now = DateTime.now();
+    final base = today ?? DateTime(now.year, now.month, now.day);
     return Tooltip(
       message: [
-        for (var i = 0; i < days.length; i++) '${formatDay(DateTime(now.year, now.month, now.day - (days.length - 1 - i)))}: ${money(days[i])}',
+        for (var i = 0; i < days.length; i++) '${_label(days.length - 1 - i, base)}: ${money(days[i])}',
       ].join('\n'),
       child: SizedBox(
         height: 36,

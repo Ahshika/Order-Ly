@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:orderly/src/core/api_client.dart';
+import 'package:orderly/src/core/firebase_config.dart';
 import 'package:orderly/src/core/license.dart';
 import 'package:orderly/src/server/api_server.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +30,24 @@ void main() {
       expect(lic.shop, 'محل النور');
       expect(lic.devices, 5);
       expect(lic.expires!.year, 2030);
+    });
+
+    test('a shop Firebase project rides inside the signed code; bad settings are refused', () async {
+      final fb = FirebaseProject(projectId: 'cafe-elnour', apiKey: 'fake-test-api-key-0000000000', databaseUrl: 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app/');
+      final d = data();
+      final code = await signLicense(
+          LicenseData(id: d.id, shop: d.shop, device: d.device, plan: d.plan, expires: null, devices: 5, branches: 2, issued: d.issued, firebase: fb), seed);
+      final lic = await verifyLicense(code, deviceCode: 'ABCDE-FGHJK', publicKey: pub);
+      expect(lic.firebase!.projectId, 'cafe-elnour');
+      final ep = FirebaseEndpoints.forProject(lic.firebase!);
+      expect(ep.rtdb, 'https://cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app');
+      expect(ep.menuDatabaseParam, 'cafe-elnour-default-rtdb.europe-west1.firebasedatabase.app');
+      expect(FirebaseEndpoints.live.menuDatabaseParam, isNull);
+      // من غير مشروع: زي الأكواد القديمة
+      expect((await verifyLicense(await signLicense(d, seed), deviceCode: 'ABCDE-FGHJK', publicKey: pub)).firebase, isNull);
+      for (final bad in ['http://x-default-rtdb.firebaseio.com', 'https://evil.example.com', 'https://x.firebaseio.com/path', 'https://a.b.c.firebasedatabase.app']) {
+        expect(() => FirebaseProject(projectId: 'cafe-elnour', apiKey: 'fake-test-api-key-0000000000', databaseUrl: bad), throwsFormatException, reason: bad);
+      }
     });
 
     test('code for another device is rejected', () async {

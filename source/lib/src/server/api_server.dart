@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:image/image.dart' as img;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path/path.dart' as p;
@@ -19,6 +20,7 @@ import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../core/app_info.dart';
+import '../core/business_day.dart';
 import '../core/diagnostics.dart';
 import '../core/firebase_config.dart';
 import '../core/format.dart';
@@ -26,20 +28,24 @@ import '../core/license.dart';
 import 'db.dart';
 import 'discovery.dart';
 import 'passwords.dart';
+import 'web_push.dart';
 
 part 'backup_service.dart';
 part 'cloud_sync.dart';
 part 'routes_branches.dart';
 part 'routes_checks.dart';
+part 'routes_day_reports.dart';
 part 'routes_inventory.dart';
 part 'routes_license.dart';
 part 'routes_menu.dart';
+part 'routes_owner.dart';
 part 'routes_payments.dart';
+part 'routes_remote.dart';
 part 'routes_reports.dart';
 part 'routes_shop.dart';
 part 'routes_tables.dart';
+part 'web_app.dart';
 
-const serverPort = 8753;
 const roles = {'owner', 'supervisor', 'cashier', 'waiter', 'kitchen'};
 
 /// اللي بيقدروا يشتغلوا على الحسابات والفلوس
@@ -84,13 +90,41 @@ class AuthUser {
 
 /// سيرفر الكافيه: بيشتغل على كمبيوتر الكاشير، وكل الموبايلات والتابلتات التانية بتكلمه.
 class OrderlyServer {
-  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true});
+  OrderlyServer({required this.dataDir, this.requestedPort = serverPort, this.cloudSync = true, this.firebase, String? webDir, PushSender? pushSender})
+      : webDir = webDir ?? _WebApp._findWebDir(),
+        pushSender = pushSender ?? _realPushSender;
+
+  /// إشعارات المالك (routes_owner.dart). الاختبارات بتحط واحد وهمي.
+  final PushSender pushSender;
+
+  static final _pushClient = http.Client();
+  static Future<PushResult> _realPushSender(PushSubscriptionData sub, Map<String, Object?> message, P256Keys vapid) =>
+      sendPush(_pushClient, sub, message, vapid: vapid, subject: menuSiteUrl);
 
   final String dataDir;
   final int requestedPort;
 
   /// المزامنة مع منيو العملاء على Firebase (بتتقفل في الاختبارات).
   final bool cloudSync;
+
+  /// للاختبارات (Firebase وهمي). null = المشروع اللي في كود التفعيل، أو الأساسي.
+  final FirebaseEndpoints? firebase;
+
+  /// فولدر نسخة الويب للموظفين (web_app.dart)، أو null لو مش موجودة.
+  final String? webDir;
+
+  /// مشروع Firebase اللي المحل ده بيستخدمه: من كود التفعيل لو فيه، وإلا الأساسي.
+  Future<FirebaseEndpoints> _resolveFirebase() async {
+    if (firebase != null) return firebase!;
+    final code = db.setting('license_code');
+    if (code == null || code.isEmpty) return FirebaseEndpoints.live;
+    try {
+      final fb = (await verifyLicense(code, deviceCode: _deviceCode)).firebase;
+      return fb == null ? FirebaseEndpoints.live : FirebaseEndpoints.forProject(fb);
+    } on LicenseException {
+      return FirebaseEndpoints.live;
+    }
+  }
   CloudSync? _cloud;
   Timer? _jobsTimer;
   Timer? _firstJobTimer;
@@ -185,6 +219,18 @@ class OrderlyServer {
   /// بيمسح كل بيانات الكافيه من Firebase (للاختبارات بس).
   Future<void> cleanupCloudForTests() async => _cloud?.deleteEverything();
 
+  /// الدورة العادية اللي بتحصل كل دقيقة (من غير ما تنسى اللي اتبعت قبل كده)، للاختبارات.
+  Future<void> cloudTickForTests() async {
+    _cloud?.kick('tick');
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+  }
+
+  /// كأن آخر ملخص لايف اتبعت من أكتر من دقيقة (للاختبارات).
+  void forgetLiveForTests() => _cloud?._sent.remove('live-at');
+
+  /// كأن توكن Firebase خلص (بيعيش ساعة) عشان المزامنة الجاية تجدده (للاختبارات).
+  void expireCloudTokenForTests() => _cloud?._idToken = null;
+
   /// آخر خطأ في المزامنة (فاضي لو كله تمام).
   String? get cloudError => db.setting('cloud_last_error');
 
@@ -232,11 +278,15 @@ class OrderlyServer {
     _registerInventoryRoutes(r);
     _registerBackupRoutes(r);
     _registerReportRoutes(r);
+    _registerDayReportRoutes(r);
     _registerLicenseRoutes(r);
     _registerBranchRoutes(r);
+    _registerOwnerRoutes(r);
+    _registerRemoteRoutes(r);
 
     r.get('/api/ws', _webSocket);
-    r.all('/<ignored|.*>', (Request _) => _json(404, {'error': 'المسار ده مش موجود'}));
+    // أي مسار تاني: نسخة الويب للموظفين (الأيفون)، و/api/... اللي مش موجود 404
+    r.all('/<ignored|.*>', (Request req) => req.url.path.startsWith('api/') ? _json(404, {'error': 'المسار ده مش موجود'}) : _webApp(req));
     return r;
   }
 
@@ -543,7 +593,7 @@ class OrderlyServer {
   /// بيبلّغ كل الأجهزة المتصلة إن فيه حاجة اتغيرت عشان تحدّث الشاشة.
   void _broadcast(String topic) {
     _screenCache.clear();
-    if (const {'shop', 'menu', 'tables', 'checks', 'orders', 'payments', 'calls', 'stock'}.contains(topic)) _cloud?.kick(topic);
+    if (const {'shop', 'menu', 'tables', 'checks', 'orders', 'payments', 'calls', 'stock', 'register'}.contains(topic)) _cloud?.kick(topic);
     final msg = jsonEncode({'type': 'changed', 'topic': topic});
     for (final s in _sockets.toList()) {
       try {

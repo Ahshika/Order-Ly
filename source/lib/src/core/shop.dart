@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'business_day.dart';
 import 'format.dart';
 import 'providers.dart';
 import 'realtime.dart';
@@ -16,6 +17,7 @@ class ShopProfile {
         branchName = j['branchName'] as String?,
         logo = j['logoBase64'] == null ? null : base64.decode(j['logoBase64'] as String),
         settings = Map<String, dynamic>.from(j['settings'] as Map? ?? const {}),
+        businessDate = BusinessDay.parseKey(j['businessDate']),
         menuBaseUrl = j['menuBaseUrl'] as String?,
         cafeId = (j['cloud'] as Map?)?['cafeId'] as String?,
         cloudLastSync = parseDate((j['cloud'] as Map?)?['lastSync']),
@@ -29,6 +31,15 @@ class ShopProfile {
   final String? branchName;
   final Uint8List? logo;
   final Map<String, dynamic> settings;
+
+  /// تاريخ يوم الشغل دلوقتي حسب ساعات الكافيه (null من سيرفر أقدم).
+  final DateTime? businessDate;
+
+  /// "النهارده" بتاع التقارير: يوم الشغل، ولو السيرفر أقدم، تاريخ الجهاز.
+  DateTime get today {
+    final n = DateTime.now();
+    return businessDate ?? DateTime(n.year, n.month, n.day);
+  }
   final String? menuBaseUrl;
   final String? cafeId;
   final DateTime? cloudLastSync;

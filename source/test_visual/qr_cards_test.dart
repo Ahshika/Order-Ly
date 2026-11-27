@@ -12,8 +12,8 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   List<({String title, String subtitle, String url})> cards(int n) => [
-        for (var i = 1; i <= n; i++) (title: 'ترابيزة $i', subtitle: 'الصالة', url: 'https://orderly-yvzug.web.app/m/VLQsqjmCF2Sf59k4pCp6KPYbO7J3/K45vFEheV67L5ys$i'),
-        (title: 'تيك أواي', subtitle: 'اطلب واستلم من الكاونتر', url: 'https://orderly-yvzug.web.app/m/VLQsqjmCF2Sf59k4pCp6KPYbO7J3/tkK45vFEheV67L5'),
+        for (var i = 1; i <= n; i++) (title: 'ترابيزة $i', subtitle: 'الصالة', url: 'https://orderly-cafe-28129.web.app/m/VLQsqjmCF2Sf59k4pCp6KPYbO7J3/K45vFEheV67L5ys$i'),
+        (title: 'تيك أواي', subtitle: 'اطلب واستلم من الكاونتر', url: 'https://orderly-cafe-28129.web.app/m/VLQsqjmCF2Sf59k4pCp6KPYbO7J3/tkK45vFEheV67L5'),
       ];
 
   test('render qr cards', () async {

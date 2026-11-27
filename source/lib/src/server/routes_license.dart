@@ -77,6 +77,8 @@ extension _LicenseRoutes on OrderlyServer {
         throw ApiError(400, 'الكود ده خلص يوم ${formatDate(lic.expires!.toLocal())}');
       }
       db.setSetting('license_code', code);
+      // الكود ممكن يكون فيه مشروع Firebase خاص بالمحل
+      unawaited(_cloud?.reloadProject());
       _audit(u.id, 'license.activate', 'license', lic.id, '${lic.plan} ${lic.expires?.toIso8601String() ?? 'مدى الحياة'}');
       _broadcast('license');
       return await _licenseStatus();

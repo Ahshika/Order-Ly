@@ -1,0 +1,2112 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Project\\Programes\\Order Ly\\source\\test_web\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\playwright.config.js",
+    "rootDir": "D:/Project/Programes/Order Ly/source/test_web",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 3
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/web-move/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "chromium-android",
+        "name": "chromium-android",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.js"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/web-move/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "webkit-iphone",
+        "name": "webkit-iphone",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.js"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/web-move/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "id": "firefox-phone",
+        "name": "firefox-phone",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.js"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\web-move\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "name": "chromium-android",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "testIgnore": [],
+        "testMatch": "*.spec.js",
+        "timeout": 60000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Mobile Safari/537.36",
+          "viewport": {
+            "width": 412,
+            "height": 839
+          },
+          "screen": {
+            "width": 412,
+            "height": 915
+          },
+          "deviceScaleFactor": 2.625,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium-android"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\web-move\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "name": "webkit-iphone",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "testIgnore": [],
+        "testMatch": "*.spec.js",
+        "timeout": 60000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+          "viewport": {
+            "width": 390,
+            "height": 664
+          },
+          "screen": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "webkit"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "webkit-iphone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\web-move\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 3
+        },
+        "name": "firefox-phone",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web",
+        "testIgnore": [],
+        "testMatch": "*.spec.js",
+        "timeout": 60000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "browserName": "firefox",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "launchOptions": {
+            "executablePath": "C:\\Users\\ahmed\\AppData\\Local\\Temp\\pw-firefox-1555\\firefox.exe"
+          }
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "firefox-phone"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "D:\\Project\\Programes\\Order Ly\\test-results\\web-move\\report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "D:\\Project\\Programes\\Order Ly\\test-results\\web-move\\playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 3,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "menu.spec.js",
+      "file": "menu.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "loads the real menu in Arabic, right-to-left",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 698,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:55.625Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 497,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:10.632Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1343,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:28.854Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-39e82d3db8ab9a8f2de5",
+          "file": "menu.spec.js",
+          "line": 100,
+          "column": 1
+        },
+        {
+          "title": "required size, quantity and extras: price math matches the server",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1175,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:55.626Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1556,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:11.558Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 2331,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:30.622Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-c7e3376449b61e20b953",
+          "file": "menu.spec.js",
+          "line": 109,
+          "column": 1
+        },
+        {
+          "title": "contact validation, then an order the real server accepts",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 1652,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:55.633Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 2469,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:12.238Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 3729,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:30.813Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-f2e46a2b1483b0e1da5c",
+          "file": "menu.spec.js",
+          "line": 118,
+          "column": 1
+        },
+        {
+          "title": "wallet payment: needs a screenshot, a 12 MP photo is shrunk under the Firebase 1.2 MB limit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "original PNG 46.0 MB → uploaded 164 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11716,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:56.536Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "original PNG 46.0 MB → uploaded 164 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "original PNG 45.8 MB → uploaded 242 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10744,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:13.123Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "original PNG 45.8 MB → uploaded 242 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "original PNG 45.9 MB → uploaded 263 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7202,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:33.364Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "original PNG 45.9 MB → uploaded 263 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-3af8972240bab19c90a3",
+          "file": "menu.spec.js",
+          "line": 140,
+          "column": 1
+        },
+        {
+          "title": "takeaway QR: no waiter button, order still goes through",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1005,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:57.011Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1647,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:13.714Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 1414,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:33.501Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-a961d34cd0324e5412cf",
+          "file": "menu.spec.js",
+          "line": 171,
+          "column": 1
+        },
+        {
+          "title": "wrong / old table code",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 227,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:57.483Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 369,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:14.800Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 514,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:34.558Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-e9c68f83c7fb3adf4254",
+          "file": "menu.spec.js",
+          "line": 185,
+          "column": 1
+        },
+        {
+          "title": "cafe paused mobile ordering: menu visible, sending disabled",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 914,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:57.720Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 1816,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:15.180Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 1153,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:34.934Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-9cf132ca7ecc6940ca1b",
+          "file": "menu.spec.js",
+          "line": 191,
+          "column": 1
+        },
+        {
+          "title": "cashier PC off for an hour: offline banner",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 305,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:58.028Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 452,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:15.461Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 648,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:35.090Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-c88134e6b8a70bd0c5fe",
+          "file": "menu.spec.js",
+          "line": 200,
+          "column": 1
+        },
+        {
+          "title": "internet drops while sending: error shown, cart kept, can retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:58.346Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 2094,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:15.923Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1278,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:35.754Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-cbb5c872a4da01c28e1c",
+          "file": "menu.spec.js",
+          "line": 206,
+          "column": 1
+        },
+        {
+          "title": "Firebase down when the page opens: clear message, no crash",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 263,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:58.655Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 396,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:17.008Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 484,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:36.107Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-c22821c8a0830a121ec3",
+          "file": "menu.spec.js",
+          "line": 218,
+          "column": 1
+        },
+        {
+          "title": "very slow network (4 s per request): menu still opens",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 12791,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:58.931Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 12708,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:17.417Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 12477,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:36.617Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-e8136e501769c0c312cf",
+          "file": "menu.spec.js",
+          "line": 225,
+          "column": 1
+        },
+        {
+          "title": "XSS: item names and staff-written reasons are shown as text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 984,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:35:59.577Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1204,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:18.028Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1228,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:37.052Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-174df103e498c14f4422",
+          "file": "menu.spec.js",
+          "line": 231,
+          "column": 1
+        },
+        {
+          "title": "huge menu: 60 categories × 25 items renders quickly",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "render",
+                  "description": "1500 items in 412 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 689,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:00.572Z",
+                  "annotations": [
+                    {
+                      "type": "render",
+                      "description": "1500 items in 412 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "render",
+                  "description": "1500 items in 535 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 921,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:19.244Z",
+                  "annotations": [
+                    {
+                      "type": "render",
+                      "description": "1500 items in 535 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "render",
+                  "description": "1500 items in 585 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 938,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:38.301Z",
+                  "annotations": [
+                    {
+                      "type": "render",
+                      "description": "1500 items in 585 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-5e9f7c4fbc422a65a909",
+          "file": "menu.spec.js",
+          "line": 246,
+          "column": 1
+        },
+        {
+          "title": "corrupted phone storage does not break the page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 365,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:01.282Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 508,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:20.185Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 548,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:39.256Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-1ae6a0b6e18c6a5c7b08",
+          "file": "menu.spec.js",
+          "line": 258,
+          "column": 1
+        },
+        {
+          "title": "logo: own node, downloaded once and kept on the phone (not every minute inside pub)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "usage",
+                  "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 559,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:01.660Z",
+                  "annotations": [
+                    {
+                      "type": "usage",
+                      "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "usage",
+                  "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1209,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:20.709Z",
+                  "annotations": [
+                    {
+                      "type": "usage",
+                      "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "usage",
+                  "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 845,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:39.820Z",
+                  "annotations": [
+                    {
+                      "type": "usage",
+                      "description": "pub × 12 = 5964 B, logo × 1 = 60013 B"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-f70618a178f20fe1c967",
+          "file": "menu.spec.js",
+          "line": 278,
+          "column": 1
+        },
+        {
+          "title": "old cashier version: logo inside pub still shows, no extra request",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 362,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:02.239Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 503,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:21.932Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1711,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:40.680Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-84051de65452bc11ff81",
+          "file": "menu.spec.js",
+          "line": 294,
+          "column": 1
+        },
+        {
+          "title": "one live connection per phone: the table bill comes inside the customer tracking (v2)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1189,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:02.616Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1608,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:22.449Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1266,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:41.090Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-e5a8ab93e9c76c96e051",
+          "file": "menu.spec.js",
+          "line": 301,
+          "column": 1
+        },
+        {
+          "title": "old cashier version (tracking without v2): still listens on the table bill",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 495,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:03.819Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 883,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:23.878Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 604,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:42.380Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-5d418ca93cfb3c7a6862",
+          "file": "menu.spec.js",
+          "line": 314,
+          "column": 1
+        },
+        {
+          "title": "customer who has not ordered: table bill is read only while \"my orders\" is open",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 938,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:04.327Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1194,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:24.071Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1087,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:42.405Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-42c293e61aca135475a6",
+          "file": "menu.spec.js",
+          "line": 325,
+          "column": 1
+        },
+        {
+          "title": "screen locked: no requests at all while hidden, live connection back when the customer returns",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 7879,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:05.278Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8035,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:24.775Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8094,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:43.003Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-44877f537518543ee056",
+          "file": "menu.spec.js",
+          "line": 335,
+          "column": 1
+        },
+        {
+          "title": "real transfer screenshot (text on a plain background) uploads under 300 KB",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "screenshot → uploaded 110 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1443,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:08.265Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "screenshot → uploaded 110 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "screenshot → uploaded 122 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 2569,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:25.283Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "screenshot → uploaded 122 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [
+                {
+                  "type": "proof",
+                  "description": "screenshot → uploaded 126 KB"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 1387,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:43.507Z",
+                  "annotations": [
+                    {
+                      "type": "proof",
+                      "description": "screenshot → uploaded 126 KB"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-76d6f6faaef6d3e56b7c",
+          "file": "menu.spec.js",
+          "line": 349,
+          "column": 1
+        },
+        {
+          "title": "shop on its own Firebase project: the page talks to the database in ?d=, and refuses anything that is not Firebase",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 402,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:09.721Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 525,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:27.864Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox-phone",
+              "projectName": "firefox-phone",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 582,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-23T11:36:44.917Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "217198a80e852077fe39-37a531b7b8e8237bc7b7",
+          "file": "menu.spec.js",
+          "line": 377,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-23T11:35:55.126Z",
+    "duration": 56447.86,
+    "expected": 66,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

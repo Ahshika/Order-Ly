@@ -7,6 +7,7 @@ import '../../core/cafe_models.dart';
 import '../../core/file_save.dart';
 import '../../core/format.dart';
 import '../../core/providers.dart';
+import '../../core/shop.dart';
 import '../../core/spreadsheet.dart';
 import '../../core/theme.dart';
 import '../../widgets/common.dart';
@@ -28,9 +29,11 @@ class ReportsScreen extends ConsumerStatefulWidget {
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   late _Range _range = _preset('today');
 
-  static _Range _preset(String k) {
-    final n = DateTime.now();
-    final today = DateTime(n.year, n.month, n.day);
+  /// الفترات الجاهزة بأيام الشغل (السيرفر بيحوّل كل تاريخ لبداية يوم الشغل بتاعه).
+  _Range _preset(String k) {
+    final now = DateTime.now();
+    final today = ref.read(shopProvider).value?.today ?? DateTime(now.year, now.month, now.day);
+    final n = today;
     return switch (k) {
       'yesterday' => (from: today.subtract(const Duration(days: 1)), to: today, label: 'امبارح'),
       'week' => (from: today.subtract(const Duration(days: 6)), to: today.add(const Duration(days: 1)), label: 'آخر 7 أيام'),

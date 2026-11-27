@@ -1,5 +1,8 @@
 const appName = 'Order Ly';
-const appVersion = '1.1.1';
+const appVersion = '1.2.0';
+
+/// البورت اللي سيرفر الكافيه بيسمع عليه (وبيقدّم منه نسخة الويب للموظفين).
+const serverPort = 8753;
 
 /// بيزيد لما شكل الـ API يتغير بطريقة مش متوافقة مع النسخ القديمة.
 const apiVersion = 2;

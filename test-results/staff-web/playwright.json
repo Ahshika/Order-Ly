@@ -1,0 +1,358 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Project\\Programes\\Order Ly\\source\\test_web\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config",
+      "staff/playwright.config.js"
+    ],
+    "configFile": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\staff\\playwright.config.js",
+    "rootDir": "D:/Project/Programes/Order Ly/source/test_web/staff",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/staff-web/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit-iphone",
+        "name": "webkit-iphone",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web/staff",
+        "testIgnore": [],
+        "testMatch": [
+          "staff.spec.js"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "D:/Project/Programes/Order Ly/test-results/staff-web/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-android",
+        "name": "chromium-android",
+        "testDir": "D:/Project/Programes/Order Ly/source/test_web/staff",
+        "testIgnore": [],
+        "testMatch": [
+          "staff.spec.js"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\staff-web\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "webkit-iphone",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\staff",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\staff",
+        "testIgnore": [],
+        "testMatch": "staff.spec.js",
+        "timeout": 120000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+          "viewport": {
+            "width": 390,
+            "height": 664
+          },
+          "screen": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true,
+          "defaultBrowserType": "webkit"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "webkit-iphone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Project\\Programes\\Order Ly\\test-results\\staff-web\\artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium-android",
+        "testDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\staff",
+        "snapshotDir": "D:\\Project\\Programes\\Order Ly\\source\\test_web\\staff",
+        "testIgnore": [],
+        "testMatch": "staff.spec.js",
+        "timeout": 120000,
+        "use": {
+          "locale": "ar-EG",
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Mobile Safari/537.36",
+          "viewport": {
+            "width": 412,
+            "height": 839
+          },
+          "screen": {
+            "width": 412,
+            "height": 915
+          },
+          "deviceScaleFactor": 2.625,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium-android"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "D:\\Project\\Programes\\Order Ly\\test-results\\staff-web\\report",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "D:\\Project\\Programes\\Order Ly\\test-results\\staff-web\\playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "staff.spec.js",
+      "file": "staff.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "opens from the cashier PC with no internet, waiter logs in and sees the floor",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "login screen after 1321 ms"
+                },
+                {
+                  "type": "outside",
+                  "description": "none"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4427,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T11:40:41.564Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "login screen after 1321 ms"
+                    },
+                    {
+                      "type": "outside",
+                      "description": "none"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1205aff6f7e14ab00309-26053033c9150773a71c",
+          "file": "staff.spec.js",
+          "line": 33,
+          "column": 1
+        },
+        {
+          "title": "home-screen tags for the iPhone are in place",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit-iphone",
+              "projectName": "webkit-iphone",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1499,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T11:40:46.109Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1205aff6f7e14ab00309-84aad30feb4c817fda39",
+          "file": "staff.spec.js",
+          "line": 61,
+          "column": 1
+        },
+        {
+          "title": "opens from the cashier PC with no internet, waiter logs in and sees the floor",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "login screen after 1381 ms"
+                },
+                {
+                  "type": "outside",
+                  "description": "none"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3516,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T11:40:48.174Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "login screen after 1381 ms"
+                    },
+                    {
+                      "type": "outside",
+                      "description": "none"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1205aff6f7e14ab00309-bf6a90b85d665cccaa91",
+          "file": "staff.spec.js",
+          "line": 33,
+          "column": 1
+        },
+        {
+          "title": "home-screen tags for the iPhone are in place",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-android",
+              "projectName": "chromium-android",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1485,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-26T11:40:51.851Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1205aff6f7e14ab00309-950b6e4681914b9f42ea",
+          "file": "staff.spec.js",
+          "line": 61,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-26T11:40:41.182Z",
+    "duration": 12255.88,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
